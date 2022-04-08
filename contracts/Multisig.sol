@@ -8,7 +8,7 @@ contract Multisig {
     event RemovingRequest(address indexed sender, uint256 indexed requestId);
 
     // mapping voter id => voter address
-    mapping(uint256 => address) private votersIds;
+    mapping(uint256 => address) private voterIds;
     // mapping is address a voter
     mapping(address => bool) private voters;
     // all voters count
@@ -96,7 +96,7 @@ contract Multisig {
     /**
      * @notice Throws if voter has already confirmed the request
      * @param requestId the id of request
-     * @param voterAddress 
+     * @param voterAddress addres of voter
     */
     modifier notConfirmed(uint256 requestId, address voterAddress) {
         require(!voterConfirmations[requestId][voterAddress], "already confirmed");
@@ -177,13 +177,13 @@ contract Multisig {
     */
     function insertVoter(address newVoterAddress) 
         internal 
-        notNull(newVoterAddress) 
+        notNullAddress(newVoterAddress) 
         notVoter(newVoterAddress)
     {
         voters[newVoterAddress] = true;
         activeVotersCount++;
-        votersIds[votersCounter++] = newVoterAddress;
-        InsertingVoter(newVoterAddress);
+        voterIds[votersCounter++] = newVoterAddress;
+        emit InsertingVoter(newVoterAddress);
     }
 
     /** 
@@ -194,12 +194,12 @@ contract Multisig {
     */
     function removeVoter(address oldVoterAddress) 
         internal 
-        notNull(oldVoterAddress)
+        notNullAddress(oldVoterAddress)
         isVoter(oldVoterAddress)
     {
         voters[oldVoterAddress] = false;
-        activeVoters--;
-        RemovingVoter(oldVoterAddress);
+        activeVotersCount--;
+        emit RemovingVoter(oldVoterAddress);
     }
 
     /** 
@@ -212,16 +212,16 @@ contract Multisig {
     */
     function replaceVoter(address oldVoterAddress, address newVoterAddress)
         external
-        notNull(oldVoterAddress)
+        notNullAddress(oldVoterAddress)
         isVoter(oldVoterAddress)
-        notNull(newVoterAddress)
+        notNullAddress(newVoterAddress)
         notVoter(newVoterAddress)
     {
         voters[oldVoterAddress] = false;
         voters[newVoterAddress] = true;
-        votersIds[votersCounter++] = newVoterAddress;
-        RemovingVoter(oldVoterAddress);
-        InsertingVoter(newVoterAddress);
+        voterIds[votersCounter++] = newVoterAddress;
+        emit RemovingVoter(oldVoterAddress);
+        emit InsertingVoter(newVoterAddress);
     }
 
     /**
@@ -237,7 +237,7 @@ contract Multisig {
         notExecuted(voterRequestId)
     {
         voterConfirmations[voterRequestId][msg.sender] = true;
-        ConfirmingRequest(voterRequestId, msg.sender);
+        emit ConfirmingRequest(msg.sender, voterRequestId);
     }
 
     /**
@@ -252,7 +252,7 @@ contract Multisig {
         notExecuted(voterRequestId)
     {
         voterConfirmations[voterRequestId][msg.sender] = false;
-        RemovingRequest(msg.sender, voterRequestId);
+        emit RemovingRequest(msg.sender, voterRequestId);
     }
 
     /**
@@ -265,7 +265,7 @@ contract Multisig {
         onlyVoter 
     {
         for(uint256 i = 0; i < _voters.length; i++) {
-            notVoter(voters[_voters[i]]);
+            require(!voters[_voters[i]], "already a voter");
             voterRequestsCounter = voterRequestsCounter + 1;
             voterRequests[voterRequestsCounter] = VoterRequest({
                 executed: false,
@@ -285,15 +285,15 @@ contract Multisig {
         external
         onlyVoter
     {
-        for(unt256 i = 0; i < _voters.length; i++) {
-            notVoter(voters[_voters[i]]);
-            voterRequestCounter = voterRequestCounter + 1;
+        for(uint256 i = 0; i < _voters.length; i++) {
+            require(voters[_voters[i]], "not a voter");
+            voterRequestsCounter = voterRequestsCounter + 1;
             voterRequests[voterRequestsCounter] = VoterRequest({
                 executed: false,
                 candidate: _voters[i],
                 include: false
             });
-            insertConfirmation(voterRequestCounter);
+            insertConfirmation(voterRequestsCounter);
         }
     }
 
@@ -305,10 +305,10 @@ contract Multisig {
         external
         notExecuted(voterRequestId)
     {
-        uint256 requiredVotesAmount = (activeVoters * 100) / 2;
+        uint256 requiredVotesAmount = (activeVotersCount * 100) / 2;
         uint256 affirmativeVotesCount = 0;
         for(uint256 i = 0; i < votersCounter; i++) {
-            if(voterConfirmations[voterRequestId][i] && voters[votersIds[i]]) {
+            if(voterConfirmations[voterRequestId][voterIds[i]] && voters[voterIds[i]]) {
                     affirmativeVotesCount++;
             }
         }
