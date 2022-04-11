@@ -225,7 +225,7 @@ contract Multisig {
     }
 
     /**
-     * @notice Allows a voter to remove a confirmation for a transaction
+     * @notice Allows a voter to insert a confirmation for a transaction
      * if sender is a voter, voter request is confirmed, voter request is not approved  
      * @param voterRequestId voter request id
     */ 
@@ -293,7 +293,7 @@ contract Multisig {
                 candidate: _voters[i],
                 include: false
             });
-            insertConfirmation(voterRequestsCounter);
+            removeConfirmation(voterRequestsCounter);
         }
     }
 
