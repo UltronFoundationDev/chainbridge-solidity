@@ -5,6 +5,9 @@ import "./utils/Multisig.sol";
 
 /// @notice DAO contract, which provides owner changing
 contract DAO is Multisig, IDAO {
+    event ConfirmingOwnerChangeRequest(address indexed sender, uint256 indexed requestId);
+    event RemovingOwnerChangeRequest(address indexed sender, uint256 indexed requestId);
+
     struct OwnerChangeRequest {
         address newOwner;
         bool status;
@@ -21,18 +24,28 @@ contract DAO is Multisig, IDAO {
      * @notice Throws error if owner change request is already approved
      * @param id the id of owner change request
     */
-    modifier notApproved(uint256 id) {
+    modifier notApprovedOwnerChange(uint256 id) {
         require(!ownerChangeRequests[id].status, "already approved");
         _;
     }
 
     /**
      * @notice Throws if voter has already confirmed the owner change request
-     * @param id the id of request
+     * @param id the id of change owner request
      * @param voterAddress addres of voter
     */
     modifier notConfirmedOwnerChange(uint256 id, address voterAddress) {
         require(!ownerChangesRequestConfirmations[id][voterAddress], "already confirmed");
+        _;
+    }
+
+    /**
+     * @notice Throws if voter has not confirmed the owner change request
+     * @param id the id of change owner request
+     * @param voterAddress confirming voter address
+    */
+    modifier confirmedOwnerChange(uint256 id, address voterAddress) {
+        require(ownerChangesRequestConfirmations[id][voterAddress], "not confirmed");
         _;
     }
 
@@ -45,7 +58,7 @@ contract DAO is Multisig, IDAO {
         external 
         view 
         override
-        notApproved(id)
+        notApprovedOwnerChange(id)
         returns (address)
     {
         require(ownerChangeRequests[id].newOwner != address(0), "zero address");
@@ -70,7 +83,7 @@ contract DAO is Multisig, IDAO {
     function confirmOwnerChange(uint256 id) 
         external 
         override
-        notApproved(id)
+        notApprovedOwnerChange(id)
         returns (bool)
     {
         ownerChangeRequests[id].status = true;
@@ -82,14 +95,29 @@ contract DAO is Multisig, IDAO {
      * if it is not approved
      * @param id the id of owner change request
     */
-    function voteForOwnerChangeRequest(uint256 id) 
+    function insertVoteForOwnerChangeRequest(uint256 id) 
         external 
-        notApproved(id)
+        notApprovedOwnerChange(id)
         notConfirmedOwnerChange(id, msg.sender)
         onlyVoter
     {
         ownerChangesRequestConfirmations[id][msg.sender] = true;
-        emit ConfirmingRequest(msg.sender, id);
+        emit ConfirmingOwnerChangeRequest(msg.sender, id);
+    }
+
+    /**
+     * @notice Allows a voter to remove a confirmation for owner change request 
+     * if it is not approved
+     * @param id the id of owner change request
+    */
+    function removeVoteForOwnerChangeRequest(uint256 id) 
+        external 
+        notApprovedOwnerChange(id)
+        confirmedOwnerChange(id, msg.sender)
+        onlyVoter
+    {
+        ownerChangesRequestConfirmations[id][msg.sender] = false;
+        emit RemovingOwnerChangeRequest(msg.sender, id);
     }
 
     /**
@@ -110,7 +138,7 @@ contract DAO is Multisig, IDAO {
         });
         
         ownerChangesRequestConfirmations[ownerChangeRequestCounter][msg.sender] = true;
-        emit ConfirmingRequest(msg.sender, ownerChangeRequestCounter);
+        emit ConfirmingOwnerChangeRequest(msg.sender, ownerChangeRequestCounter);
 
         return ownerChangeRequestCounter;
     }
