@@ -9,6 +9,7 @@ import "./utils/SafeCast.sol";
 import "./interfaces/IDepositExecute.sol";
 import "./interfaces/IERCHandler.sol";
 import "./interfaces/IGenericHandler.sol";
+import "./DAO.sol";
 
 /**
     @title Facilitates deposits, creation and voting of deposit proposals, and deposit executions.
@@ -24,6 +25,9 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     uint8   public _relayerThreshold;
     uint128 public _fee;
     uint40  public _expiry;
+
+    address private addressDAO;
+    IDAO private contractDAO;
 
     enum ProposalStatus {Inactive, Active, Passed, Executed, Cancelled}
 
@@ -77,6 +81,11 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         _;
     }
 
+    modifier onlyDAO() {
+        require(msg.sender == addressDAO, "not DAO contract");
+        _;
+    }
+
     modifier onlyAdminOrRelayer() {
         _onlyAdminOrRelayer();
         _;
@@ -85,6 +94,17 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     modifier onlyRelayers() {
         _onlyRelayers();
         _;
+    }
+
+    function getContractDAO() external view returns(IDAO) {
+        return contractDAO;
+    }
+
+    function setDAOContractInitial(address _address) external {
+        require(addressDAO == address(0), "already set");
+        require(_address != address(0), "Zero address");
+        addressDAO = _address;
+        contractDAO = IDAO(addressDAO);
     }
 
     function _onlyAdminOrRelayer() private view {
@@ -163,7 +183,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by an address that currently has the admin role.
         @param newAdmin Address that admin role will be granted to.
      */
-    function renounceAdmin(address newAdmin) external onlyAdmin {
+    function renounceAdmin(address newAdmin) external onlyDAO {
         address sender = _msgSender();
         require(sender != newAdmin, 'Cannot renounce oneself');
         grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
@@ -174,7 +194,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Pauses deposits, proposal creation and voting, and deposit executions.
         @notice Only callable by an address that currently has the admin role.
      */
-    function adminPauseTransfers() external onlyAdmin {
+    function adminPauseTransfers() external onlyDAO {
         _pause(_msgSender());
     }
 
@@ -182,7 +202,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Unpauses deposits, proposal creation and voting, and deposit executions.
         @notice Only callable by an address that currently has the admin role.
      */
-    function adminUnpauseTransfers() external onlyAdmin {
+    function adminUnpauseTransfers() external onlyDAO {
         _unpause(_msgSender());
     }
 
@@ -192,7 +212,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param newThreshold Value {_relayerThreshold} will be changed to.
         @notice Emits {RelayerThresholdChanged} event.
      */
-    function adminChangeRelayerThreshold(uint256 newThreshold) external onlyAdmin {
+    function adminChangeRelayerThreshold(uint256 newThreshold) external onlyDAO {
         _relayerThreshold = newThreshold.toUint8();
         emit RelayerThresholdChanged(newThreshold);
     }
@@ -232,7 +252,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param resourceID ResourceID to be used when making deposits.
         @param tokenAddress Address of contract to be called when a deposit is made and a deposited is executed.
      */
-    function adminSetResource(address handlerAddress, bytes32 resourceID, address tokenAddress) external onlyAdmin {
+    function adminSetResource(address handlerAddress, bytes32 resourceID, address tokenAddress) external onlyDAO {
         _resourceIDToHandlerAddress[resourceID] = handlerAddress;
         IERCHandler handler = IERCHandler(handlerAddress);
         handler.setResource(resourceID, tokenAddress);
@@ -253,7 +273,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         bytes4 depositFunctionSig,
         uint256 depositFunctionDepositerOffset,
         bytes4 executeFunctionSig
-    ) external onlyAdmin {
+    ) external onlyDAO {
         _resourceIDToHandlerAddress[resourceID] = handlerAddress;
         IGenericHandler handler = IGenericHandler(handlerAddress);
         handler.setResource(resourceID, contractAddress, depositFunctionSig, depositFunctionDepositerOffset, executeFunctionSig);
@@ -265,7 +285,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param handlerAddress Address of handler resource will be set for.
         @param tokenAddress Address of contract to be called when a deposit is made and a deposited is executed.
      */
-    function adminSetBurnable(address handlerAddress, address tokenAddress) external onlyAdmin {
+    function adminSetBurnable(address handlerAddress, address tokenAddress) external onlyDAO {
         IERCHandler handler = IERCHandler(handlerAddress);
         handler.setBurnable(tokenAddress);
     }
@@ -276,7 +296,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param domainID Domain ID for increasing nonce.
         @param nonce The nonce value to be set.
      */
-    function adminSetDepositNonce(uint8 domainID, uint64 nonce) external onlyAdmin {
+    function adminSetDepositNonce(uint8 domainID, uint64 nonce) external onlyDAO {
         require(nonce > _depositCounts[domainID], "Does not allow decrements of the nonce");
         _depositCounts[domainID] = nonce;
     }
@@ -287,7 +307,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param forwarder Forwarder address to be added.
         @param valid Decision for the specific forwarder.
      */
-    function adminSetForwarder(address forwarder, bool valid) external onlyAdmin {
+    function adminSetForwarder(address forwarder, bool valid) external onlyDAO {
         isValidForwarder[forwarder] = valid;
     }
 
@@ -320,7 +340,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by admin.
         @param newFee Value {_fee} will be updated to.
      */
-    function adminChangeFee(uint256 newFee) external onlyAdmin {
+    function adminChangeFee(uint256 newFee) external onlyDAO {
         require(_fee != newFee, "Current fee is equal to new fee");
         _fee = newFee.toUint128();
     }
@@ -333,7 +353,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     function adminWithdraw(
         address handlerAddress,
         bytes memory data
-    ) external onlyAdmin {
+    ) external onlyDAO {
         IERCHandler handler = IERCHandler(handlerAddress);
         handler.withdraw(data);
     }
@@ -497,7 +517,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param addrs Array of addresses to transfer {amounts} to.
         @param amounts Array of amonuts to transfer to {addrs}.
      */
-    function transferFunds(address payable[] calldata addrs, uint[] calldata amounts) external onlyAdmin {
+    function transferFunds(address payable[] calldata addrs, uint[] calldata amounts) external onlyDAO {
         for (uint256 i = 0; i < addrs.length; i++) {
             addrs[i].transfer(amounts[i]);
         }
