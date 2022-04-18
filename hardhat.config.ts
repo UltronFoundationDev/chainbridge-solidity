@@ -31,7 +31,7 @@ const config: HardhatUserConfig = {
   },
   paths: {
     sources: "./contracts",
-    tests: "/test",
+    tests: "./hardhat-test",
     cache: "./cache",
     artifacts: "./artifacts"
   },
@@ -40,7 +40,7 @@ const config: HardhatUserConfig = {
       chainId: 1337,
       forking: {
         url: "https://eth-mainnet.alchemyapi.io/v2/i2LgfhBeI-JidguSNlFuToo7kPSkFBPb",
-        blockNumber: 1
+        blockNumber: 11095000
       },
     },
     goerli: {
