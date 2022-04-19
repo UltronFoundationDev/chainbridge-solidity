@@ -233,7 +233,7 @@ contract DAO is Multisig, IDAO {
     */
     function insertVoteForOwnerChangeRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!ownerChangeRequests[id].status, "already approved");
         require(!ownerChangesRequestConfirmations[id][msg.sender], "already confirmed");
@@ -248,7 +248,7 @@ contract DAO is Multisig, IDAO {
     */
     function removeVoteFromOwnerChangeRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!ownerChangeRequests[id].status, "already approved");
         require(ownerChangesRequestConfirmations[id][msg.sender], "not confirmed");
@@ -262,7 +262,7 @@ contract DAO is Multisig, IDAO {
     */
     function newOwnerChangeRequest(address _address)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         require(_address!= address(0), "zero address");
@@ -327,7 +327,7 @@ contract DAO is Multisig, IDAO {
     */
     function insertVoteForTransferRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!transferRequests[id].status, "already approved");
         require(!transferRequestConfirmations[id][msg.sender], "already confirmed");
@@ -342,7 +342,7 @@ contract DAO is Multisig, IDAO {
     */
     function removeVoteFromTransferRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!transferRequests[id].status, "already approved");
         require(transferRequestConfirmations[id][msg.sender], "not confirmed");
@@ -358,7 +358,7 @@ contract DAO is Multisig, IDAO {
     */
     function newTransferRequest(address recepient, address tokenAddress, uint256 amount)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         require(tokenAddress!= address(0) && recepient != address(0), "zero address");
@@ -411,7 +411,7 @@ contract DAO is Multisig, IDAO {
 
     function insertVoteForPauseStatusRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!pauseStatusRequests[id].status, "already approved");
         require(!pauseStatusRequestConfirmations[id][msg.sender], "already confirmed");
@@ -421,7 +421,7 @@ contract DAO is Multisig, IDAO {
 
     function removeVoteFromPauseStatusRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!pauseStatusRequests[id].status, "already approved");
         require(pauseStatusRequestConfirmations[id][msg.sender], "not confirmed");
@@ -431,7 +431,7 @@ contract DAO is Multisig, IDAO {
 
     function newPauseStatusRequest(bool mode)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         require(pauseStatusRequestCounter > 0
@@ -486,7 +486,7 @@ contract DAO is Multisig, IDAO {
 
     function insertVoteForChangeRelayerThresholdRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!changeRelayerThresholdRequests[id].status, "already approved");
         require(!changeRelayerThresholdRequestConfirmations[id][msg.sender], "already confirmed");
@@ -496,7 +496,7 @@ contract DAO is Multisig, IDAO {
 
     function removeVoteFromChangeRelayerThresholdRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!changeRelayerThresholdRequests[id].status, "already approved");
         require(changeRelayerThresholdRequestConfirmations[id][msg.sender], "not confirmed");
@@ -506,7 +506,7 @@ contract DAO is Multisig, IDAO {
 
     function newChangeRelayerThresholdRequest(uint256 amount)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         changeRelayerThresholdRequestCounter = changeRelayerThresholdRequestCounter + 1;
@@ -558,7 +558,7 @@ contract DAO is Multisig, IDAO {
     
     function insertVoteForSetResourceRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setResourceRequests[id].status, "already approved");
         require(!setResourceRequestConfirmations[id][msg.sender], "already confirmed");
@@ -568,7 +568,7 @@ contract DAO is Multisig, IDAO {
 
     function removeVoteForSetResourceRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setResourceRequests[id].status, "already approved");
         require(setResourceRequestConfirmations[id][msg.sender], "not confirmed");
@@ -578,7 +578,7 @@ contract DAO is Multisig, IDAO {
 
     function newSetResourceRequest(address handlerAddress, bytes32 resourceId, address tokenAddress)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         require(tokenAddress!= address(0) && handlerAddress != address(0), "zero address");
@@ -633,7 +633,7 @@ contract DAO is Multisig, IDAO {
 
     function insertVoteForChangeFeeRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!changeFeeRequests[id].status, "already approved");
         require(!changeFeeRequestConfirmations[id][msg.sender], "already confirmed");
@@ -643,7 +643,7 @@ contract DAO is Multisig, IDAO {
 
     function removeVoteFromChangeFeeRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!changeFeeRequests[id].status, "already approved");
         require(changeFeeRequestConfirmations[id][msg.sender], "not confirmed");
@@ -653,7 +653,7 @@ contract DAO is Multisig, IDAO {
 
     function newChangeFeeRequest(uint256 amount)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         changeFeeRequestCounter = changeFeeRequestCounter + 1;
@@ -704,7 +704,7 @@ contract DAO is Multisig, IDAO {
 
     function insertVoteForWithdrawRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!withdrawRequests[id].status, "already approved");
         require(!withdrawRequestConfirmations[id][msg.sender], "already confirmed");
@@ -714,7 +714,7 @@ contract DAO is Multisig, IDAO {
 
     function removeVoteFromWithdrawRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!withdrawRequests[id].status, "already approved");
         require(withdrawRequestConfirmations[id][msg.sender], "not confirmed");
@@ -724,7 +724,7 @@ contract DAO is Multisig, IDAO {
 
     function newWithdrawRequest(address handlerAddress, bytes calldata data)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         require(handlerAddress != address(0), "zero address");
@@ -778,7 +778,7 @@ contract DAO is Multisig, IDAO {
 
     function insertVoteForSetBurnableRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setBurnableRequests[id].status, "already approved");
         require(!setBurnableRequestConfirmations[id][msg.sender], "already confirmed");
@@ -788,7 +788,7 @@ contract DAO is Multisig, IDAO {
 
     function removeVoteFromSetBurnableRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setBurnableRequests[id].status, "already approved");
         require(setBurnableRequestConfirmations[id][msg.sender], "not confirmed");
@@ -798,7 +798,7 @@ contract DAO is Multisig, IDAO {
 
     function newSetBurnableRequest(address handlerAddress, address tokenAddress)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         require(tokenAddress!= address(0) && handlerAddress != address(0), "zero address");
@@ -852,7 +852,7 @@ contract DAO is Multisig, IDAO {
 
     function insertVoteForSetNonceRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setNonceRequests[id].status, "already approved");
         require(!setNonceRequestConfirmations[id][msg.sender], "already confirmed");
@@ -862,7 +862,7 @@ contract DAO is Multisig, IDAO {
 
     function removeVoteFromSetNonceRequest(uint256 id) 
         external 
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setNonceRequests[id].status, "already approved");
         require(setNonceRequestConfirmations[id][msg.sender], "not confirmed");
@@ -872,7 +872,7 @@ contract DAO is Multisig, IDAO {
 
     function newSetNonceRequest(uint8 domainId, uint64 nonce)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         setNonceRequestCounter = setNonceRequestCounter + 1;
@@ -924,7 +924,7 @@ contract DAO is Multisig, IDAO {
 
     function insertVoteForSetForwarderRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setForwarderRequests[id].status, "already approved");
         require(!setForwarderRequestConfirmations[id][msg.sender], "already confirmed");
@@ -934,7 +934,7 @@ contract DAO is Multisig, IDAO {
 
     function removeVoteFromSetForwarderRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setForwarderRequests[id].status, "already approved");
         require(setForwarderRequestConfirmations[id][msg.sender], "not confirmed");
@@ -944,7 +944,7 @@ contract DAO is Multisig, IDAO {
 
     function newSetForwarderRequest(address forwarder, bool valid)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         require(forwarder != address(0), "zero address");
@@ -1000,7 +1000,7 @@ contract DAO is Multisig, IDAO {
 
     function insertVoteForSetGenericResourceRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setGenericResourceRequests[id].status, "already approved");
         require(!setGenericResourceRequestConfirmations[id][msg.sender], "already confirmed");
@@ -1010,7 +1010,7 @@ contract DAO is Multisig, IDAO {
 
     function removeVoteFromSetGenericResourceRequest(uint256 id)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
     {
         require(!setGenericResourceRequests[id].status, "already approved");
         require(setGenericResourceRequestConfirmations[id][msg.sender], "not confirmed");
@@ -1026,7 +1026,7 @@ contract DAO is Multisig, IDAO {
         uint256 depositFunctionDepositerOffset,
         bytes4 executeFunctionSig)
         external
-        onlyVoter
+        onlyVoter(msg.sender)
         returns (uint256)
     {
         require(handlerAddress != address(0) && contractAddress != address(0), "zero address");

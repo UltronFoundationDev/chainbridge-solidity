@@ -31,14 +31,6 @@ contract Multisig {
     uint256 private voterRequestsCounter;
 
     /**
-     * @notice Throws if sender is not a voter
-    */
-    modifier onlyVoter() {
-        require(voters[msg.sender], "not a voter");
-        _;
-    }
-
-    /**
      * @notice Throws if address is zero address
      * @param _address the checking address
     */
@@ -51,7 +43,7 @@ contract Multisig {
      * @notice Throws if address is not a voter
      * @param _address the checking address
     */
-    modifier isVoter(address _address) {
+    modifier onlyVoter(address _address) {
         require(voters[_address], "not a voter");
         _;
     }
@@ -82,35 +74,7 @@ contract Multisig {
         require(!voterRequests[requestId].executed, "already executed");
         _;
     }
-
-    /**
-     * @notice Throws if voter has not confirmed the request
-     * @param requestId the id of request
-     * @param voterAddress confirming voter address
-    */
-    modifier confirmed(uint256 requestId, address voterAddress) {
-        require(voterConfirmations[requestId][voterAddress], "not confirmed");
-        _;
-    }
-
-    /**
-     * @notice Throws if voter has already confirmed the request
-     * @param requestId the id of request
-     * @param voterAddress addres of voter
-    */
-    modifier notConfirmed(uint256 requestId, address voterAddress) {
-        require(!voterConfirmations[requestId][voterAddress], "already confirmed");
-        _;
-    }
-
-    /**
-     * @notice Throws if active voters count is not empty
-    */
-    modifier isActiveVotersEmpty() {
-        require(activeVotersCount == 0, "Act. voters not empty");
-        _;
-    }
-
+    
     /**
      * @notice Returns voter address by id if id != 0
      * @param id the id of voter 
@@ -164,8 +128,8 @@ contract Multisig {
     */
     function insertInitialVoter()
         external
-        isActiveVotersEmpty
     {
+        require(activeVotersCount == 0, "Act. voters not empty");
         insertVoter(msg.sender);
     }
 
@@ -194,8 +158,7 @@ contract Multisig {
     */
     function removeVoter(address oldVoterAddress) 
         internal 
-        notNullAddress(oldVoterAddress)
-        isVoter(oldVoterAddress)
+        onlyVoter(oldVoterAddress)
     {
         voters[oldVoterAddress] = false;
         activeVotersCount--;
@@ -212,8 +175,8 @@ contract Multisig {
     */
     function replaceVoter(address oldVoterAddress, address newVoterAddress)
         external
-        notNullAddress(oldVoterAddress)
-        isVoter(oldVoterAddress)
+        onlyVoter(msg.sender)
+        onlyVoter(oldVoterAddress)
         notNullAddress(newVoterAddress)
         notVoter(newVoterAddress)
     {
@@ -230,12 +193,12 @@ contract Multisig {
      * @param voterRequestId voter request id
     */ 
     function insertConfirmation(uint256 voterRequestId)
-        internal
-        onlyVoter
-        notConfirmed(voterRequestId, msg.sender)
+        external
+        onlyVoter(msg.sender)
         voterRequestExists(voterRequestId)
         notExecuted(voterRequestId)
     {
+        require(!voterConfirmations[voterRequestId][msg.sender], "already confirmed");
         voterConfirmations[voterRequestId][msg.sender] = true;
         emit ConfirmingRequest(msg.sender, voterRequestId);
     }
@@ -246,11 +209,12 @@ contract Multisig {
      * @param voterRequestId voter request id
     */ 
     function removeConfirmation(uint256 voterRequestId)
-        internal
-        onlyVoter
-        confirmed(voterRequestId, msg.sender)
+        external
+        onlyVoter(msg.sender)
+        voterRequestExists(voterRequestId)
         notExecuted(voterRequestId)
     {
+        require(voterConfirmations[voterRequestId][msg.sender], "not confirmed");
         voterConfirmations[voterRequestId][msg.sender] = false;
         emit RemovingRequest(msg.sender, voterRequestId);
     }
@@ -258,43 +222,43 @@ contract Multisig {
     /**
      * @notice Allows a voter to add a confirmation for a request
      * if sender is a voter, voter request is confirmed, voter request is not approved  
-     * @param _voters list of voters addresses
+     * @param voterAddress new voter address
     */
-    function insertVoterRequest(address[] memory _voters) 
+    function insertVoterRequest(address voterAddress) 
         external 
-        onlyVoter 
+        notNullAddress(voterAddress)
+        onlyVoter(msg.sender)
+        notVoter(voterAddress)
     {
-        for(uint256 i = 0; i < _voters.length; i++) {
-            require(!voters[_voters[i]], "already a voter");
-            voterRequestsCounter = voterRequestsCounter + 1;
-            voterRequests[voterRequestsCounter] = VoterRequest({
-                executed: false,
-                candidate: _voters[i],
-                include: true
-            });
-            insertConfirmation(voterRequestsCounter);
-        }
+        voterRequestsCounter = voterRequestsCounter + 1;
+        voterRequests[voterRequestsCounter] = VoterRequest({
+            executed: false,
+            candidate: voterAddress,
+            include: true
+        });
+        voterConfirmations[voterRequestsCounter][msg.sender] = true;
+        emit ConfirmingRequest(msg.sender, voterRequestsCounter);
     }
 
     /**
      * @notice Allows a voter to remove a confirmation for a request
      * if sender is a voter, voter request is confirmed, voter request is not approved  
-     * @param _voters list of voters addresses
+     * @param voterAddress voter address to be removed
     */
-    function removeVoterRequest(address[] memory _voters) 
+    function removeVoterRequest(address voterAddress) 
         external
-        onlyVoter
+        notNullAddress(voterAddress)
+        onlyVoter(msg.sender)
+        onlyVoter(voterAddress)
     {
-        for(uint256 i = 0; i < _voters.length; i++) {
-            require(voters[_voters[i]], "not a voter");
-            voterRequestsCounter = voterRequestsCounter + 1;
-            voterRequests[voterRequestsCounter] = VoterRequest({
-                executed: false,
-                candidate: _voters[i],
-                include: false
-            });
-            removeConfirmation(voterRequestsCounter);
-        }
+        voterRequestsCounter = voterRequestsCounter + 1;
+        voterRequests[voterRequestsCounter] = VoterRequest({
+            executed: false,
+            candidate: voterAddress,
+            include: false
+        });
+        voterConfirmations[voterRequestsCounter][msg.sender] = true;
+        emit RemovingRequest(msg.sender, voterRequestsCounter);
     }
 
     /**
