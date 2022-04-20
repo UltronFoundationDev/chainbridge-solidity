@@ -49,15 +49,6 @@ contract Multisig {
     }
 
     /**
-     * @notice Throws if address is already a voter
-     * @param _address the cheking address
-    */
-    modifier notVoter(address _address) {
-        require(!voters[_address], "already a voter");
-        _;
-    }
-
-    /**
      * @notice Throws if voter request address is zero address
      * @param voterRequestId the checking voter request Id
     */
@@ -142,8 +133,8 @@ contract Multisig {
     function insertVoter(address newVoterAddress) 
         internal 
         notNullAddress(newVoterAddress) 
-        notVoter(newVoterAddress)
     {
+        require(!voters[newVoterAddress], "already a voter");
         voters[newVoterAddress] = true;
         activeVotersCount++;
         voterIds[votersCounter++] = newVoterAddress;
@@ -163,28 +154,6 @@ contract Multisig {
         voters[oldVoterAddress] = false;
         activeVotersCount--;
         emit RemovingVoter(oldVoterAddress);
-    }
-
-    /** 
-     * @notice Replaces old voter address with new address in the voter list 
-     * if addresses are not zero addresses, old voter address is a voter
-     * and new voter address in not a voter
-     * @dev Triggers insert, remove events(logging inserted and removed addresses)
-     * @param oldVoterAddress the address, which should be removed
-     * @param newVoterAddress the address, which should be inserted
-    */
-    function replaceVoter(address oldVoterAddress, address newVoterAddress)
-        external
-        onlyVoter(msg.sender)
-        onlyVoter(oldVoterAddress)
-        notNullAddress(newVoterAddress)
-        notVoter(newVoterAddress)
-    {
-        voters[oldVoterAddress] = false;
-        voters[newVoterAddress] = true;
-        voterIds[votersCounter++] = newVoterAddress;
-        emit RemovingVoter(oldVoterAddress);
-        emit InsertingVoter(newVoterAddress);
     }
 
     /**
@@ -223,42 +192,27 @@ contract Multisig {
      * @notice Allows a voter to add a confirmation for a request
      * if sender is a voter, voter request is confirmed, voter request is not approved  
      * @param voterAddress new voter address
+     * @param include insert/remove(true/false) voter from voter list
     */
-    function insertVoterRequest(address voterAddress) 
+    function newVoterRequest(bool include, address voterAddress) 
         external 
         notNullAddress(voterAddress)
         onlyVoter(msg.sender)
-        notVoter(voterAddress)
     {
+        if(include) {
+            require(!voters[voterAddress], "already a voter");
+        } 
+        else {
+            require(voters[voterAddress], "not a voter");
+        }
         voterRequestsCounter = voterRequestsCounter + 1;
         voterRequests[voterRequestsCounter] = VoterRequest({
             executed: false,
             candidate: voterAddress,
-            include: true
+            include: include
         });
         voterConfirmations[voterRequestsCounter][msg.sender] = true;
         emit ConfirmingRequest(msg.sender, voterRequestsCounter);
-    }
-
-    /**
-     * @notice Allows a voter to remove a confirmation for a request
-     * if sender is a voter, voter request is confirmed, voter request is not approved  
-     * @param voterAddress voter address to be removed
-    */
-    function removeVoterRequest(address voterAddress) 
-        external
-        notNullAddress(voterAddress)
-        onlyVoter(msg.sender)
-        onlyVoter(voterAddress)
-    {
-        voterRequestsCounter = voterRequestsCounter + 1;
-        voterRequests[voterRequestsCounter] = VoterRequest({
-            executed: false,
-            candidate: voterAddress,
-            include: false
-        });
-        voterConfirmations[voterRequestsCounter][msg.sender] = true;
-        emit RemovingRequest(msg.sender, voterRequestsCounter);
     }
 
     /**
