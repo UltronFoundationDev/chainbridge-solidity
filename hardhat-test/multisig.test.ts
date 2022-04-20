@@ -75,14 +75,4 @@ describe("Multisig test", () => {
         expect(await multisig.getActiveVotersCount()).equals(2);
     });
 
-    it('Replace voter if enough votes', async () => { 
-        await multisig.connect(owner).replaceVoter(newVoterSecond.address, voterSecond.address);
-
-        await expect(multisig.connect(owner).replaceVoter(voterFirst.address, newVoterSecond.address)).revertedWith('not a voter');
-        await expect(multisig.connect(owner).replaceVoter(voterSecond.address, owner.address)).revertedWith('already a voter');
-
-        expect(await multisig.getVoterStatusByAddress(newVoterSecond.address)).equals(false);
-        expect(await multisig.getVoterStatusByAddress(voterSecond.address)).equals(true);
-    });
-
 })
