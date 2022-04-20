@@ -19,8 +19,7 @@ contract DAO is Multisig, IDAO {
         Withdraw
     }
 
-    event InsertingVoteForRequest(RequestType indexed requestType, address indexed sender, uint256 indexed requestId);
-    event RemovingVoteFromRequest(RequestType indexed requestType, address indexed sender, uint256 indexed requestId);
+    event NewVoteForRequest(RequestType indexed requestType, bool voteType, address indexed sender, uint256 indexed requestId);
 
     struct OwnerChangeRequest {
         address newOwner;
@@ -28,9 +27,8 @@ contract DAO is Multisig, IDAO {
     }
 
     struct TransferRequest {
-        address recepient;
-        address token;
-        uint256 value;
+        address payable[] addresses;
+        uint[] amounts;
         bool status;
     }
 
@@ -178,6 +176,9 @@ contract DAO is Multisig, IDAO {
         _;
     }
 
+    /**
+     * @notice Throws error if any contract except bridge trys to call the function
+    */
     function setBridgeContractInitial(address _address) external {
         require(bridgeContract == address(0), "already set");
         require(_address != address(0), "Zero address");
@@ -215,7 +216,7 @@ contract DAO is Multisig, IDAO {
      * @notice Approves changing owner request if it is not approved
      * @param id the id of owner change request
     */
-    function confirmOwnerChange(uint256 id) 
+    function confirmOwnerChangeRequest(uint256 id) 
         external 
         override
         onlyBridge
@@ -229,31 +230,23 @@ contract DAO is Multisig, IDAO {
     /**
      * @notice Allows a voter to insert a confirmation for owner change request 
      * if it is not approved and not confirmed
+     * @param voteType the vote type: true/false = insert/remove vote
      * @param id the id of owner change request
     */
-    function insertVoteForOwnerChangeRequest(uint256 id) 
+    function newVoteForOwnerChangeRequest(bool voteType, uint256 id) 
         external 
         onlyVoter(msg.sender)
     {
         require(!ownerChangeRequests[id].status, "already approved");
-        require(!ownerChangesRequestConfirmations[id][msg.sender], "already confirmed");
-        ownerChangesRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.OwnerChange, msg.sender, id);
-    }
+        if(voteType) {
+            require(!ownerChangesRequestConfirmations[id][msg.sender], "already confirmed");
 
-    /**
-     * @notice Allows a voter to remove a confirmation from owner change request 
-     * if it is not approved and it was already confirmed
-     * @param id the id of owner change request
-    */
-    function removeVoteFromOwnerChangeRequest(uint256 id) 
-        external 
-        onlyVoter(msg.sender)
-    {
-        require(!ownerChangeRequests[id].status, "already approved");
-        require(ownerChangesRequestConfirmations[id][msg.sender], "not confirmed");
-        ownerChangesRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.OwnerChange, msg.sender, id);
+        }
+        else {
+            require(ownerChangesRequestConfirmations[id][msg.sender], "not confirmed");
+        }
+        ownerChangesRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.OwnerChange, voteType, msg.sender, id);
     }
 
     /**
@@ -274,7 +267,7 @@ contract DAO is Multisig, IDAO {
         });
         
         ownerChangesRequestConfirmations[ownerChangeRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.OwnerChange, msg.sender, ownerChangeRequestCounter);
+        emit NewVoteForRequest(RequestType.OwnerChange, true, msg.sender, ownerChangeRequestCounter);
 
         return ownerChangeRequestCounter;
     }
@@ -288,7 +281,7 @@ contract DAO is Multisig, IDAO {
         external
         view
         override
-        returns (uint256, address, address)
+        returns (address payable[] memory, uint[] memory)
     {
         require(!transferRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
@@ -302,14 +295,14 @@ contract DAO is Multisig, IDAO {
         }
 
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-        return (transferRequests[id].value, transferRequests[id].recepient, transferRequests[id].token);
+        return (transferRequests[id].addresses, transferRequests[id].amounts);
     }
 
     /**
      * @notice Approves transfer request if it is not approved
      * @param id the id of transfer request
     */
-    function confirmTransfer(uint256 id)
+    function confirmTransferRequest(uint256 id)
         external
         override
         onlyBridge
@@ -323,56 +316,41 @@ contract DAO is Multisig, IDAO {
     /**
      * @notice Allows a voter to insert a confirmation for transfer request 
      * if it is not approved and not confirmed
+     * @param voteType the vote type: true/false = insert/remove vote
      * @param id the id of transfer request
     */
-    function insertVoteForTransferRequest(uint256 id)
+    function newVoteForTransferRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
     {
         require(!transferRequests[id].status, "already approved");
-        require(!transferRequestConfirmations[id][msg.sender], "already confirmed");
-        transferRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.Transfer, msg.sender, id);
-    }
-
-    /**
-     * @notice Allows a voter to remove a confirmation from transfer request 
-     * if it is not approved and it was already confirmed
-     * @param id the id of transfer request
-    */
-    function removeVoteFromTransferRequest(uint256 id)
-        external
-        onlyVoter(msg.sender)
-    {
-        require(!transferRequests[id].status, "already approved");
-        require(transferRequestConfirmations[id][msg.sender], "not confirmed");
-        transferRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.Transfer, msg.sender, id);
+        if(voteType) {
+            require(!transferRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(transferRequestConfirmations[id][msg.sender], "not confirmed");
+        }
+        transferRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.Transfer, voteType, msg.sender, id);
     }
 
     /**
      * @notice Creation of transfer request by any voter
-     * @param recepient the recepient address
-     * @param tokenAddress the token address, which we want to send
-     * @param amount the amount of tokens, which we want to send
     */
-    function newTransferRequest(address recepient, address tokenAddress, uint256 amount)
+    function newTransferRequest(address payable[] calldata addresses, uint[] calldata amounts)
         external
         onlyVoter(msg.sender)
         returns (uint256)
     {
-        require(tokenAddress!= address(0) && recepient != address(0), "zero address");
-
         transferRequestCounter = transferRequestCounter + 1;
         transferRequests[transferRequestCounter] = TransferRequest({
-            recepient: recepient,
-            token: tokenAddress,
-            value: amount,
+            addresses: addresses,
+            amounts: amounts,
             status: false
         });
 
         transferRequestConfirmations[transferRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.Transfer, msg.sender, transferRequestCounter);
+        emit NewVoteForRequest(RequestType.Transfer, true, msg.sender, transferRequestCounter);
 
         return transferRequestCounter;
     }
@@ -409,24 +387,19 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
-    function insertVoteForPauseStatusRequest(uint256 id)
+    function newVoteForPauseStatusRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
     {
         require(!pauseStatusRequests[id].status, "already approved");
-        require(!pauseStatusRequestConfirmations[id][msg.sender], "already confirmed");
+        if(voteType) {
+            require(!pauseStatusRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(pauseStatusRequestConfirmations[id][msg.sender], "not confirmed");
+        }
         pauseStatusRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.PauseStatus, msg.sender, id);
-    }
-
-    function removeVoteFromPauseStatusRequest(uint256 id)
-        external
-        onlyVoter(msg.sender)
-    {
-        require(!pauseStatusRequests[id].status, "already approved");
-        require(pauseStatusRequestConfirmations[id][msg.sender], "not confirmed");
-        pauseStatusRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.PauseStatus, msg.sender, id);
+        emit NewVoteForRequest(RequestType.PauseStatus, voteType, msg.sender, id);
     }
 
     function newPauseStatusRequest(bool mode)
@@ -446,7 +419,7 @@ contract DAO is Multisig, IDAO {
         });
 
         pauseStatusRequestConfirmations[pauseStatusRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.PauseStatus, msg.sender, pauseStatusRequestCounter);
+        emit NewVoteForRequest(RequestType.PauseStatus, true, msg.sender, pauseStatusRequestCounter);
 
         return pauseStatusRequestCounter;
     }
@@ -484,24 +457,19 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
-    function insertVoteForChangeRelayerThresholdRequest(uint256 id)
+    function newVoteForChangeRelayerThresholdRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
     {
         require(!changeRelayerThresholdRequests[id].status, "already approved");
-        require(!changeRelayerThresholdRequestConfirmations[id][msg.sender], "already confirmed");
-        changeRelayerThresholdRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.RelayerThreshold, msg.sender, id);
-    }
-
-    function removeVoteFromChangeRelayerThresholdRequest(uint256 id)
-        external
-        onlyVoter(msg.sender)
-    {
-        require(!changeRelayerThresholdRequests[id].status, "already approved");
-        require(changeRelayerThresholdRequestConfirmations[id][msg.sender], "not confirmed");
-        changeRelayerThresholdRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.RelayerThreshold, msg.sender, id);
+        if(voteType) {
+            require(!changeRelayerThresholdRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(!changeRelayerThresholdRequestConfirmations[id][msg.sender], "not confirmed");
+        }
+        changeRelayerThresholdRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.RelayerThreshold, voteType, msg.sender, id);
     }
 
     function newChangeRelayerThresholdRequest(uint256 amount)
@@ -518,7 +486,7 @@ contract DAO is Multisig, IDAO {
         });
 
         changeRelayerThresholdRequestConfirmations[changeRelayerThresholdRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.RelayerThreshold, msg.sender, changeRelayerThresholdRequestCounter);
+        emit NewVoteForRequest(RequestType.RelayerThreshold, true, msg.sender, changeRelayerThresholdRequestCounter);
 
         return changeRelayerThresholdRequestCounter;
     }
@@ -556,24 +524,19 @@ contract DAO is Multisig, IDAO {
         return true;
     }
     
-    function insertVoteForSetResourceRequest(uint256 id)
+    function newVoteForSetResourceRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
     {
         require(!setResourceRequests[id].status, "already approved");
-        require(!setResourceRequestConfirmations[id][msg.sender], "already confirmed");
-        setResourceRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetResource, msg.sender, id);
-    }
-
-    function removeVoteForSetResourceRequest(uint256 id)
-        external
-        onlyVoter(msg.sender)
-    {
-        require(!setResourceRequests[id].status, "already approved");
-        require(setResourceRequestConfirmations[id][msg.sender], "not confirmed");
-        setResourceRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.SetResource, msg.sender, id);
+        if(voteType) {
+            require(!setResourceRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(setResourceRequestConfirmations[id][msg.sender], "not confirmed");
+        }
+        setResourceRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.SetResource, voteType, msg.sender, id);
     }
 
     function newSetResourceRequest(address handlerAddress, bytes32 resourceId, address tokenAddress)
@@ -593,7 +556,7 @@ contract DAO is Multisig, IDAO {
         });
 
         setResourceRequestConfirmations[setResourceRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetResource, msg.sender, setResourceRequestCounter);
+        emit NewVoteForRequest(RequestType.SetResource, true, msg.sender, setResourceRequestCounter);
 
         return setResourceRequestCounter;
     }
@@ -631,24 +594,19 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
-    function insertVoteForChangeFeeRequest(uint256 id) 
+    function newVoteForChangeFeeRequest(bool voteType, uint256 id) 
         external 
         onlyVoter(msg.sender)
     {
         require(!changeFeeRequests[id].status, "already approved");
-        require(!changeFeeRequestConfirmations[id][msg.sender], "already confirmed");
-        changeFeeRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.ChangeFee, msg.sender, id);
-    }
-
-    function removeVoteFromChangeFeeRequest(uint256 id) 
-        external 
-        onlyVoter(msg.sender)
-    {
-        require(!changeFeeRequests[id].status, "already approved");
-        require(changeFeeRequestConfirmations[id][msg.sender], "not confirmed");
-        changeFeeRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.ChangeFee, msg.sender, id);
+        if(voteType) {
+            require(!changeFeeRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(changeFeeRequestConfirmations[id][msg.sender], "not confirmed");
+        }
+        changeFeeRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.ChangeFee, voteType, msg.sender, id);
     }
 
     function newChangeFeeRequest(uint256 amount)
@@ -664,7 +622,7 @@ contract DAO is Multisig, IDAO {
         });
         
         changeFeeRequestConfirmations[changeFeeRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.ChangeFee, msg.sender, changeFeeRequestCounter);
+        emit NewVoteForRequest(RequestType.ChangeFee, true, msg.sender, changeFeeRequestCounter);
 
         return changeFeeRequestCounter;
     }
@@ -702,24 +660,19 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
-    function insertVoteForWithdrawRequest(uint256 id) 
+    function newVoteForWithdrawRequest(bool voteType, uint256 id) 
         external 
         onlyVoter(msg.sender)
     {
         require(!withdrawRequests[id].status, "already approved");
-        require(!withdrawRequestConfirmations[id][msg.sender], "already confirmed");
-        withdrawRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.Withdraw, msg.sender, id);
-    }
-
-    function removeVoteFromWithdrawRequest(uint256 id) 
-        external 
-        onlyVoter(msg.sender)
-    {
-        require(!withdrawRequests[id].status, "already approved");
-        require(withdrawRequestConfirmations[id][msg.sender], "not confirmed");
-        withdrawRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.Withdraw, msg.sender, id);
+        if(voteType) {
+            require(!withdrawRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(withdrawRequestConfirmations[id][msg.sender], "not confirmed");
+        }
+        withdrawRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.Withdraw, voteType, msg.sender, id);
     }
 
     function newWithdrawRequest(address handlerAddress, bytes calldata data)
@@ -738,7 +691,7 @@ contract DAO is Multisig, IDAO {
         });
         
         withdrawRequestConfirmations[withdrawRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.Withdraw, msg.sender, withdrawRequestCounter);
+        emit NewVoteForRequest(RequestType.Withdraw, true, msg.sender, withdrawRequestCounter);
 
         return withdrawRequestCounter;
     }
@@ -776,24 +729,19 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
-    function insertVoteForSetBurnableRequest(uint256 id) 
+    function newVoteForSetBurnableRequest(bool voteType, uint256 id) 
         external 
         onlyVoter(msg.sender)
     {
         require(!setBurnableRequests[id].status, "already approved");
-        require(!setBurnableRequestConfirmations[id][msg.sender], "already confirmed");
-        setBurnableRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetBurnable, msg.sender, id);
-    }
-
-    function removeVoteFromSetBurnableRequest(uint256 id) 
-        external 
-        onlyVoter(msg.sender)
-    {
-        require(!setBurnableRequests[id].status, "already approved");
-        require(setBurnableRequestConfirmations[id][msg.sender], "not confirmed");
-        setBurnableRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.SetBurnable, msg.sender, id);
+        if(voteType) {
+            require(!setBurnableRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(setBurnableRequestConfirmations[id][msg.sender], "not confirmed");
+        }
+        setBurnableRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.SetBurnable, voteType, msg.sender, id);
     }
 
     function newSetBurnableRequest(address handlerAddress, address tokenAddress)
@@ -812,7 +760,7 @@ contract DAO is Multisig, IDAO {
         });
         
         setBurnableRequestConfirmations[setBurnableRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetBurnable, msg.sender, setBurnableRequestCounter);
+        emit NewVoteForRequest(RequestType.SetBurnable, true, msg.sender, setBurnableRequestCounter);
 
         return setBurnableRequestCounter;
     }
@@ -850,24 +798,19 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
-    function insertVoteForSetNonceRequest(uint256 id) 
+    function newVoteForSetNonceRequest(bool voteType, uint256 id) 
         external 
         onlyVoter(msg.sender)
     {
         require(!setNonceRequests[id].status, "already approved");
-        require(!setNonceRequestConfirmations[id][msg.sender], "already confirmed");
-        setNonceRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetNonce, msg.sender, id);
-    }
-
-    function removeVoteFromSetNonceRequest(uint256 id) 
-        external 
-        onlyVoter(msg.sender)
-    {
-        require(!setNonceRequests[id].status, "already approved");
-        require(setNonceRequestConfirmations[id][msg.sender], "not confirmed");
-        setNonceRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.SetNonce, msg.sender, id);
+        if(voteType) {
+            require(!setNonceRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(setNonceRequestConfirmations[id][msg.sender], "not confirmed");
+        }
+        setNonceRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.SetNonce, voteType, msg.sender, id);
     }
 
     function newSetNonceRequest(uint8 domainId, uint64 nonce)
@@ -884,7 +827,7 @@ contract DAO is Multisig, IDAO {
         });
         
         setNonceRequestConfirmations[setNonceRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetNonce, msg.sender, setNonceRequestCounter);
+        emit NewVoteForRequest(RequestType.SetNonce, true, msg.sender, setNonceRequestCounter);
 
         return setNonceRequestCounter;
     }
@@ -922,24 +865,19 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
-    function insertVoteForSetForwarderRequest(uint256 id)
+    function newVoteForSetForwarderRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
     {
         require(!setForwarderRequests[id].status, "already approved");
-        require(!setForwarderRequestConfirmations[id][msg.sender], "already confirmed");
-        setForwarderRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetForwarder, msg.sender, id);
-    }
-
-    function removeVoteFromSetForwarderRequest(uint256 id)
-        external
-        onlyVoter(msg.sender)
-    {
-        require(!setForwarderRequests[id].status, "already approved");
-        require(setForwarderRequestConfirmations[id][msg.sender], "not confirmed");
-        setForwarderRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.SetForwarder, msg.sender, id);
+        if(voteType) {
+            require(!setForwarderRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(setForwarderRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        setForwarderRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.SetForwarder, voteType, msg.sender, id);
     }
 
     function newSetForwarderRequest(address forwarder, bool valid)
@@ -957,7 +895,7 @@ contract DAO is Multisig, IDAO {
         });
         
         setForwarderRequestConfirmations[setForwarderRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetForwarder, msg.sender, setForwarderRequestCounter);
+        emit NewVoteForRequest(RequestType.SetForwarder, true, msg.sender, setForwarderRequestCounter);
 
         return setForwarderRequestCounter;
     }
@@ -998,24 +936,19 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
-    function insertVoteForSetGenericResourceRequest(uint256 id)
+    function newVoteForSetGenericResourceRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
     {
         require(!setGenericResourceRequests[id].status, "already approved");
-        require(!setGenericResourceRequestConfirmations[id][msg.sender], "already confirmed");
+        if(voteType) {
+            require(!setGenericResourceRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(setGenericResourceRequestConfirmations[id][msg.sender], "not confirmed");
+        }
         setGenericResourceRequestConfirmations[id][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetGenericResource, msg.sender, id);
-    }
-
-    function removeVoteFromSetGenericResourceRequest(uint256 id)
-        external
-        onlyVoter(msg.sender)
-    {
-        require(!setGenericResourceRequests[id].status, "already approved");
-        require(setGenericResourceRequestConfirmations[id][msg.sender], "not confirmed");
-        setGenericResourceRequestConfirmations[id][msg.sender] = false;
-        emit RemovingVoteFromRequest(RequestType.SetGenericResource, msg.sender, id);
+        emit NewVoteForRequest(RequestType.SetGenericResource, voteType, msg.sender, id);
     }
 
     function newSetGenericResourceRequest(
@@ -1043,7 +976,7 @@ contract DAO is Multisig, IDAO {
         });
         
         setGenericResourceRequestConfirmations[setGenericResourceRequestCounter][msg.sender] = true;
-        emit InsertingVoteForRequest(RequestType.SetGenericResource, msg.sender, setGenericResourceRequestCounter);
+        emit NewVoteForRequest(RequestType.SetGenericResource, true, msg.sender, setGenericResourceRequestCounter);
 
         return setGenericResourceRequestCounter;
     }

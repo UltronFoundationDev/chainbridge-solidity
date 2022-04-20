@@ -2,10 +2,10 @@ pragma solidity 0.8.11;
 
 interface IDAO {
     function isOwnerChangeAvailable(uint256 id) external view returns (address);
-    function confirmOwnerChange(uint256 id) external returns (bool);
+    function confirmOwnerChangeRequest(uint256 id) external returns (bool);
 
-    function isTransferAvailable(uint256 id) external view returns (uint256, address, address);
-    function confirmTransfer(uint256 id) external returns (bool);
+    function isTransferAvailable(uint256 id) external view returns (address payable[] memory, uint[] memory);
+    function confirmTransferRequest(uint256 id) external returns (bool);
 
     function isPauseStatusAvailable(uint256 id) external view returns (bool);
     function confirmPauseStatusRequest(uint256 id) external returns (bool);
