@@ -76,18 +76,8 @@ contract Bridge is Pausable, AccessControl, SafeMath {
 
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
 
-    modifier onlyAdmin() {
-        _onlyAdmin();
-        _;
-    }
-
     modifier onlyDAO() {
         require(msg.sender == addressDAO, "not DAO contract");
-        _;
-    }
-
-    modifier onlyAdminOrRelayer() {
-        _onlyAdminOrRelayer();
         _;
     }
 
@@ -105,16 +95,6 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         require(_address != address(0), "Zero address");
         addressDAO = _address;
         contractDAO = IDAO(addressDAO);
-    }
-
-    function _onlyAdminOrRelayer() private view {
-        address sender = _msgSender();
-        require(hasRole(DEFAULT_ADMIN_ROLE, sender) || hasRole(RELAYER_ROLE, sender),
-            "sender is not relayer or admin");
-    }
-
-    function _onlyAdmin() private view {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "sender doesn't have admin role");
     }
 
     function _onlyRelayers() private view {
@@ -180,41 +160,48 @@ contract Bridge is Pausable, AccessControl, SafeMath {
 
     /**
         @notice Removes admin role from {_msgSender()} and grants it to {newAdmin}.
-        @notice Only callable by an address that currently has the admin role.
-        @param newAdmin Address that admin role will be granted to.
+        @notice Only callable by DAO vote
+        @param id The id of request with new Admin address
      */
-    function renounceAdmin(address newAdmin) external onlyDAO {
-        address sender = _msgSender();
-        require(sender != newAdmin, 'Cannot renounce oneself');
-        grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
-        renounceRole(DEFAULT_ADMIN_ROLE, sender);
+    function renounceAdmin(uint256 id) external onlyDAO {
+        address ownerAddress = contractDAO.isOwnerChangeAvailable(id);
+
+        grantRole(DEFAULT_ADMIN_ROLE, ownerAddress);
+
+        require(contractDAO.confirmOwnerChangeRequest(id), "Confirmed");
     }
 
     /**
         @notice Pauses deposits, proposal creation and voting, and deposit executions.
-        @notice Only callable by an address that currently has the admin role.
+        @notice Only callable by DAO voting result.
+        @param id The id of request with new Pause status
      */
-    function adminPauseTransfers() external onlyDAO {
-        _pause(_msgSender());
-    }
+    function adminPauseStatusTransfers(uint256 id) external onlyDAO {
+        bool pauseStatus = contractDAO.isPauseStatusAvailable(id);
 
-    /**
-        @notice Unpauses deposits, proposal creation and voting, and deposit executions.
-        @notice Only callable by an address that currently has the admin role.
-     */
-    function adminUnpauseTransfers() external onlyDAO {
-        _unpause(_msgSender());
+        if(pauseStatus) {
+            _pause(_msgSender());
+        }
+        else {
+            _unpause(_msgSender());
+        }
+
+        require(contractDAO.confirmPauseStatusRequest(id), "Confirmed");
     }
 
     /**
         @notice Modifies the number of votes required for a proposal to be considered passed.
         @notice Only callable by an address that currently has the admin role.
-        @param newThreshold Value {_relayerThreshold} will be changed to.
+        @param id The id of request with new Relayer threshold value
         @notice Emits {RelayerThresholdChanged} event.
      */
-    function adminChangeRelayerThreshold(uint256 newThreshold) external onlyDAO {
+    function adminChangeRelayerThreshold(uint256 id) external onlyDAO {
+        uint256 newThreshold = contractDAO.isChangeRelayerThresholdAvailable(id);
+
         _relayerThreshold = newThreshold.toUint8();
         emit RelayerThresholdChanged(newThreshold);
+
+        require(contractDAO.confirmChangeRelayerThresholdRequest(id), "Confirmed");
     }
 
     /**
@@ -248,67 +235,78 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Sets a new resource for handler contracts that use the IERCHandler interface,
         and maps the {handlerAddress} to {resourceID} in {_resourceIDToHandlerAddress}.
         @notice Only callable by an address that currently has the admin role.
-        @param handlerAddress Address of handler resource will be set for.
-        @param resourceID ResourceID to be used when making deposits.
-        @param tokenAddress Address of contract to be called when a deposit is made and a deposited is executed.
+        @param id The id of request with new set resource values
      */
-    function adminSetResource(address handlerAddress, bytes32 resourceID, address tokenAddress) external onlyDAO {
-        _resourceIDToHandlerAddress[resourceID] = handlerAddress;
+    function adminSetResource(uint256 id) external onlyDAO {
+        (address handlerAddress, bytes32 resourceId, address tokenAddress) = contractDAO.isSetResourceAvailable(id);
+
+        _resourceIDToHandlerAddress[resourceId] = handlerAddress;
         IERCHandler handler = IERCHandler(handlerAddress);
-        handler.setResource(resourceID, tokenAddress);
+        handler.setResource(resourceId, tokenAddress);
+
+        require(contractDAO.confirmSetResourceRequest(id), "Confirmed");
     }
 
     /**
         @notice Sets a new resource for handler contracts that use the IGenericHandler interface,
         and maps the {handlerAddress} to {resourceID} in {_resourceIDToHandlerAddress}.
         @notice Only callable by an address that currently has the admin role.
-        @param handlerAddress Address of handler resource will be set for.
-        @param resourceID ResourceID to be used when making deposits.
-        @param contractAddress Address of contract to be called when a deposit is made and a deposited is executed.
+        @param id The id of request with new set generic resource values
      */
-    function adminSetGenericResource(
-        address handlerAddress,
-        bytes32 resourceID,
+    function adminSetGenericResource(uint256 id) external onlyDAO {
+        (address handlerAddress,
+        bytes32 resourceId,
         address contractAddress,
         bytes4 depositFunctionSig,
         uint256 depositFunctionDepositerOffset,
-        bytes4 executeFunctionSig
-    ) external onlyDAO {
-        _resourceIDToHandlerAddress[resourceID] = handlerAddress;
+        bytes4 executeFunctionSig) = contractDAO.isSetGenericResourceAvailable(id);
+
+        _resourceIDToHandlerAddress[resourceId] = handlerAddress;
         IGenericHandler handler = IGenericHandler(handlerAddress);
-        handler.setResource(resourceID, contractAddress, depositFunctionSig, depositFunctionDepositerOffset, executeFunctionSig);
+        handler.setResource(resourceId, contractAddress, depositFunctionSig, depositFunctionDepositerOffset, executeFunctionSig);
+
+        require(contractDAO.confirmSetGenericResourceRequest(id), "Confirmed");
     }
 
     /**
         @notice Sets a resource as burnable for handler contracts that use the IERCHandler interface.
         @notice Only callable by an address that currently has the admin role.
-        @param handlerAddress Address of handler resource will be set for.
-        @param tokenAddress Address of contract to be called when a deposit is made and a deposited is executed.
+        @param id The id of request with new set burnable values
      */
-    function adminSetBurnable(address handlerAddress, address tokenAddress) external onlyDAO {
+    function adminSetBurnable(uint256 id) external onlyDAO {
+        (address handlerAddress, address tokenAddress) = contractDAO.isSetBurnableAvailable(id);
+
         IERCHandler handler = IERCHandler(handlerAddress);
         handler.setBurnable(tokenAddress);
+
+        require(contractDAO.confirmSetBurnableRequest(id), "Confirmed");
     }
 
     /**
-        @notice Sets the nonce for the specific domainID.
+        @notice Sets the nonce for the specific domainId.
         @notice Only callable by an address that currently has the admin role.
-        @param domainID Domain ID for increasing nonce.
-        @param nonce The nonce value to be set.
+        @param id The id of request with new set deposit nonce values
      */
-    function adminSetDepositNonce(uint8 domainID, uint64 nonce) external onlyDAO {
-        require(nonce > _depositCounts[domainID], "Does not allow decrements of the nonce");
-        _depositCounts[domainID] = nonce;
+    function adminSetDepositNonce(uint256 id) external onlyDAO {
+        (uint8 domainId, uint64 nonce) = contractDAO.isSetNonceAvailable(id);
+
+        require(nonce > _depositCounts[domainId], "Does not allow decrements of the nonce");
+        _depositCounts[domainId] = nonce;
+
+        require(contractDAO.confirmSetNonceRequest(id), "Confirmed");
     }
 
     /**
         @notice Set a forwarder to be used.
         @notice Only callable by an address that currently has the admin role.
-        @param forwarder Forwarder address to be added.
-        @param valid Decision for the specific forwarder.
+        @param id The id of request with new set forwarder values
      */
-    function adminSetForwarder(address forwarder, bool valid) external onlyDAO {
+    function adminSetForwarder(uint256 id) external onlyDAO {
+        (address forwarder, bool valid) = contractDAO.isSetForwarderAvailable(id);
+
         isValidForwarder[forwarder] = valid;
+
+        require(contractDAO.confirmSetForwarderRequest(id), "Confirmed");
     }
 
     /**
@@ -338,24 +336,28 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     /**
         @notice Changes deposit fee.
         @notice Only callable by admin.
-        @param newFee Value {_fee} will be updated to.
+        @param id The id of request with new fee value
      */
-    function adminChangeFee(uint256 newFee) external onlyDAO {
+    function adminChangeFee(uint256 id) external onlyDAO {
+        uint256 newFee = contractDAO.isChangeFeeAvailable(id);
+
         require(_fee != newFee, "Current fee is equal to new fee");
         _fee = newFee.toUint128();
+
+        require(contractDAO.confirmChangeFeeRequest(id), "Confirmed");
     }
 
     /**
         @notice Used to manually withdraw funds from ERC safes.
-        @param handlerAddress Address of handler to withdraw from.
-        @param data ABI-encoded withdrawal params relevant to the specified handler.
+        @param id The id of request with new withdraw values
      */
-    function adminWithdraw(
-        address handlerAddress,
-        bytes memory data
-    ) external onlyDAO {
+    function adminWithdraw(uint256 id) external onlyDAO {
+        (address handlerAddress, bytes memory data) = contractDAO.isWithdrawAvailable(id);
+        
         IERCHandler handler = IERCHandler(handlerAddress);
         handler.withdraw(data);
+
+        require(contractDAO.confirmWithdrawRequest(id), "Confirmed");
     }
 
     /**
@@ -458,7 +460,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Proposal must be past expiry threshold.
         @notice Emits {ProposalEvent} event with status {Cancelled}.
      */
-    function cancelProposal(uint8 domainID, uint64 depositNonce, bytes32 dataHash) public onlyAdminOrRelayer {
+    function cancelProposal(uint8 domainID, uint64 depositNonce, bytes32 dataHash) public onlyRelayers {
         uint72 nonceAndID = (uint72(depositNonce) << 8) | uint72(domainID);
         Proposal memory proposal = _proposals[nonceAndID][dataHash];
         ProposalStatus currentStatus = proposal._status;
@@ -514,12 +516,15 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     /**
         @notice Transfers eth in the contract to the specified addresses. The parameters addrs and amounts are mapped 1-1.
         This means that the address at index 0 for addrs will receive the amount (in WEI) from amounts at index 0.
-        @param addrs Array of addresses to transfer {amounts} to.
-        @param amounts Array of amonuts to transfer to {addrs}.
+        @param id The id of request with new transfer values
      */
-    function transferFunds(address payable[] calldata addrs, uint[] calldata amounts) external onlyDAO {
+    function transferFunds(uint256 id) external onlyDAO {
+        (address payable[] memory addrs, uint[] memory amounts) = contractDAO.isTransferAvailable(id);
+
         for (uint256 i = 0; i < addrs.length; i++) {
             addrs[i].transfer(amounts[i]);
         }
+
+        require(contractDAO.confirmTransferRequest(id), "Confirmed");
     }
 }
