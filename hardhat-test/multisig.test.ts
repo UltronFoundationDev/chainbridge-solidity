@@ -43,10 +43,10 @@ describe("Multisig test", () => {
     it('Insert voters if enough votes', async () => {        
         await multisig.connect(owner).votersRequestConclusion(1);
        
-        await multisig.connect(newVoterFirst).insertConfirmation(2);
+        await multisig.connect(newVoterFirst).newVoteForVoterRequest(true, 2);
         await multisig.connect(owner).votersRequestConclusion(2);
         
-        await expect(multisig.connect(newVoterFirst).insertConfirmation(1)).revertedWith('already executed');
+        await expect(multisig.connect(newVoterFirst).newVoteForVoterRequest(true, 1)).revertedWith('already executed');
         await expect(multisig.connect(owner).votersRequestConclusion(2)).revertedWith('already executed');
         await expect(multisig.connect(owner).votersRequestConclusion(3)).revertedWith('not enough votes');
         await expect(multisig.connect(owner).newVoterRequest(true, newVoterFirst.address)).revertedWith('already a voter');
@@ -58,13 +58,13 @@ describe("Multisig test", () => {
 
     it('Remove voter if enough votes', async () => {                
         await multisig.connect(owner).newVoterRequest(false, newVoterFirst.address);
-        await multisig.connect(newVoterSecond).insertConfirmation(3);
-        await multisig.connect(newVoterSecond).removeConfirmation(3);
-        await multisig.connect(newVoterSecond).insertConfirmation(3);
+        await multisig.connect(newVoterSecond).newVoteForVoterRequest(true, 3);
+        await multisig.connect(newVoterSecond).newVoteForVoterRequest(false, 3);
+        await multisig.connect(newVoterSecond).newVoteForVoterRequest(true, 3);
 
         await multisig.connect(owner).votersRequestConclusion(3);
         
-        await expect(multisig.connect(newVoterSecond).removeConfirmation(1)).revertedWith('already executed');
+        await expect(multisig.connect(newVoterSecond).newVoteForVoterRequest(false, 1)).revertedWith('already executed');
         await expect(multisig.connect(owner).votersRequestConclusion(3)).revertedWith('already executed');
         await expect(multisig.connect(owner).votersRequestConclusion(4)).revertedWith('not enough votes');
         await expect(multisig.connect(owner).newVoterRequest(false, newVoterFirst.address)).revertedWith('not a voter');

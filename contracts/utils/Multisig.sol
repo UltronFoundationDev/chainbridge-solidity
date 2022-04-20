@@ -4,8 +4,7 @@ pragma solidity 0.8.11;
 contract Multisig {
     event InsertingVoter(address indexed _address);
     event RemovingVoter(address indexed _address);
-    event ConfirmingRequest(address indexed sender, uint256 indexed requestId);
-    event RemovingRequest(address indexed sender, uint256 indexed requestId);
+    event VoteForVoterRequest(bool indexed voteType, address indexed sender, uint256 indexed requestId);
 
     // mapping voter id => voter address
     mapping(uint256 => address) private voterIds;
@@ -158,34 +157,24 @@ contract Multisig {
 
     /**
      * @notice Allows a voter to insert a confirmation for a transaction
-     * if sender is a voter, voter request is confirmed, voter request is not approved  
+     * if sender is a voter, voter request is confirmed, voter request is not approved 
+     * @param voteType the vote type: true/false = insert/remove vote
      * @param voterRequestId voter request id
     */ 
-    function insertConfirmation(uint256 voterRequestId)
+    function newVoteForVoterRequest(bool voteType, uint256 voterRequestId)
         external
         onlyVoter(msg.sender)
         voterRequestExists(voterRequestId)
         notExecuted(voterRequestId)
     {
-        require(!voterConfirmations[voterRequestId][msg.sender], "already confirmed");
-        voterConfirmations[voterRequestId][msg.sender] = true;
-        emit ConfirmingRequest(msg.sender, voterRequestId);
-    }
-
-    /**
-     * @notice Allows a voter to remove a confirmation for a transaction
-     * if sender is a voter, voter request is confirmed, voter request is not approved  
-     * @param voterRequestId voter request id
-    */ 
-    function removeConfirmation(uint256 voterRequestId)
-        external
-        onlyVoter(msg.sender)
-        voterRequestExists(voterRequestId)
-        notExecuted(voterRequestId)
-    {
-        require(voterConfirmations[voterRequestId][msg.sender], "not confirmed");
-        voterConfirmations[voterRequestId][msg.sender] = false;
-        emit RemovingRequest(msg.sender, voterRequestId);
+        if(voteType) {
+            require(!voterConfirmations[voterRequestId][msg.sender], "already confirmed");
+        }
+        else {
+            require(voterConfirmations[voterRequestId][msg.sender], "not confirmed");
+        }
+        voterConfirmations[voterRequestId][msg.sender] = voteType;
+        emit VoteForVoterRequest(voteType, msg.sender, voterRequestId);
     }
 
     /**
@@ -212,7 +201,7 @@ contract Multisig {
             include: include
         });
         voterConfirmations[voterRequestsCounter][msg.sender] = true;
-        emit ConfirmingRequest(msg.sender, voterRequestsCounter);
+        emit VoteForVoterRequest(true, msg.sender, voterRequestsCounter);
     }
 
     /**
