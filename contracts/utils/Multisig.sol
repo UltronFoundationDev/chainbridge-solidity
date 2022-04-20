@@ -155,6 +155,28 @@ contract Multisig {
         activeVotersCount--;
         emit RemovingVoter(oldVoterAddress);
     }
+    
+    /** 
+     * @notice Replaces old voter address with new address in the voter list 
+     * if addresses are not zero addresses, old voter address is a voter
+     * and new voter address in not a voter
+     * @dev Triggers insert, remove events(logging inserted and removed addresses)
+     * @param oldVoterAddress the address, which should be removed
+     * @param newVoterAddress the address, which should be inserted
+    */
+    function replaceVoter(address oldVoterAddress, address newVoterAddress)
+        external
+        onlyVoter(msg.sender)
+        onlyVoter(oldVoterAddress)
+        notNullAddress(newVoterAddress)
+        notVoter(newVoterAddress)
+    {
+        voters[oldVoterAddress] = false;
+        voters[newVoterAddress] = true;
+        voterIds[votersCounter++] = newVoterAddress;
+        emit RemovingVoter(oldVoterAddress);
+        emit InsertingVoter(newVoterAddress);
+    }
 
     /**
      * @notice Allows a voter to insert a confirmation for a transaction
