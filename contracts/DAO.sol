@@ -2,6 +2,7 @@ pragma solidity 0.8.11;
 
 import "./interfaces/IDAO.sol";
 import "./utils/Multisig.sol";
+import "hardhat/console.sol";
 
 /// @notice DAO contract, which provides owner changing
 contract DAO is Multisig, IDAO {
@@ -172,7 +173,7 @@ contract DAO is Multisig, IDAO {
      * @notice Throws error if any contract except bridge trys to call the function
     */
     modifier onlyBridge() {
-        require(bridgeContract == msg.sender, "Not Bridge address");
+        require(bridgeContract == msg.sender, "not bridge address");
         _;
     }
 
@@ -181,7 +182,7 @@ contract DAO is Multisig, IDAO {
     */
     function setBridgeContractInitial(address _address) external {
         require(bridgeContract == address(0), "already set");
-        require(_address != address(0), "Zero address");
+        require(_address != address(0), "zero address");
         bridgeContract = _address;
     }
 
@@ -197,18 +198,16 @@ contract DAO is Multisig, IDAO {
         returns (address)
     {
         require(!ownerChangeRequests[id].status, "already approved");
-        require(ownerChangeRequests[id].newOwner != address(0), "zero address");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = 0;
-        
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(ownerChangesRequestConfirmations[id][getVoterById(id)] 
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(ownerChangesRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-        
+
         return ownerChangeRequests[id].newOwner;
     }
 
@@ -240,7 +239,6 @@ contract DAO is Multisig, IDAO {
         require(!ownerChangeRequests[id].status, "already approved");
         if(voteType) {
             require(!ownerChangesRequestConfirmations[id][msg.sender], "already confirmed");
-
         }
         else {
             require(ownerChangesRequestConfirmations[id][msg.sender], "not confirmed");
@@ -268,7 +266,6 @@ contract DAO is Multisig, IDAO {
         
         ownerChangesRequestConfirmations[ownerChangeRequestCounter][msg.sender] = true;
         emit NewVoteForRequest(RequestType.OwnerChange, true, msg.sender, ownerChangeRequestCounter);
-
         return ownerChangeRequestCounter;
     }
 
@@ -288,13 +285,13 @@ contract DAO is Multisig, IDAO {
         uint256 affirmativeVotesCount = 0;
 
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(transferRequestConfirmations[id][getVoterById(id)]
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(transferRequestConfirmations[id][getVoterById(i)]
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
+
         return (transferRequests[id].addresses, transferRequests[id].amounts);
     }
 
@@ -366,13 +363,13 @@ contract DAO is Multisig, IDAO {
         uint256 affirmativeVotesCount = 0;
 
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(transferRequestConfirmations[id][getVoterById(id)]
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(pauseStatusRequestConfirmations[id][getVoterById(i)]
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
+        
         return pauseStatusRequests[id].mode;
     }
 
@@ -398,7 +395,7 @@ contract DAO is Multisig, IDAO {
         else {
             require(pauseStatusRequestConfirmations[id][msg.sender], "not confirmed");
         }
-        pauseStatusRequestConfirmations[id][msg.sender] = true;
+        pauseStatusRequestConfirmations[id][msg.sender] = voteType;
         emit NewVoteForRequest(RequestType.PauseStatus, voteType, msg.sender, id);
     }
 
@@ -407,12 +404,7 @@ contract DAO is Multisig, IDAO {
         onlyVoter(msg.sender)
         returns (uint256)
     {
-        require(pauseStatusRequestCounter > 0
-            && pauseStatusRequests[pauseStatusRequestCounter].mode == !mode
-            && pauseStatusRequests[pauseStatusRequestCounter].status == true, "pause mode should differ");
-
-        pauseStatusRequestCounter = pauseStatusRequestCounter + 1;
-                
+        pauseStatusRequestCounter = pauseStatusRequestCounter + 1;   
         pauseStatusRequests[pauseStatusRequestCounter] = PauseStatusRequest({
             mode: mode,
             status: false
@@ -431,18 +423,17 @@ contract DAO is Multisig, IDAO {
         returns (uint256) 
     {
         require(!changeRelayerThresholdRequests[id].status, "already approved");
-
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = 0;
 
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(changeRelayerThresholdRequestConfirmations[id][getVoterById(id)]
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(changeRelayerThresholdRequestConfirmations[id][getVoterById(i)]
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
+
         return changeRelayerThresholdRequests[id].amount;
     }
 
@@ -466,7 +457,7 @@ contract DAO is Multisig, IDAO {
             require(!changeRelayerThresholdRequestConfirmations[id][msg.sender], "already confirmed");
         }
         else {
-            require(!changeRelayerThresholdRequestConfirmations[id][msg.sender], "not confirmed");
+            require(changeRelayerThresholdRequestConfirmations[id][msg.sender], "not confirmed");
         }
         changeRelayerThresholdRequestConfirmations[id][msg.sender] = voteType;
         emit NewVoteForRequest(RequestType.RelayerThreshold, voteType, msg.sender, id);
@@ -477,10 +468,8 @@ contract DAO is Multisig, IDAO {
         onlyVoter(msg.sender)
         returns (uint256)
     {
-        changeRelayerThresholdRequestCounter = changeRelayerThresholdRequestCounter + 1;
-                
-        changeRelayerThresholdRequests[changeRelayerThresholdRequestCounter] = ChangeRelayerThresholdRequest
-        ({
+        changeRelayerThresholdRequestCounter = changeRelayerThresholdRequestCounter + 1;     
+        changeRelayerThresholdRequests[changeRelayerThresholdRequestCounter] = ChangeRelayerThresholdRequest ({
             amount: amount,
             status: false
         });
@@ -498,18 +487,17 @@ contract DAO is Multisig, IDAO {
         returns (address, bytes32, address)
     {
         require(!setResourceRequests[id].status, "already approved");
-
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = 0;
 
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(setResourceRequestConfirmations[id][getVoterById(id)]
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(setResourceRequestConfirmations[id][getVoterById(i)]
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
+
         return (setResourceRequests[id].handlerAddress, setResourceRequests[id].resourceId, setResourceRequests[id].tokenAddress);
     }
     
@@ -545,9 +533,7 @@ contract DAO is Multisig, IDAO {
         returns (uint256)
     {
         require(tokenAddress!= address(0) && handlerAddress != address(0), "zero address");
-
         setResourceRequestCounter = setResourceRequestCounter + 1;
-
         setResourceRequests[setResourceRequestCounter] = SetResourceRequest({
             handlerAddress: handlerAddress,
             resourceId: resourceId,
@@ -568,13 +554,12 @@ contract DAO is Multisig, IDAO {
         returns (uint256)
     {
         require(!changeFeeRequests[id].status, "already approved");
-
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = 0;
         
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(changeFeeRequestConfirmations[id][getVoterById(id)] 
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(changeFeeRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
@@ -615,7 +600,6 @@ contract DAO is Multisig, IDAO {
         returns (uint256)
     {
         changeFeeRequestCounter = changeFeeRequestCounter + 1;
-        
         changeFeeRequests[changeFeeRequestCounter] = ChangeFeeRequest({
             amount: amount,
             status: false
@@ -634,13 +618,12 @@ contract DAO is Multisig, IDAO {
         returns (address, bytes memory)
     {
         require(!withdrawRequests[id].status, "already approved");
-
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = 0;
         
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(withdrawRequestConfirmations[id][getVoterById(id)] 
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(withdrawRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
@@ -703,13 +686,12 @@ contract DAO is Multisig, IDAO {
         returns (address, address)
     {
         require(!setBurnableRequests[id].status, "already approved");
-
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = 0;
         
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(setBurnableRequestConfirmations[id][getVoterById(id)] 
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(setBurnableRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
@@ -750,9 +732,7 @@ contract DAO is Multisig, IDAO {
         returns (uint256)
     {
         require(tokenAddress!= address(0) && handlerAddress != address(0), "zero address");
-      
         setBurnableRequestCounter = setBurnableRequestCounter + 1;
-        
         setBurnableRequests[setBurnableRequestCounter] = SetBurnableRequest({
             handlerAddress: handlerAddress,
             tokenAddress: tokenAddress,
@@ -772,13 +752,12 @@ contract DAO is Multisig, IDAO {
         returns (uint8, uint64)
     {
         require(!setNonceRequests[id].status, "already approved");
-
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = 0;
         
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(setNonceRequestConfirmations[id][getVoterById(id)] 
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(setNonceRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
@@ -819,7 +798,6 @@ contract DAO is Multisig, IDAO {
         returns (uint256)
     {
         setNonceRequestCounter = setNonceRequestCounter + 1;
-        
         setNonceRequests[setNonceRequestCounter] = SetNonceRequest({
             domainId: domainId,
             nonce: nonce,
@@ -839,13 +817,12 @@ contract DAO is Multisig, IDAO {
         returns (address, bool)
     {
         require(!setForwarderRequests[id].status, "already approved");
-
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = 0;
         
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(setForwarderRequestConfirmations[id][getVoterById(id)] 
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(setForwarderRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
@@ -874,7 +851,7 @@ contract DAO is Multisig, IDAO {
             require(!setForwarderRequestConfirmations[id][msg.sender], "already confirmed");
         }
         else {
-            require(setForwarderRequestConfirmations[id][msg.sender], "already confirmed");
+            require(setForwarderRequestConfirmations[id][msg.sender], "not confirmed");
         }
         setForwarderRequestConfirmations[id][msg.sender] = voteType;
         emit NewVoteForRequest(RequestType.SetForwarder, voteType, msg.sender, id);
@@ -887,7 +864,6 @@ contract DAO is Multisig, IDAO {
     {
         require(forwarder != address(0), "zero address");
         setForwarderRequestCounter = setForwarderRequestCounter + 1;
-        
         setForwarderRequests[setForwarderRequestCounter] = SetForwarderRequest({
             forwarder: forwarder,
             valid: valid,
@@ -911,8 +887,8 @@ contract DAO is Multisig, IDAO {
         uint256 affirmativeVotesCount = 0;
         
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(setGenericResourceRequestConfirmations[id][getVoterById(id)] 
-            && getVoterStatusByAddress(getVoterById(id))) {
+            if(setGenericResourceRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
@@ -947,7 +923,7 @@ contract DAO is Multisig, IDAO {
         else {
             require(setGenericResourceRequestConfirmations[id][msg.sender], "not confirmed");
         }
-        setGenericResourceRequestConfirmations[id][msg.sender] = true;
+        setGenericResourceRequestConfirmations[id][msg.sender] = voteType;
         emit NewVoteForRequest(RequestType.SetGenericResource, voteType, msg.sender, id);
     }
 
@@ -964,7 +940,7 @@ contract DAO is Multisig, IDAO {
     {
         require(handlerAddress != address(0) && contractAddress != address(0), "zero address");
         setGenericResourceRequestCounter = setGenericResourceRequestCounter + 1;
-        
+
         setGenericResourceRequests[setGenericResourceRequestCounter] = SetGenericResourceRequest({
             handlerAddress: handlerAddress,
             resourceId: resourceId,
@@ -980,5 +956,4 @@ contract DAO is Multisig, IDAO {
 
         return setGenericResourceRequestCounter;
     }
-
 }
