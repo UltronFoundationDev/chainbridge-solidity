@@ -54,7 +54,7 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
         await expect(dao.setBridgeContractInitial(zeroAddress)).revertedWith("zero address");
 
         await dao.setBridgeContractInitial(bridge.address);
-        console.log(`${beforeTest}${colorBlue}Inserted${colorReset} initial bridge addres to DAO: ${colorGreen}${bridge.address}${colorReset}`);    
+        console.log(`${beforeTest}${colorBlue}Inserted${colorReset} initial bridge address to DAO: ${colorGreen}${bridge.address}${colorReset}`);    
     });
 
     it("Bridge contract address is setted\n", async () => {
@@ -89,7 +89,7 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
 
     it("Transfer request is available and returns correct value\n", async () => {
         const addreses:string[] = [owner.address, voterFirst.address];
-        const amounts: number[] = [1, 2, 3, 4];
+        const amounts: number[] = [2, 2];
 
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender is not a voter`);
         await expect(dao.connect(newVoterSecond).newTransferRequest(addreses, amounts)).revertedWith("not a voter"); 

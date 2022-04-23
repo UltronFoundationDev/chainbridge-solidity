@@ -12,6 +12,17 @@ export const abiEncode = (valueTypes: readonly (string | ParamType)[], values: r
     return AbiCoder.encode(valueTypes, values)
 };
 
+export const createGenericDepositData = (hexMetaData: string) => {
+    if (hexMetaData === null) {
+        return '0x' +
+            toHex(0, 32).substr(2) // len(metaData) (32 bytes)
+    } 
+    const hexMetaDataLength = (hexMetaData.substr(2)).length / 2;
+    return '0x' +
+        toHex(hexMetaDataLength, 32).substr(2) +
+        hexMetaData.substr(2)
+};
+
 export const createResourceID = (contractAddress: string, domainId: number | bigint | BytesLike | Hexable) => {
     return toHex(contractAddress + toHex(domainId, 1).substr(2), 32)
 };

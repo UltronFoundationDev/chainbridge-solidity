@@ -40,14 +40,16 @@ const config: HardhatUserConfig = {
       chainId: 1337,
       forking: {
         url: "https://eth-mainnet.alchemyapi.io/v2/i2LgfhBeI-JidguSNlFuToo7kPSkFBPb",
-        blockNumber: 11095000
+        blockNumber: 11095000,
       },
+      gas: 2100000,
+      gasPrice: 8000000000
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
       chainId: 5,
-      gas: 2200000,
-      gasPrice: 1000000000
+      gas: 2100000,
+      gasPrice: 8000000000
     }
   },
   etherscan: {
