@@ -4,7 +4,8 @@ import "./interfaces/IDAO.sol";
 import "./utils/Multisig.sol";
 import "hardhat/console.sol";
 
-/// @notice DAO contract, which provides owner changing
+/// @title Decentralized autonomous organization for bridge
+/// @notice DAO contract, which provides bridge functions manipulation 
 contract DAO is Multisig, IDAO {
     enum RequestType {
         OwnerChange,
@@ -187,8 +188,7 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
-     * @notice Allows changing owner request if it is not approved 
-     * and there are enough votes
+     * @notice Allows changing owner request if it is not approved and there are enough votes
      * @param id the id of change owner request
     */
     function isOwnerChangeAvailable(uint256 id) 
@@ -270,8 +270,7 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
-     * @notice Allows transfer request if it is not approved 
-     * and there are enough votes
+     * @notice Allows transfer request if it is not approved and there are enough votes
      * @param id the id of transfer request
     */
     function isTransferAvailable(uint256 id)
@@ -311,8 +310,7 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
-     * @notice Allows a voter to insert a confirmation for transfer request 
-     * if it is not approved and not confirmed
+     * @notice Allows a voter to insert a confirmation for transfer request if it is not approved
      * @param voteType the vote type: true/false = insert/remove vote
      * @param id the id of transfer request
     */
@@ -332,7 +330,11 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
-     * @notice Creation of transfer request by any voter
+     * @notice Creation of transfer request by any voter 
+     * The parameters addresses and amounts are mapped 1-1.
+     * This means that the address at index 0 for addrs will receive the amount (in WEI) from amounts at index 0.
+     * @param addresses Array of addresses to transfer {amounts} to.
+     * @param amounts Array of amonuts to transfer to {addrs}.
     */
     function newTransferRequest(address payable[] calldata addresses, uint[] calldata amounts)
         external
@@ -352,6 +354,10 @@ contract DAO is Multisig, IDAO {
         return transferRequestCounter;
     }
 
+    /**
+     * @notice Allows pause status request if it is not approved and there are enough votes
+     * @param id the id of pause status request
+    */
     function isPauseStatusAvailable(uint256 id)
         external
         view
@@ -373,6 +379,10 @@ contract DAO is Multisig, IDAO {
         return pauseStatusRequests[id].mode;
     }
 
+    /**
+     * @notice Approves pause status request if it is not approved
+     * @param id the id of pause status request
+    */
     function confirmPauseStatusRequest(uint256 id)
         external
         onlyBridge
@@ -384,6 +394,11 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
+    /**
+     * @notice Allows a voter to insert a confirmation for pause status request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of pause status request
+    */
     function newVoteForPauseStatusRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
@@ -399,6 +414,10 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.PauseStatus, voteType, msg.sender, id);
     }
 
+    /**
+     * @notice Creation of pause status request by any voter
+     * @param mode new pause mode(true - pause; false - unpause)
+    */
     function newPauseStatusRequest(bool mode)
         external
         onlyVoter(msg.sender)
@@ -416,6 +435,10 @@ contract DAO is Multisig, IDAO {
         return pauseStatusRequestCounter;
     }
 
+    /**
+     * @notice Allows changing relayer threshold request if it is not approved and there are enough votes
+     * @param id the id of change relayer threshold request
+    */
     function isChangeRelayerThresholdAvailable(uint256 id) 
         external 
         view 
@@ -437,6 +460,10 @@ contract DAO is Multisig, IDAO {
         return changeRelayerThresholdRequests[id].amount;
     }
 
+    /**
+     * @notice Approves change relayer threshold request if it is not approved
+     * @param id the id of change relayer threshold request
+    */
     function confirmChangeRelayerThresholdRequest(uint256 id) 
         external
         override
@@ -448,6 +475,11 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
+    /**
+     * @notice Allows a voter to insert a confirmation for change relayer threshold request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of change relayer threshold request
+    */
     function newVoteForChangeRelayerThresholdRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
@@ -463,6 +495,10 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.RelayerThreshold, voteType, msg.sender, id);
     }
 
+    /**
+     * @notice Creation of change relayer threshold request by any voter
+     * @param amount new relayer threshold value
+    */
     function newChangeRelayerThresholdRequest(uint256 amount)
         external
         onlyVoter(msg.sender)
@@ -480,6 +516,10 @@ contract DAO is Multisig, IDAO {
         return changeRelayerThresholdRequestCounter;
     }
 
+    /**
+     * @notice Allows set resource request if it is not approved and there are enough votes
+     * @param id the id of set resource request
+    */
     function isSetResourceAvailable(uint256 id)
         external
         view
@@ -500,7 +540,11 @@ contract DAO is Multisig, IDAO {
 
         return (setResourceRequests[id].handlerAddress, setResourceRequests[id].resourceId, setResourceRequests[id].tokenAddress);
     }
-    
+
+    /**
+     * @notice Approves set resource request if it is not approved
+     * @param id the id of set resource status request
+    */
     function confirmSetResourceRequest(uint256 id)
         external
         onlyBridge
@@ -512,6 +556,11 @@ contract DAO is Multisig, IDAO {
         return true;
     }
     
+    /**
+     * @notice Allows a voter to insert a confirmation for set resource request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of set resource request
+    */
     function newVoteForSetResourceRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
@@ -527,6 +576,12 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.SetResource, voteType, msg.sender, id);
     }
 
+    /**
+     * @notice Creation of set resorce request by any voter
+     * @param handlerAddress Address of handler resource will be set for
+     * @param resourceId ResourceId to be used when making deposits
+     * @param tokenAddress Address of contract to be called, when a deposit is made and a deposited is executed
+    */
     function newSetResourceRequest(address handlerAddress, bytes32 resourceId, address tokenAddress)
         external
         onlyVoter(msg.sender)
@@ -547,6 +602,10 @@ contract DAO is Multisig, IDAO {
         return setResourceRequestCounter;
     }
 
+    /**
+     * @notice Allows changing fee request if it is not approved and there are enough votes
+     * @param id the id of change fee request
+    */
     function isChangeFeeAvailable(uint256 id) 
         external 
         view 
@@ -568,6 +627,10 @@ contract DAO is Multisig, IDAO {
         return changeFeeRequests[id].amount;
     }
 
+    /**
+     * @notice Approves change fee request if it is not approved
+     * @param id the id of change fee request
+    */
     function confirmChangeFeeRequest(uint256 id) 
         external 
         override
@@ -579,6 +642,11 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
+    /**
+     * @notice Allows a voter to insert a confirmation for change fee request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of change fee request
+    */
     function newVoteForChangeFeeRequest(bool voteType, uint256 id) 
         external 
         onlyVoter(msg.sender)
@@ -594,6 +662,10 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.ChangeFee, voteType, msg.sender, id);
     }
 
+    /**
+     * @notice Creation of change fee request by any voter
+     * @param amount new fee value to be set
+    */
     function newChangeFeeRequest(uint256 amount)
         external
         onlyVoter(msg.sender)
@@ -611,6 +683,10 @@ contract DAO is Multisig, IDAO {
         return changeFeeRequestCounter;
     }
 
+    /**
+     * @notice Allows withdraw request if it is not approved and there are enough votes
+     * @param id the id of withdraw request
+    */
     function isWithdrawAvailable(uint256 id) 
         external 
         view 
@@ -632,6 +708,10 @@ contract DAO is Multisig, IDAO {
         return (withdrawRequests[id].handlerAddress, withdrawRequests[id].data);
     }
 
+    /**
+     * @notice Approves withdraw request if it is not approved
+     * @param id the id of withdraw request
+    */
     function confirmWithdrawRequest(uint256 id) 
         external 
         override
@@ -643,6 +723,11 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
+    /**
+     * @notice Allows a voter to insert a confirmation for withdraw request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of withdraw request
+    */
     function newVoteForWithdrawRequest(bool voteType, uint256 id) 
         external 
         onlyVoter(msg.sender)
@@ -658,6 +743,11 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.Withdraw, voteType, msg.sender, id);
     }
 
+    /**
+     * @notice Creation of withdraw request by any voter
+     * @param handlerAddress Address of handler to withdraw from
+     * @param data ABI-encoded withdrawal params relevant to the specified handler
+    */
     function newWithdrawRequest(address handlerAddress, bytes calldata data)
         external
         onlyVoter(msg.sender)
@@ -679,6 +769,10 @@ contract DAO is Multisig, IDAO {
         return withdrawRequestCounter;
     }
 
+    /**
+     * @notice Allows set burnable request if it is not approved and there are enough votes
+     * @param id the id of set burnable request
+    */
     function isSetBurnableAvailable(uint256 id) 
         external 
         view 
@@ -700,6 +794,10 @@ contract DAO is Multisig, IDAO {
         return (setBurnableRequests[id].handlerAddress, setBurnableRequests[id].tokenAddress);
     }
 
+    /**
+     * @notice Approves set burnable request if it is not approved
+     * @param id the id of set burnable request
+    */
     function confirmSetBurnableRequest(uint256 id) 
         external 
         override
@@ -711,6 +809,11 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
+    /**
+     * @notice Allows a voter to insert a confirmation for set burnable request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of set burnable request
+    */
     function newVoteForSetBurnableRequest(bool voteType, uint256 id) 
         external 
         onlyVoter(msg.sender)
@@ -726,6 +829,11 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.SetBurnable, voteType, msg.sender, id);
     }
 
+    /**
+     * @notice Creation of set burnable request by any voter
+     * @param handlerAddress Address of handler resource will be set for
+     * @param tokenAddress Address of contract to be called when a deposit is made and a deposited is executed
+    */
     function newSetBurnableRequest(address handlerAddress, address tokenAddress)
         external
         onlyVoter(msg.sender)
@@ -745,6 +853,10 @@ contract DAO is Multisig, IDAO {
         return setBurnableRequestCounter;
     }
 
+    /**
+     * @notice Allows setting nonce request if it is not approved and there are enough votes
+     * @param id the id of set nonce request
+    */
     function isSetNonceAvailable(uint256 id) 
         external 
         view 
@@ -766,6 +878,10 @@ contract DAO is Multisig, IDAO {
         return (setNonceRequests[id].domainId, setNonceRequests[id].nonce);
     }
 
+    /**
+     * @notice Approves set nonce request if it is not approved
+     * @param id the id of set nonce request
+    */
     function confirmSetNonceRequest(uint256 id) 
         external 
         override
@@ -777,6 +893,11 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
+    /**
+     * @notice Allows a voter to insert a confirmation for set nonce request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of set nonce request
+    */
     function newVoteForSetNonceRequest(bool voteType, uint256 id) 
         external 
         onlyVoter(msg.sender)
@@ -792,6 +913,11 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.SetNonce, voteType, msg.sender, id);
     }
 
+    /**
+     * @notice Creation of set nonce request by any voter
+     * @param domainId Domain ID for increasing nonce
+     * @param nonce The nonce value to be set
+    */
     function newSetNonceRequest(uint8 domainId, uint64 nonce)
         external
         onlyVoter(msg.sender)
@@ -810,6 +936,10 @@ contract DAO is Multisig, IDAO {
         return setNonceRequestCounter;
     }
 
+    /**
+     * @notice Allows setting forwarder request if it is not approved and there are enough votes
+     * @param id the id of set forwarder request
+    */
     function isSetForwarderAvailable(uint256 id) 
         external 
         view
@@ -831,6 +961,10 @@ contract DAO is Multisig, IDAO {
         return (setForwarderRequests[id].forwarder, setForwarderRequests[id].valid);
     }
 
+    /**
+     * @notice Approves set forwarder request if it is not approved
+     * @param id the id of set forwarder request
+    */
     function confirmSetForwarderRequest(uint256 id) 
         external 
         onlyBridge
@@ -842,6 +976,11 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
+    /**
+     * @notice Allows a voter to insert a confirmation for set forwarder request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of set forwarder request
+    */
     function newVoteForSetForwarderRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
@@ -857,6 +996,11 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.SetForwarder, voteType, msg.sender, id);
     }
 
+    /**
+     * @notice Creation of set resorce request by any voter
+     * @param forwarder Forwarder address to be added
+     * @param valid Decision for the specific forwarder
+    */
     function newSetForwarderRequest(address forwarder, bool valid)
         external
         onlyVoter(msg.sender)
@@ -876,6 +1020,10 @@ contract DAO is Multisig, IDAO {
         return setForwarderRequestCounter;
     }
 
+    /**
+     * @notice Allows setting generic resource request if it is not approved and there are enough votes
+     * @param id the id of set generic resource request
+    */
     function isSetGenericResourceAvailable(uint256 id) 
         external 
         view 
@@ -902,6 +1050,10 @@ contract DAO is Multisig, IDAO {
                 setGenericResourceRequests[id].executeFunctionSig);
     }
 
+    /**
+     * @notice Approves set generic resource request if it is not approved
+     * @param id the id of set generic resource request
+    */
     function confirmSetGenericResourceRequest(uint256 id) 
         external
         onlyBridge 
@@ -912,6 +1064,11 @@ contract DAO is Multisig, IDAO {
         return true;
     }
 
+    /** 
+     * @notice Allows a voter to insert a confirmation for set generic resource request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of set generic resource request
+    */
     function newVoteForSetGenericResourceRequest(bool voteType, uint256 id)
         external
         onlyVoter(msg.sender)
@@ -927,6 +1084,15 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.SetGenericResource, voteType, msg.sender, id);
     }
 
+    /**
+     * @notice Creation of set resorce request by any voter
+     * @param handlerAddress Address of handler resource will be set for
+     * @param resourceId ResourceID to be used when making deposits
+     * @param contractAddress Address of contract to be called when a deposit is made and a deposited is executed
+     * @param depositFunctionSig The signature of deposit function
+     * @param depositFunctionDepositerOffset Depositer offset of deposit function
+     * @param executeFunctionSig The signature of execute function
+    */
     function newSetGenericResourceRequest(
         address handlerAddress,
         bytes32 resourceId,

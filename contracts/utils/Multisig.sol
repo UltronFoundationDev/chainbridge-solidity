@@ -1,5 +1,6 @@
 pragma solidity 0.8.11;
 
+/// @title Multisignature contract implementation
 /// @notice Multisig contract, which provides multisig functions that could be implemented when needed
 contract Multisig {
     event InsertingVoter(address indexed _address);
