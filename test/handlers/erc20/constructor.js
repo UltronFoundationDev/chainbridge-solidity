@@ -6,6 +6,7 @@
 const TruffleAssert = require('truffle-assertions');
 const Ethers = require('ethers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC20MintableContract = artifacts.require("ERC20PresetMinterPauser");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
@@ -14,6 +15,7 @@ contract('ERC20Handler - [constructor]', async () => {
     const relayerThreshold = 2;
     const domainID = 1;
 
+    let DAOInstance;
     let BridgeInstance;
     let ERC20MintableInstance1;
     let ERC20MintableInstance2;
@@ -29,6 +31,11 @@ contract('ERC20Handler - [constructor]', async () => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance2 = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance3 = instance)
         ])
+        
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         initialResourceIDs = [];
         burnableContractAddresses = [];
@@ -47,10 +54,12 @@ contract('ERC20Handler - [constructor]', async () => {
     it('initialResourceIDs should be parsed correctly and corresponding resourceID mappings should have expected values', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
 
+
         for (i = 0; i < initialResourceIDs.length; i++) {
-            await TruffleAssert.passes(BridgeInstance.adminSetResource(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i]));
+            await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
+            await TruffleAssert.passes(BridgeInstance.adminSetResource(i+1));
         }
-        
+ 
         for (const resourceID of initialResourceIDs) {
             const tokenAddress = `0x` + resourceID.substr(24,40);
             

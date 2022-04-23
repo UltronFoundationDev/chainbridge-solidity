@@ -2,6 +2,7 @@
  * Copyright 2020 ChainSafe Systems
  * SPDX-License-Identifier: LGPL-3.0-only
  */
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
 const ERC721HandlerContract = artifacts.require("ERC721Handler");
@@ -19,10 +20,12 @@ contract('Gas Benchmark - [contract deployments]', async () => {
     const centrifugeAssetMinCount = 1;
     const gasBenchmarks = [];
 
+    let DAOInstance;
     let BridgeInstance;
 
     it('Should deploy all contracts and print benchmarks', async () => {
         let contractInstances = [await BridgeContract.new(domainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance)];
+        contractInstances.concat(await DAOContract.new().then(instance => DAOInstance = instance));
         contractInstances = contractInstances.concat(
             await Promise.all([
                 ERC20HandlerContract.new(BridgeInstance.address),

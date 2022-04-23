@@ -6,6 +6,7 @@
 const TruffleAssert = require('truffle-assertions');
 const Ethers = require('ethers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC20MintableContract = artifacts.require("ERC20PresetMinterPauser");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
@@ -16,6 +17,7 @@ contract('ERC20Handler - [isWhitelisted]', async () => {
     const relayerThreshold = 2;
     const domainID = 1;
 
+    let DAOInstance;
     let BridgeInstance;
     let ERC20MintableInstance1;
     let ERC20MintableInstance2;
@@ -30,6 +32,11 @@ contract('ERC20Handler - [isWhitelisted]', async () => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance2 = instance)
         ])
 
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         initialResourceIDs = [];
         resourceID1 = Ethers.utils.hexZeroPad((ERC20MintableInstance1.address + Ethers.utils.hexlify(domainID).substr(2)), 32);
         initialResourceIDs.push(resourceID1);
@@ -43,7 +50,8 @@ contract('ERC20Handler - [isWhitelisted]', async () => {
 
     it('initialContractAddress should be whitelisted', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
-        await BridgeInstance.adminSetResource(ERC20HandlerInstance.address, resourceID1, ERC20MintableInstance1.address);
+        await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID1, ERC20MintableInstance1.address);
+        await BridgeInstance.adminSetResource(1);
         const isWhitelisted = await ERC20HandlerInstance._contractWhitelist.call(ERC20MintableInstance1.address);
         assert.isTrue(isWhitelisted, "Contract wasn't successfully whitelisted");
     });

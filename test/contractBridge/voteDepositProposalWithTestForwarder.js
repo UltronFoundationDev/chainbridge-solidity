@@ -8,6 +8,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC20MintableContract = artifacts.require("ERC20PresetMinterPauser");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
@@ -38,6 +39,7 @@ contract('Bridge - [voteProposal through forwarder]', async (accounts) => {
         Cancelled : '4'
     }
 
+    let DAOInstance;
     let BridgeInstance;
     let DestinationERC20MintableInstance;
     let DestinationERC20HandlerInstance;
@@ -64,6 +66,11 @@ contract('Bridge - [voteProposal through forwarder]', async (accounts) => {
             ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance)
         ]);
         
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originDomainID);
         initialResourceIDs = [resourceID];
         initialContractAddresses = [DestinationERC20MintableInstance.address];
@@ -72,20 +79,22 @@ contract('Bridge - [voteProposal through forwarder]', async (accounts) => {
         DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
         ForwarderInstance = await ForwarderContract.new();
 
-        await TruffleAssert.passes(BridgeInstance.adminSetResource(DestinationERC20HandlerInstance.address, resourceID, initialContractAddresses[0]));
-        await TruffleAssert.passes(BridgeInstance.adminSetBurnable(DestinationERC20HandlerInstance.address, burnableContractAddresses[0]));
+        await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, initialContractAddresses[0]);
+        await DAOInstance.newSetBurnableRequest(DestinationERC20HandlerInstance.address, burnableContractAddresses[0]);
+        await TruffleAssert.passes(BridgeInstance.adminSetResource(1));
+        await TruffleAssert.passes(BridgeInstance.adminSetBurnable(1));
 
         depositData = Helpers.createERCDepositData(depositAmount, 20, destinationChainRecipientAddress);
         depositDataHash = Ethers.utils.keccak256(DestinationERC20HandlerInstance.address + depositData.substr(2));
 
-        await Promise.all([
-            DestinationERC20MintableInstance.grantRole(await DestinationERC20MintableInstance.MINTER_ROLE(), DestinationERC20HandlerInstance.address),
-            BridgeInstance.adminSetResource(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address)
-        ]);
+        await DestinationERC20MintableInstance.grantRole(await DestinationERC20MintableInstance.MINTER_ROLE(), DestinationERC20HandlerInstance.address);
+        await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
+        await BridgeInstance.adminSetResource(2);
 
         voteCallData = Helpers.createCallData(BridgeInstance, 'voteProposal', ["uint8", "uint64", "bytes32", "bytes"], [originDomainID, expectedDepositNonce, resourceID, depositData]);
         executeCallData = Helpers.createCallData(BridgeInstance, 'executeProposal', ["uint8", "uint64", "bytes", "bytes32", "bool"], [originDomainID, expectedDepositNonce, depositData, resourceID, true]);
-        await BridgeInstance.adminSetForwarder(ForwarderInstance.address, true);
+        await DAOInstance.newSetForwarderRequest(ForwarderInstance.address, true);
+        await BridgeInstance.adminSetForwarder(1);
     });
 
     it ('[sanity] bridge configured with threshold and relayers', async () => {

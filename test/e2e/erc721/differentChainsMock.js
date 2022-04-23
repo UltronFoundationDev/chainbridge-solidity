@@ -3,6 +3,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC721MintableContract = artifacts.require("ERC721MinterBurnerPauser");
 const ERC721HandlerContract = artifacts.require("ERC721Handler");
@@ -23,6 +24,7 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
     const tokenID = 1;
     const expectedDepositNonce = 1;
 
+    let OriginDAOInstance;
     let OriginBridgeInstance;
     let OriginERC721MintableInstance;
     let OriginERC721HandlerInstance;
@@ -31,6 +33,7 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
     let originResourceID;
     let originBurnableContractAddresses;
 
+    let DestinationDAOInstance;
     let DestinationBridgeInstance;
     let DestinationERC721MintableInstance;
     let DestinationERC721HandlerInstance;
@@ -47,6 +50,16 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
             ERC721MintableContract.new("token", "TOK", "").then(instance => OriginERC721MintableInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => DestinationERC721MintableInstance = instance)
         ]);
+
+        OriginDAOInstance = await DAOContract.new();
+        await OriginDAOInstance.insertInitialVoter();
+        await OriginDAOInstance.setBridgeContractInitial(OriginBridgeInstance.address);
+        await OriginBridgeInstance.setDAOContractInitial(OriginDAOInstance.address);
+
+        DestinationDAOInstance = await DAOContract.new();
+        await DestinationDAOInstance.insertInitialVoter();
+        await DestinationDAOInstance.setBridgeContractInitial(DestinationBridgeInstance.address);
+        await DestinationBridgeInstance.setDAOContractInitial(DestinationDAOInstance.address);
         
         originResourceID = Helpers.createResourceID(OriginERC721MintableInstance.address, originDomainID);
         originInitialResourceIDs = [originResourceID];
@@ -67,13 +80,17 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
 
         await OriginERC721MintableInstance.mint(depositerAddress, tokenID, "");
 
-        await Promise.all([
-            OriginERC721MintableInstance.approve(OriginERC721HandlerInstance.address, tokenID, { from: depositerAddress }),
-            DestinationERC721MintableInstance.grantRole(await DestinationERC721MintableInstance.MINTER_ROLE(), DestinationERC721HandlerInstance.address),
-            OriginBridgeInstance.adminSetResource(OriginERC721HandlerInstance.address, originResourceID, OriginERC721MintableInstance.address),
-            DestinationBridgeInstance.adminSetResource(DestinationERC721HandlerInstance.address, destinationResourceID, DestinationERC721MintableInstance.address),
-            DestinationBridgeInstance.adminSetBurnable(DestinationERC721HandlerInstance.address, destinationBurnableContractAddresses[0])
-        ]);
+        await OriginERC721MintableInstance.approve(OriginERC721HandlerInstance.address, tokenID, { from: depositerAddress });
+        await DestinationERC721MintableInstance.grantRole(await DestinationERC721MintableInstance.MINTER_ROLE(), DestinationERC721HandlerInstance.address);
+       
+        await OriginDAOInstance.newSetResourceRequest(OriginERC721HandlerInstance.address, originResourceID, OriginERC721MintableInstance.address);
+        await OriginBridgeInstance.adminSetResource(1);
+
+        await DestinationDAOInstance.newSetResourceRequest(DestinationERC721HandlerInstance.address, destinationResourceID, DestinationERC721MintableInstance.address);
+        await DestinationBridgeInstance.adminSetResource(1);
+
+        await DestinationDAOInstance.newSetBurnableRequest(DestinationERC721HandlerInstance.address, destinationBurnableContractAddresses[0]);
+        await DestinationBridgeInstance.adminSetBurnable(1);
 
         originDepositData = Helpers.createERCDepositData(tokenID, 20, recipientAddress);
         originDepositProposalData = Helpers.createERC721DepositProposalData(tokenID, 20, recipientAddress, 32, 0);

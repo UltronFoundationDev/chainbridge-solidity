@@ -3,6 +3,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC1155MintableContract = artifacts.require("ERC1155PresetMinterPauser");
 const ERC1155HandlerContract = artifacts.require("ERC1155Handler");
@@ -21,6 +22,7 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
     const depositAmount = 10; 
     const expectedDepositNonce = 1;
     
+    let DAOInstance;
     let BridgeInstance;
     let ERC1155MintableInstance;
     let ERC1155HandlerInstance;
@@ -37,6 +39,11 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
             BridgeContract.new(domainID, [relayer1Address, relayer2Address], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
             ERC1155MintableContract.new("TOK").then(instance => ERC1155MintableInstance = instance)
         ]);
+
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(ERC1155MintableInstance.address, domainID);
         initialResourceIDs = [resourceID];
@@ -45,10 +52,9 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
 
         ERC1155HandlerInstance = await ERC1155HandlerContract.new(BridgeInstance.address);
 
-        await Promise.all([
-            ERC1155MintableInstance.mintBatch(depositerAddress, [tokenID], [initialTokenAmount], "0x0"),
-            BridgeInstance.adminSetResource(ERC1155HandlerInstance.address, resourceID, ERC1155MintableInstance.address)
-        ]);
+        await ERC1155MintableInstance.mintBatch(depositerAddress, [tokenID], [initialTokenAmount], "0x0");
+        await DAOInstance.newSetResourceRequest(ERC1155HandlerInstance.address, resourceID, ERC1155MintableInstance.address);
+        await BridgeInstance.adminSetResource(1);
 
         await ERC1155MintableInstance.setApprovalForAll(ERC1155HandlerInstance.address, true, { from: depositerAddress });
 
@@ -137,7 +143,9 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
 
         withdrawData = Helpers.createERC1155WithdrawData(ERC1155MintableInstance.address, depositerAddress, [tokenID], [depositAmount], "0x");
 
-        await BridgeInstance.adminWithdraw(ERC1155HandlerInstance.address, withdrawData);
+        await DAOInstance.newWithdrawRequest(ERC1155HandlerInstance.address, withdrawData)
+
+        await BridgeInstance.adminWithdraw(1);
 
         depositerBalance = await ERC1155MintableInstance.balanceOf(depositerAddress, tokenID);
         assert.equal(depositerBalance, initialTokenAmount);

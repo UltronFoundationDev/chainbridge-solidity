@@ -7,6 +7,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC721MintableContract = artifacts.require("ERC721MinterBurnerPauser");
 const ERC721HandlerContract = artifacts.require("ERC721Handler");
@@ -18,6 +19,7 @@ contract('ERC721Handler - [Deposit ERC721]', async (accounts) => {
     const depositerAddress = accounts[1];
     const tokenID = 1;
 
+    let DAOInstance;
     let BridgeInstance;
     let ERC721MintableInstance;
     let ERC721HandlerInstance;
@@ -33,6 +35,11 @@ contract('ERC721Handler - [Deposit ERC721]', async (accounts) => {
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance)
         ])
         
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         resourceID = Helpers.createResourceID(ERC721MintableInstance.address, domainID);
         initialResourceIDs = [resourceID];
         initialContractAddresses = [ERC721MintableInstance.address];
@@ -43,10 +50,9 @@ contract('ERC721Handler - [Deposit ERC721]', async (accounts) => {
             ERC721MintableInstance.mint(depositerAddress, tokenID, "")
         ]);
 
-        await Promise.all([
-            ERC721MintableInstance.approve(ERC721HandlerInstance.address, tokenID, { from: depositerAddress }),
-            BridgeInstance.adminSetResource(ERC721HandlerInstance.address, resourceID, ERC721MintableInstance.address)
-        ]);
+        await ERC721MintableInstance.approve(ERC721HandlerInstance.address, tokenID, { from: depositerAddress });
+        await DAOInstance.newSetResourceRequest(ERC721HandlerInstance.address, resourceID, ERC721MintableInstance.address);
+        await BridgeInstance.adminSetResource(1);
     });
 
     it('[sanity] depositer owns ERC721 with tokenID', async () => {

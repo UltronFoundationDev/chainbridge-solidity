@@ -8,6 +8,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC20MintableContract = artifacts.require("ERC20PresetMinterPauser");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
@@ -24,6 +25,7 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
     const relayerThreshold = 1;
     const expectedCreateEventStatus = 1;
     
+    let DAOInstance;
     let BridgeInstance;
     let DestinationERC20MintableInstance;
     let resourceID;
@@ -36,11 +38,17 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
             BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance)
         ]);
 
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, destinationDomainID);
 
         DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
 
-        await BridgeInstance.adminSetResource(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
+        await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
+        await BridgeInstance.adminSetResource(1);
         
         data = Helpers.createERCDepositData(
             depositAmount,
@@ -157,7 +165,7 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
     const relayerThreshold = 2;
     const expectedCreateEventStatus = 1;
 
-    
+    let DAOInstance;
     let BridgeInstance;
     let DestinationERC20MintableInstance;
     let DestinationERC20HandlerInstance;
@@ -171,11 +179,17 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
             BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance)
         ]);
 
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, destinationDomainID);
 
         DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
 
-        await BridgeInstance.adminSetResource(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
+        await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
+        await BridgeInstance.adminSetResource(1);
         
         data = Helpers.createERCDepositData(
             depositAmount,

@@ -7,6 +7,7 @@ const TruffleAssert = require('truffle-assertions');
 
 const Helpers = require('../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const CentrifugeAssetContract = artifacts.require("CentrifugeAsset");
 const GenericHandlerContract = artifacts.require("GenericHandler");
@@ -16,6 +17,7 @@ contract('Bridge - [deposit - Generic]', async () => {
     const destinationDomainID = 2;
     const expectedDepositNonce = 1;
     
+    let DAOInstance;
     let BridgeInstance;
     let GenericHandlerInstance;
     let depositData;
@@ -30,6 +32,11 @@ contract('Bridge - [deposit - Generic]', async () => {
             CentrifugeAssetContract.new().then(instance => CentrifugeAssetInstance = instance),
             BridgeInstance = BridgeContract.new(originDomainID, [], 0, 0, 100).then(instance => BridgeInstance = instance)
         ]);
+
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(CentrifugeAssetInstance.address, originDomainID)
         initialResourceIDs = [resourceID];
@@ -41,7 +48,8 @@ contract('Bridge - [deposit - Generic]', async () => {
         GenericHandlerInstance = await GenericHandlerContract.new(
             BridgeInstance.address);
             
-        await BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, resourceID,  initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, resourceID,  initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0]);
+        await BridgeInstance.adminSetGenericResource(1);
 
         depositData = Helpers.createGenericDepositData('0xdeadbeef');
     });

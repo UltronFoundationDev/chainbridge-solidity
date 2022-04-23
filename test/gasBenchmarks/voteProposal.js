@@ -6,6 +6,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
 const ERC20MintableContract = artifacts.require("ERC20PresetMinterPauser");
@@ -24,6 +25,7 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
     const initialRelayers = [relayer1Address, relayer2Address];
     const erc20TokenAmount = 100;
 
+    let DAOInstance;
     let BridgeInstance;
     let ERC20MintableInstance;
     let ERC20HandlerInstance;
@@ -38,14 +40,18 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance),
         ]);
 
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         erc20ResourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
 
         await ERC20HandlerContract.new(BridgeInstance.address).then(instance => ERC20HandlerInstance = instance);
 
-        await Promise.all([
-            ERC20MintableInstance.approve(ERC20HandlerInstance.address, erc20TokenAmount, { from: depositerAddress }),
-            BridgeInstance.adminSetResource(ERC20HandlerInstance.address, erc20ResourceID, ERC20MintableInstance.address),
-        ]);
+        await ERC20MintableInstance.approve(ERC20HandlerInstance.address, erc20TokenAmount, { from: depositerAddress });
+        await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, erc20ResourceID, ERC20MintableInstance.address);
+        await BridgeInstance.adminSetResource(1);
     });
 
     it('Should create proposal - relayerThreshold = 2, not finalized', async () => {
@@ -78,6 +84,7 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
 
     it('Should vote proposal - relayerThreshold = 1, finalized', async () => {
         const newDepositNonce = 2;
+        await DAOInstance.newChangeRelayerThresholdRequest(1);
         await BridgeInstance.adminChangeRelayerThreshold(1);
 
         const depositData = Helpers.createERCDepositData(

@@ -8,6 +8,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const CentrifugeAssetContract = artifacts.require("CentrifugeAsset");
 const GenericHandlerContract = artifacts.require("GenericHandler");
@@ -26,6 +27,7 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
     const centrifugeAssetMinCount = 10;
     const hashOfCentrifugeAsset = Ethers.utils.keccak256('0xc0ffee');
 
+    let DAOInstance;
     let BridgeInstance;
     let CentrifugeAssetInstance;
     let initialResourceIDs;
@@ -43,6 +45,11 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
             CentrifugeAssetContract.new(centrifugeAssetMinCount).then(instance => CentrifugeAssetInstance = instance)
         ]);
 
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         const centrifugeAssetFuncSig = Helpers.getFunctionSignature(CentrifugeAssetInstance, 'store');
 
         resourceID = Helpers.createResourceID(CentrifugeAssetInstance.address, domainID);
@@ -55,7 +62,8 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
         GenericHandlerInstance = await GenericHandlerContract.new(
             BridgeInstance.address);
 
-        await BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, resourceID,  initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, resourceID,  initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0]);
+        await BridgeInstance.adminSetGenericResource(1);
 
         depositData = Helpers.createGenericDepositData(hashOfCentrifugeAsset);
         depositProposalDataHash = Ethers.utils.keccak256(GenericHandlerInstance.address + depositData.substr(2));

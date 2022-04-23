@@ -3,6 +3,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC20MintableContract = artifacts.require("ERC20PresetMinterPauser");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
@@ -24,6 +25,7 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
     const depositAmount = 10;
     const expectedDepositNonce = 1;
     
+    let OrininDAOInstance;
     let OriginBridgeInstance;
     let OriginERC20MintableInstance;
     let OriginERC20HandlerInstance;
@@ -35,6 +37,7 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
     let originInitialContractAddresses;
     let originBurnableContractAddresses;
     
+    let DestinationDAOInstance;
     let DestinationBridgeInstance;
     let DestinationERC20MintableInstance;
     let DestinationERC20HandlerInstance;
@@ -53,6 +56,16 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
             ERC20MintableContract.new("token", "TOK").then(instance => OriginERC20MintableInstance = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance)
         ]);
+
+        OriginDAOInstance = await DAOContract.new();
+        await OriginDAOInstance.insertInitialVoter();
+        await OriginDAOInstance.setBridgeContractInitial(OriginBridgeInstance.address);
+        await OriginBridgeInstance.setDAOContractInitial(OriginDAOInstance.address);
+
+        DestinationDAOInstance = await DAOContract.new();
+        await DestinationDAOInstance.insertInitialVoter();
+        await DestinationDAOInstance.setBridgeContractInitial(DestinationBridgeInstance.address);
+        await DestinationBridgeInstance.setDAOContractInitial(DestinationDAOInstance.address);
 
         originResourceID = Helpers.createResourceID(OriginERC20MintableInstance.address, originDomainID);
         originInitialResourceIDs = [originResourceID];
@@ -76,10 +89,16 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         await OriginERC20MintableInstance.approve(OriginERC20HandlerInstance.address, depositAmount, { from: depositerAddress }),
         await OriginERC20MintableInstance.grantRole(await OriginERC20MintableInstance.MINTER_ROLE(), OriginERC20HandlerInstance.address),
         await DestinationERC20MintableInstance.grantRole(await DestinationERC20MintableInstance.MINTER_ROLE(), DestinationERC20HandlerInstance.address),
-        await OriginBridgeInstance.adminSetResource(OriginERC20HandlerInstance.address, originResourceID, OriginERC20MintableInstance.address),
-        await OriginBridgeInstance.adminSetBurnable(OriginERC20HandlerInstance.address, originBurnableContractAddresses[0]),
-        await DestinationBridgeInstance.adminSetResource(DestinationERC20HandlerInstance.address, destinationResourceID, DestinationERC20MintableInstance.address),
-        await DestinationBridgeInstance.adminSetBurnable(DestinationERC20HandlerInstance.address, destinationBurnableContractAddresses[0])
+        
+        await OriginDAOInstance.newSetResourceRequest(OriginERC20HandlerInstance.address, originResourceID, OriginERC20MintableInstance.address);
+        await OriginDAOInstance.newSetBurnableRequest(OriginERC20HandlerInstance.address, originBurnableContractAddresses[0]);
+        await OriginBridgeInstance.adminSetResource(1),
+        await OriginBridgeInstance.adminSetBurnable(1),
+        
+        await DestinationDAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, destinationResourceID, DestinationERC20MintableInstance.address);
+        await DestinationDAOInstance.newSetBurnableRequest(DestinationERC20HandlerInstance.address, destinationBurnableContractAddresses[0]);
+        await DestinationBridgeInstance.adminSetResource(1);
+        await DestinationBridgeInstance.adminSetBurnable(1);
 
         originDepositData = Helpers.createERCDepositData(depositAmount, 20, recipientAddress);
         originDepositProposalData = Helpers.createERCDepositData(depositAmount, 20, recipientAddress);

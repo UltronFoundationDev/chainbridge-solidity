@@ -7,6 +7,7 @@ const TruffleAssert = require('truffle-assertions');
 const Ethers = require('ethers');
 const Helpers = require('../../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const CentrifugeAssetContract = artifacts.require("CentrifugeAsset");
 const GenericHandlerContract = artifacts.require("GenericHandler");
@@ -23,6 +24,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
 
     const depositerAddress = accounts[1];
 
+    let DAOInstance;
     let BridgeInstance;
     let CentrifugeAssetInstance;
     let NoArgumentInstance;
@@ -51,6 +53,12 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             WithDepositerContract.new().then(instance => WithDepositerInstance = instance),
             ReturnDataContract.new().then(instance => ReturnDataInstance = instance),
         ]);
+
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         initialResourceIDs = [
             Helpers.createResourceID(CentrifugeAssetInstance.address, domainID),
             Helpers.createResourceID(NoArgumentInstance.address, domainID),
@@ -97,18 +105,22 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             Helpers.blankFunctionSig,
         ];
 
-        GenericHandlerInstance = await GenericHandlerContract.new(
-            BridgeInstance.address);
+        GenericHandlerInstance = await GenericHandlerContract.new(BridgeInstance.address);
         
-        await Promise.all([
-            BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, initialResourceIDs[0], initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0]),
-            BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, initialResourceIDs[1], initialContractAddresses[1], initialDepositFunctionSignatures[1], initialDepositFunctionDepositerOffsets[1], initialExecuteFunctionSignatures[1]),
-            BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, initialResourceIDs[2], initialContractAddresses[2], initialDepositFunctionSignatures[2], initialDepositFunctionDepositerOffsets[2], initialExecuteFunctionSignatures[2]),
-            BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, initialResourceIDs[3], initialContractAddresses[3], initialDepositFunctionSignatures[3], initialDepositFunctionDepositerOffsets[3], initialExecuteFunctionSignatures[3]),
-            BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, initialResourceIDs[4], initialContractAddresses[4], initialDepositFunctionSignatures[4], initialDepositFunctionDepositerOffsets[4], initialExecuteFunctionSignatures[4]),
-            BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, initialResourceIDs[5], initialContractAddresses[5], initialDepositFunctionSignatures[5], initialDepositFunctionDepositerOffsets[5], initialExecuteFunctionSignatures[5]),
-            BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, initialResourceIDs[6], initialContractAddresses[6], initialDepositFunctionSignatures[6], initialDepositFunctionDepositerOffsets[6], initialExecuteFunctionSignatures[6])
-        ]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, initialResourceIDs[0], initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, initialResourceIDs[1], initialContractAddresses[1], initialDepositFunctionSignatures[1], initialDepositFunctionDepositerOffsets[1], initialExecuteFunctionSignatures[1]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, initialResourceIDs[2], initialContractAddresses[2], initialDepositFunctionSignatures[2], initialDepositFunctionDepositerOffsets[2], initialExecuteFunctionSignatures[2]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, initialResourceIDs[3], initialContractAddresses[3], initialDepositFunctionSignatures[3], initialDepositFunctionDepositerOffsets[3], initialExecuteFunctionSignatures[3]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, initialResourceIDs[4], initialContractAddresses[4], initialDepositFunctionSignatures[4], initialDepositFunctionDepositerOffsets[4], initialExecuteFunctionSignatures[4]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, initialResourceIDs[5], initialContractAddresses[5], initialDepositFunctionSignatures[5], initialDepositFunctionDepositerOffsets[5], initialExecuteFunctionSignatures[5]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, initialResourceIDs[6], initialContractAddresses[6], initialDepositFunctionSignatures[6], initialDepositFunctionDepositerOffsets[6], initialExecuteFunctionSignatures[6]);
+        await BridgeInstance.adminSetGenericResource(1);
+        await BridgeInstance.adminSetGenericResource(2);
+        await BridgeInstance.adminSetGenericResource(3);
+        await BridgeInstance.adminSetGenericResource(4);
+        await BridgeInstance.adminSetGenericResource(5);
+        await BridgeInstance.adminSetGenericResource(6);
+        await BridgeInstance.adminSetGenericResource(7);
                 
         depositData = Helpers.createGenericDepositData('0xdeadbeef');
     });

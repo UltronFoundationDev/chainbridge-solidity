@@ -7,6 +7,7 @@ const TruffleAssert = require('truffle-assertions');
 
 const Helpers = require('../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC20MintableContract = artifacts.require("ERC20PresetMinterPauser");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
@@ -21,6 +22,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
     const depositAmount = 10;
     const expectedDepositNonce = 1;
     
+    let DAOInstance;
     let BridgeInstance;
     let OriginERC20MintableInstance;
     let OriginERC20HandlerInstance;
@@ -32,15 +34,19 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
             BridgeInstance = await BridgeContract.new(originDomainID, [], relayerThreshold, 0, 100)
         ]);
         
-        
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         resourceID = Helpers.createResourceID(OriginERC20MintableInstance.address, originDomainID);
 
         OriginERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
 
-        await Promise.all([
-            BridgeInstance.adminSetResource(OriginERC20HandlerInstance.address, resourceID, OriginERC20MintableInstance.address),
-            OriginERC20MintableInstance.mint(depositerAddress, originChainInitialTokenAmount)
-        ]);
+        await DAOInstance.newSetResourceRequest(OriginERC20HandlerInstance.address, resourceID, OriginERC20MintableInstance.address);
+        await BridgeInstance.adminSetResource(1);
+        await OriginERC20MintableInstance.mint(depositerAddress, originChainInitialTokenAmount);
+
         await OriginERC20MintableInstance.approve(OriginERC20HandlerInstance.address, depositAmount * 2, { from: depositerAddress });
 
         depositData = Helpers.createERCDepositData(

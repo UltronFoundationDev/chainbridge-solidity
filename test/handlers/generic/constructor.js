@@ -8,6 +8,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const GenericHandlerContract = artifacts.require("GenericHandler");
 const CentrifugeAssetContract = artifacts.require("CentrifugeAsset");
@@ -20,6 +21,7 @@ contract('GenericHandler - [constructor]', async () => {
     const blankFunctionDepositerOffset = 0;
     const centrifugeAssetStoreFuncSig = 'store(bytes32)';
 
+    let DAOInstance;
     let BridgeInstance;
     let CentrifugeAssetInstance1;
     let CentrifugeAssetInstance2;
@@ -37,6 +39,11 @@ contract('GenericHandler - [constructor]', async () => {
             CentrifugeAssetContract.new(centrifugeAssetMinCount).then(instance => CentrifugeAssetInstance2 = instance),
             CentrifugeAssetContract.new(centrifugeAssetMinCount).then(instance => CentrifugeAssetInstance3 = instance)
         ]);
+
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         initialResourceIDs = [
             Helpers.createResourceID(CentrifugeAssetInstance1.address, domainID),
@@ -63,7 +70,8 @@ contract('GenericHandler - [constructor]', async () => {
             BridgeInstance.address);
 
         for (let i = 0; i < initialResourceIDs.length; i++) {
-            await BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i], initialDepositFunctionSignatures[i], initialDepositFunctionDepositerOffsets[i], initialExecuteFunctionSignatures[i]);
+            await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i], initialDepositFunctionSignatures[i], initialDepositFunctionDepositerOffsets[i], initialExecuteFunctionSignatures[i]);
+            await BridgeInstance.adminSetGenericResource(i+1);
         }
         
         for (let i = 0; i < initialResourceIDs.length; i++) {

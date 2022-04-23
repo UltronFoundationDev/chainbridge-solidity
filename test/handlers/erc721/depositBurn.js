@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
  
- const TruffleAssert = require('truffle-assertions');
+const TruffleAssert = require('truffle-assertions');
 
- const Helpers = require('../../helpers');
+const Helpers = require('../../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC721MintableContract = artifacts.require("ERC721MinterBurnerPauser");
 const ERC721HandlerContract = artifacts.require("ERC721Handler");
@@ -20,6 +21,7 @@ contract('ERC721Handler - [Deposit Burn ERC721]', async (accounts) => {
 
     const tokenID = 1;
 
+    let DAOInstance;
     let BridgeInstance;
     let ERC721MintableInstance1;
     let ERC721MintableInstance2;
@@ -38,6 +40,11 @@ contract('ERC721Handler - [Deposit Burn ERC721]', async (accounts) => {
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance2 = instance)
         ])
 
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         resourceID1 = Helpers.createResourceID(ERC721MintableInstance1.address, domainID);
         resourceID2 = Helpers.createResourceID(ERC721MintableInstance2.address, domainID);
         initialResourceIDs = [resourceID1, resourceID2];
@@ -49,12 +56,13 @@ contract('ERC721Handler - [Deposit Burn ERC721]', async (accounts) => {
             ERC721MintableInstance1.mint(depositerAddress, tokenID, "")
         ]);
             
-        await Promise.all([
-            ERC721MintableInstance1.approve(ERC721HandlerInstance.address, tokenID, { from: depositerAddress }),
-            BridgeInstance.adminSetResource(ERC721HandlerInstance.address, resourceID1, ERC721MintableInstance1.address),
-            BridgeInstance.adminSetResource(ERC721HandlerInstance.address, resourceID2, ERC721MintableInstance2.address),
-            BridgeInstance.adminSetBurnable(ERC721HandlerInstance.address, ERC721MintableInstance1.address),
-        ]);
+        await ERC721MintableInstance1.approve(ERC721HandlerInstance.address, tokenID, { from: depositerAddress });
+        await DAOInstance.newSetResourceRequest(ERC721HandlerInstance.address, resourceID1, ERC721MintableInstance1.address);
+        await DAOInstance.newSetResourceRequest(ERC721HandlerInstance.address, resourceID2, ERC721MintableInstance2.address);
+        await DAOInstance.newSetBurnableRequest(ERC721HandlerInstance.address, ERC721MintableInstance1.address);
+        await BridgeInstance.adminSetResource(1);
+        await BridgeInstance.adminSetResource(2);
+        await BridgeInstance.adminSetBurnable(1);
 
         depositData = Helpers.createERCDepositData(tokenID, 20, recipientAddress);
     });

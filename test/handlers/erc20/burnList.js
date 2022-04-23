@@ -6,6 +6,7 @@
 const TruffleAssert = require('truffle-assertions');
 const Ethers = require('ethers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC20MintableContract = artifacts.require("ERC20PresetMinterPauser");
 const ERC20HandlerContract = artifacts.require("ERC20Handler");
@@ -14,6 +15,7 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
     const relayerThreshold = 2;
     const domainID = 1;
 
+    let DAOInstance;
     let RelayerInstance;
     let BridgeInstance;
     let ERC20MintableInstance1;
@@ -31,6 +33,11 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance2 = instance)
         ]);
 
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         resourceID1 = Ethers.utils.hexZeroPad((ERC20MintableInstance1.address + Ethers.utils.hexlify(domainID).substr(2)), 32);
         resourceID2 = Ethers.utils.hexZeroPad((ERC20MintableInstance2.address + Ethers.utils.hexlify(domainID).substr(2)), 32);
         initialResourceIDs = [resourceID1, resourceID2];
@@ -46,11 +53,13 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
         
         for (i = 0; i < initialResourceIDs.length; i++) {
-            await TruffleAssert.passes(BridgeInstance.adminSetResource(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i]));
+            await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
+            await TruffleAssert.passes(BridgeInstance.adminSetResource(i+1));
         }
 
         for (i = 0; i < burnableContractAddresses.length; i++) {
-            await TruffleAssert.passes(BridgeInstance.adminSetBurnable(ERC20HandlerInstance.address, burnableContractAddresses[i]));
+            await DAOInstance.newSetBurnableRequest(ERC20HandlerInstance.address, burnableContractAddresses[i])
+            await TruffleAssert.passes(BridgeInstance.adminSetBurnable(i+1));
         }
         
         for (const burnableAddress of burnableContractAddresses) {
@@ -63,11 +72,13 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
 
         for (i = 0; i < initialResourceIDs.length; i++) {
-            await TruffleAssert.passes(BridgeInstance.adminSetResource(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i]));
+            await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
+            await TruffleAssert.passes(BridgeInstance.adminSetResource(i+1));
         }
 
         for (i = 0; i < burnableContractAddresses.length; i++) {
-            await TruffleAssert.passes(BridgeInstance.adminSetBurnable(ERC20HandlerInstance.address, burnableContractAddresses[i]));
+            await DAOInstance.newSetBurnableRequest(ERC20HandlerInstance.address, burnableContractAddresses[i])
+            await TruffleAssert.passes(BridgeInstance.adminSetBurnable(i+1));
         }
 
         const isBurnable = await ERC20HandlerInstance._burnList.call(ERC20MintableInstance2.address);
@@ -78,14 +89,17 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
 
         for (i = 0; i < initialResourceIDs.length; i++) {
-            await TruffleAssert.passes(BridgeInstance.adminSetResource(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i]));
+            await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
+            await TruffleAssert.passes(BridgeInstance.adminSetResource(i+1));
         }
 
         for (i = 0; i < burnableContractAddresses.length; i++) {
-            await TruffleAssert.passes(BridgeInstance.adminSetBurnable(ERC20HandlerInstance.address, burnableContractAddresses[i]));
+            await DAOInstance.newSetBurnableRequest(ERC20HandlerInstance.address, burnableContractAddresses[i])
+            await TruffleAssert.passes(BridgeInstance.adminSetBurnable(i+1));
         }
         
-        await BridgeInstance.adminSetBurnable(ERC20HandlerInstance.address, ERC20MintableInstance2.address);
+        await DAOInstance.newSetBurnableRequest(ERC20HandlerInstance.address, ERC20MintableInstance2.address);
+        await BridgeInstance.adminSetBurnable(burnableContractAddresses.length + 1);
         const isBurnable = await ERC20HandlerInstance._burnList.call(ERC20MintableInstance2.address);
         assert.isTrue(isBurnable, "Contract wasn't successfully marked burnable");
     });

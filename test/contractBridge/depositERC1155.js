@@ -6,7 +6,7 @@
 const TruffleAssert = require('truffle-assertions');
 
 const Helpers = require('../helpers');
-
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC1155MintableContract = artifacts.require("ERC1155PresetMinterPauser");
 const ERC1155HandlerContract = artifacts.require("ERC1155Handler");
@@ -21,6 +21,7 @@ contract('Bridge - [deposit - ERC1155]', async (accounts) => {
     const depositAmount = 10;
     const expectedDepositNonce = 1;
     
+    let DAOInstance;
     let BridgeInstance;
     let OriginERC1155MintableInstance;
     let OriginERC1155HandlerInstance;
@@ -31,16 +32,19 @@ contract('Bridge - [deposit - ERC1155]', async (accounts) => {
             ERC1155MintableContract.new("TOK").then(instance => OriginERC1155MintableInstance = instance),
             BridgeInstance = await BridgeContract.new(originDomainID, [], relayerThreshold, 0, 100)
         ]);
-        
-        
+                
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         resourceID = Helpers.createResourceID(OriginERC1155MintableInstance.address, originDomainID);
 
         OriginERC1155HandlerInstance = await ERC1155HandlerContract.new(BridgeInstance.address);
 
-        await Promise.all([
-            BridgeInstance.adminSetResource(OriginERC1155HandlerInstance.address, resourceID, OriginERC1155MintableInstance.address),
-            OriginERC1155MintableInstance.mintBatch(depositerAddress, [originChainTokenID], [originChainInitialTokenAmount], "0x0")
-        ]);
+        await DAOInstance.newSetResourceRequest(OriginERC1155HandlerInstance.address, resourceID, OriginERC1155MintableInstance.address);
+        await BridgeInstance.adminSetResource(1);
+        await OriginERC1155MintableInstance.mintBatch(depositerAddress, [originChainTokenID], [originChainInitialTokenAmount], "0x0");
         await OriginERC1155MintableInstance.setApprovalForAll(OriginERC1155HandlerInstance.address, true, { from: depositerAddress });
 
         depositData = Helpers.createERC1155DepositData([originChainTokenID], [depositAmount]);

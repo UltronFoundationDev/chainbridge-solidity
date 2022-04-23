@@ -3,6 +3,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const ERC721MintableContract = artifacts.require("ERC721MinterBurnerPauser");
 const ERC721HandlerContract = artifacts.require("ERC721Handler");
@@ -20,6 +21,7 @@ contract('E2E ERC721 - Same Chain', async accounts => {
     const depositMetadata = "0xc0ff33";
     const expectedDepositNonce = 1;
     
+    let DAOInstance;
     let BridgeInstance;
     let ERC721MintableInstance;
     let ERC721HandlerInstance;
@@ -37,6 +39,11 @@ contract('E2E ERC721 - Same Chain', async accounts => {
             BridgeContract.new(domainID, [relayer1Address, relayer2Address], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance)
         ]);
+
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(ERC721MintableInstance.address, domainID);
         initialResourceIDs = [resourceID];
@@ -45,10 +52,9 @@ contract('E2E ERC721 - Same Chain', async accounts => {
 
         ERC721HandlerInstance = await ERC721HandlerContract.new(BridgeInstance.address);
 
-        await Promise.all([
-            ERC721MintableInstance.mint(depositerAddress, tokenID, depositMetadata),
-            BridgeInstance.adminSetResource(ERC721HandlerInstance.address, resourceID, ERC721MintableInstance.address)
-        ]);
+        await ERC721MintableInstance.mint(depositerAddress, tokenID, depositMetadata);
+        await DAOInstance.newSetResourceRequest(ERC721HandlerInstance.address, resourceID, ERC721MintableInstance.address);
+        await BridgeInstance.adminSetResource(1);
 
         await ERC721MintableInstance.approve(ERC721HandlerInstance.address, tokenID, { from: depositerAddress });
 

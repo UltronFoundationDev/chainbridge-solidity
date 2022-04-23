@@ -8,6 +8,7 @@ const Ethers = require('ethers');
 
 const Helpers = require('../helpers');
 
+const DAOContract = artifacts.require("DAO");
 const BridgeContract = artifacts.require("Bridge");
 const CentrifugeAssetContract = artifacts.require("CentrifugeAsset");
 const GenericHandlerContract = artifacts.require("GenericHandler");
@@ -19,6 +20,7 @@ contract('Bridge - [fee]', async (accounts) => {
     const blankFunctionDepositerOffset = 0;
     const relayer = accounts[0];
 
+    let DAOInstance;
     let BridgeInstance;
     let GenericHandlerInstance;
     let resourceID;
@@ -35,6 +37,11 @@ contract('Bridge - [fee]', async (accounts) => {
             BridgeInstance = BridgeContract.new(originDomainID, [relayer], 0, 0, 100).then(instance => BridgeInstance = instance)
         ]);
 
+        DAOInstance = await DAOContract.new();
+        await DAOInstance.insertInitialVoter();
+        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+
         resourceID = Helpers.createResourceID(CentrifugeAssetInstance.address, originDomainID)
         initialResourceIDs = [resourceID];
         initialContractAddresses = [CentrifugeAssetInstance.address];
@@ -45,7 +52,8 @@ contract('Bridge - [fee]', async (accounts) => {
         GenericHandlerInstance = await GenericHandlerContract.new(
             BridgeInstance.address);
 
-        await BridgeInstance.adminSetGenericResource(GenericHandlerInstance.address, resourceID,  initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0]);
+        await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, resourceID,  initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0]);
+        await BridgeInstance.adminSetGenericResource(1);
             
         depositData = Helpers.createGenericDepositData('0xdeadbeef');
     });
@@ -78,7 +86,8 @@ contract('Bridge - [fee]', async (accounts) => {
         // current fee is set to 0
         assert.equal(await BridgeInstance._fee.call(), 0)
         // Change fee to 0.5 ether
-        await BridgeInstance.adminChangeFee(Ethers.utils.parseEther("0.5"), { from: relayer })
+        await DAOInstance.newChangeFeeRequest(Ethers.utils.parseEther("0.5"), { from: relayer });
+        await BridgeInstance.adminChangeFee(1);
         assert.equal(web3.utils.fromWei((await BridgeInstance._fee.call()), "ether"), "0.5");
 
         await TruffleAssert.passes(
@@ -94,7 +103,8 @@ contract('Bridge - [fee]', async (accounts) => {
     });
 
     it('distribute fees', async () => {
-        await BridgeInstance.adminChangeFee(Ethers.utils.parseEther("1"), { from: relayer });
+        await DAOInstance.newChangeFeeRequest(Ethers.utils.parseEther("1"), { from: relayer });
+        await BridgeInstance.adminChangeFee(1);
         assert.equal(web3.utils.fromWei((await BridgeInstance._fee.call()), "ether"), "1");
 
         // check the balance is 0
@@ -108,10 +118,8 @@ contract('Bridge - [fee]', async (accounts) => {
         let payout = Ethers.utils.parseEther("0.5")
         // Transfer the funds
         TruffleAssert.passes(
-            await BridgeInstance.transferFunds(
-                [accounts[1], accounts[2]], 
-                [payout, payout]
-            )
+            await DAOInstance.newTransferRequest([accounts[1], accounts[2]], [payout, payout]),
+            await BridgeInstance.transferFunds(1)
         )
         b1 = await web3.eth.getBalance(accounts[1]);
         b2 = await web3.eth.getBalance(accounts[2]);
