@@ -43,6 +43,7 @@
     "chai": "^4.3.4",
     "commander": "^9.0.0",
     "coveralls": "^3.1.1",
+    "dotenv": "^16.0.0",
     "eth-sig-util": "^3.0.1",
     "ethereum-waffle": "^3.4.4",
     "ethereumjs-util": "^7.1.4",
