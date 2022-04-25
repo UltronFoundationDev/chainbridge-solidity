@@ -39,7 +39,6 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
         ]);
 
         DAOInstance = await DAOContract.new();
-        await DAOInstance.insertInitialVoter();
         await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
@@ -180,7 +179,6 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
         ]);
 
         DAOInstance = await DAOContract.new();
-        await DAOInstance.insertInitialVoter();
         await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 

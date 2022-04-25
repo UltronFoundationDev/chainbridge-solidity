@@ -41,7 +41,6 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         ]);
 
         DAOInstance = await DAOContract.new();
-        await DAOInstance.insertInitialVoter();
         await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         

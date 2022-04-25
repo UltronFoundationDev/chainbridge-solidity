@@ -35,7 +35,6 @@ contract('Bridge - [admin]', async accounts => {
         BridgeInstance = await BridgeContract.new(domainID, initialRelayers, initialRelayerThreshold, 0, 100);
         ADMIN_ROLE = await BridgeInstance.DEFAULT_ADMIN_ROLE();
         DAOInstance = await DAOContract.new();
-        await DAOInstance.insertInitialVoter();
         await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
     });

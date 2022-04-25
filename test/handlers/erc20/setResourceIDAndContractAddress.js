@@ -30,7 +30,6 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
         ERC20MintableInstance1 = await ERC20MintableContract.new("token", "TOK");
 
         DAOInstance = await DAOContract.new();
-        await DAOInstance.insertInitialVoter();
         await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 

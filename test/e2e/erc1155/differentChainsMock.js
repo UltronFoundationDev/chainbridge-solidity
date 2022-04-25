@@ -53,12 +53,10 @@ contract('E2E ERC1155 - Two EVM Chains', async accounts => {
         ]);
 
         OriginDAOInstance = await DAOContract.new();
-        await OriginDAOInstance.insertInitialVoter();
         await OriginDAOInstance.setBridgeContractInitial(OriginBridgeInstance.address);
         await OriginBridgeInstance.setDAOContractInitial(OriginDAOInstance.address);
 
         DestinationDAOInstance = await DAOContract.new();
-        await DestinationDAOInstance.insertInitialVoter();
         await DestinationDAOInstance.setBridgeContractInitial(DestinationBridgeInstance.address);
         await DestinationBridgeInstance.setDAOContractInitial(DestinationDAOInstance.address);
         

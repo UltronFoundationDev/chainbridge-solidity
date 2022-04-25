@@ -41,7 +41,6 @@ contract('ERC721Handler - [Deposit Burn ERC721]', async (accounts) => {
         ])
 
         DAOInstance = await DAOContract.new();
-        await DAOInstance.insertInitialVoter();
         await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 

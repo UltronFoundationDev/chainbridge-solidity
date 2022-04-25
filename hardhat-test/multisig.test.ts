@@ -35,9 +35,6 @@ describe("\x1b[33mMultisig test\x1b[0m\n", () => {
     });
 
     it("Insert initial voter", async () => {
-        console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
-        await multisig.connect(owner).insertInitialVoter();
-       
         const res = await multisig.getActiveVotersCount();
         console.log(`${insideTest}Compares active voters count [${colorBlue}${res}${colorReset}] with returned value: [${colorGreen}${1}${colorReset}]`);
         expect(res).equals(1);

@@ -33,7 +33,6 @@ contract('ERC20Handler - [constructor]', async () => {
         ])
         
         DAOInstance = await DAOContract.new();
-        await DAOInstance.insertInitialVoter();
         await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 

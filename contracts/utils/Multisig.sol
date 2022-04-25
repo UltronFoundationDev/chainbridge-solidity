@@ -65,6 +65,10 @@ contract Multisig {
         require(!voterRequests[requestId].executed, "already executed");
         _;
     }
+
+    constructor() {
+        insertVoter(msg.sender);
+    }
     
     /**
      * @notice Returns voter address by id if id != 0
@@ -112,16 +116,6 @@ contract Multisig {
         returns(uint256) 
     {
         return votersCounter;
-    }
-
-    /**
-     * @notice Adds new voter if voter list is empty
-    */
-    function insertInitialVoter()
-        external
-    {
-        require(activeVotersCount == 0, "Act. voters not empty");
-        insertVoter(msg.sender);
     }
 
     /**

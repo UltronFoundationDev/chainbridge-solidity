@@ -45,7 +45,6 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         dao = await (await new DAO__factory(owner).deploy()).deployed();
         console.log(`${beforeTest}Deployed DAO contract: ${colorBlue}${dao.address}${colorReset}`)
-        dao.connect(owner).insertInitialVoter();
         console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
 
         bridge = await (await new Bridge__factory(owner).deploy(domainId, initialRelayers, initialRelayerThreshold, fee, expiry)).deployed();
