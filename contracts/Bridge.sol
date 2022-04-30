@@ -76,6 +76,16 @@ contract Bridge is Pausable, AccessControl, SafeMath {
 
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
 
+    modifier onlyAdmin() {
+        _onlyAdmin();
+        _;
+    }
+
+    modifier onlyAdminOrRelayer() {
+        _onlyAdminOrRelayer();
+        _;
+    }
+
     modifier onlyRelayers() {
         _onlyRelayers();
         _;
@@ -90,6 +100,16 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         require(_address != address(0), "zero address");
         addressDAO = _address;
         contractDAO = IDAO(addressDAO);
+    }
+
+    function _onlyAdminOrRelayer() private view {
+        address sender = _msgSender();
+        require(hasRole(DEFAULT_ADMIN_ROLE, sender) || hasRole(RELAYER_ROLE, sender),
+            "sender is not relayer or admin");
+    }
+
+    function _onlyAdmin() private view {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "sender doesn't have admin role");
     }
 
     function _onlyRelayers() private view {
@@ -158,7 +178,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by DAO vote
         @param id The id of request with new Admin address
      */
-    function renounceAdmin(uint256 id) external {
+    function renounceAdmin(uint256 id) external onlyAdmin  {
         address ownerAddress = contractDAO.isOwnerChangeAvailable(id);
 
         address sender = _msgSender();
@@ -174,7 +194,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by DAO voting result.
         @param id The id of request with new Pause status
      */
-    function adminPauseStatusTransfers(uint256 id) external {
+    function adminPauseStatusTransfers(uint256 id) external onlyAdmin  {
         bool pauseStatus = contractDAO.isPauseStatusAvailable(id);
 
         if(pauseStatus) {
@@ -193,7 +213,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param id The id of request with new Relayer threshold value
         @notice Emits {RelayerThresholdChanged} event.
      */
-    function adminChangeRelayerThreshold(uint256 id) external {
+    function adminChangeRelayerThreshold(uint256 id) external onlyAdmin  {
         uint256 newThreshold = contractDAO.isChangeRelayerThresholdAvailable(id);
 
         _relayerThreshold = newThreshold.toUint8();
@@ -235,7 +255,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by an address that currently has the admin role.
         @param id The id of request with new set resource values
      */
-    function adminSetResource(uint256 id) external {
+    function adminSetResource(uint256 id) external onlyAdmin  {
         (address handlerAddress, bytes32 resourceId, address tokenAddress) = contractDAO.isSetResourceAvailable(id);
 
         _resourceIDToHandlerAddress[resourceId] = handlerAddress;
@@ -251,7 +271,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by an address that currently has the admin role.
         @param id The id of request with new set generic resource values
      */
-    function adminSetGenericResource(uint256 id) external {
+    function adminSetGenericResource(uint256 id) external onlyAdmin  {
         (address handlerAddress,
         bytes32 resourceId,
         address contractAddress,
@@ -271,7 +291,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by an address that currently has the admin role.
         @param id The id of request with new set burnable values
      */
-    function adminSetBurnable(uint256 id) external {
+    function adminSetBurnable(uint256 id) external onlyAdmin  {
         (address handlerAddress, address tokenAddress) = contractDAO.isSetBurnableAvailable(id);
 
         IERCHandler handler = IERCHandler(handlerAddress);
@@ -285,7 +305,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by an address that currently has the admin role.
         @param id The id of request with new set deposit nonce values
      */
-    function adminSetDepositNonce(uint256 id) external {
+    function adminSetDepositNonce(uint256 id) external onlyAdmin  {
         (uint8 domainId, uint64 nonce) = contractDAO.isSetNonceAvailable(id);
 
         require(nonce > _depositCounts[domainId], "Does not allow decrements of the nonce");
@@ -299,7 +319,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by an address that currently has the admin role.
         @param id The id of request with new set forwarder values
      */
-    function adminSetForwarder(uint256 id) external {
+    function adminSetForwarder(uint256 id) external onlyAdmin  {
         (address forwarder, bool valid) = contractDAO.isSetForwarderAvailable(id);
 
         isValidForwarder[forwarder] = valid;
@@ -336,7 +356,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Only callable by admin.
         @param id The id of request with new fee value
      */
-    function adminChangeFee(uint256 id) external {
+    function adminChangeFee(uint256 id) external onlyAdmin  {
         uint256 newFee = contractDAO.isChangeFeeAvailable(id);
 
         require(_fee != newFee, "Current fee is equal to new fee");
@@ -349,7 +369,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @notice Used to manually withdraw funds from ERC safes.
         @param id The id of request with new withdraw values
      */
-    function adminWithdraw(uint256 id) external {
+    function adminWithdraw(uint256 id) external onlyAdmin {
         (address handlerAddress, bytes memory data) = contractDAO.isWithdrawAvailable(id);
         
         IERCHandler handler = IERCHandler(handlerAddress);
@@ -516,7 +536,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         This means that the address at index 0 for addrs will receive the amount (in WEI) from amounts at index 0.
         @param id The id of request with new transfer values
      */
-    function transferFunds(uint256 id) external {
+    function transferFunds(uint256 id) external onlyAdmin  {
         (address payable[] memory addrs, uint[] memory amounts) = contractDAO.isTransferAvailable(id);
 
         for (uint256 i = 0; i < addrs.length; i++) {

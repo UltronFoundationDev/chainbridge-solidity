@@ -31,6 +31,10 @@ contract('Bridge - [admin]', async accounts => {
 
     let withdrawData = '';
 
+    const assertOnlyAdmin = (method, ...params) => {
+        return TruffleAssert.reverts(method(...params, {from: initialRelayers[1]}), "sender doesn't have admin role");
+    };
+
     beforeEach(async () => {
         BridgeInstance = await BridgeContract.new(domainID, initialRelayers, initialRelayerThreshold, 0, 100);
         ADMIN_ROLE = await BridgeInstance.DEFAULT_ADMIN_ROLE();
@@ -137,6 +141,10 @@ contract('Bridge - [admin]', async accounts => {
         assert.equal(await ERC20HandlerInstance._tokenContractAddressToResourceID.call(ERC20MintableInstance.address), resourceID.toLowerCase());
     });
 
+    it('Should require admin role to set a ERC20 Resource ID and contract address', async () => {
+        await assertOnlyAdmin(BridgeInstance.adminSetResource, 1);
+    });
+
     // Set Generic Resource
 
     it('Should set a Generic Resource ID and contract address', async () => {
@@ -148,6 +156,10 @@ contract('Bridge - [admin]', async accounts => {
         await TruffleAssert.passes(BridgeInstance.adminSetGenericResource(1));
         assert.equal(await GenericHandlerInstance._resourceIDToContractAddress.call(resourceID), CentrifugeAssetInstance.address);
         assert.equal(await GenericHandlerInstance._contractAddressToResourceID.call(CentrifugeAssetInstance.address), resourceID.toLowerCase());
+    });
+
+    it('Should require admin role to set a Generic Resource ID and contract address', async () => {
+        await assertOnlyAdmin(BridgeInstance.adminSetGenericResource, 1);
     });
 
     // Set burnable
@@ -162,6 +174,10 @@ contract('Bridge - [admin]', async accounts => {
         await TruffleAssert.passes(BridgeInstance.adminSetResource(1));
         await TruffleAssert.passes(BridgeInstance.adminSetBurnable(1));
         assert.isTrue(await ERC20HandlerInstance._burnList.call(ERC20MintableInstance.address));
+    });
+
+    it('Should require admin role to set ERC20MintableInstance.address as burnable', async () => {
+        await assertOnlyAdmin(BridgeInstance.adminSetBurnable, 1);
     });
 
     // Set fee
@@ -179,6 +195,10 @@ contract('Bridge - [admin]', async accounts => {
     it('Should not set the same fee', async () => {
         await DAOInstance.newChangeFeeRequest(0);
         await TruffleAssert.reverts(BridgeInstance.adminChangeFee(1), "Current fee is equal to new fee");
+    });
+
+    it('Should require admin role to set fee', async () => {
+        await assertOnlyAdmin(BridgeInstance.adminChangeFee, 1);
     });
 
     // Withdraw
@@ -216,6 +236,10 @@ contract('Bridge - [admin]', async accounts => {
         assert.equal(ownerBalance, numTokens);
     });
 
+    it('Should require admin role to withdraw funds', async () => {
+        await assertOnlyAdmin(BridgeInstance.adminWithdraw, 1);
+    });
+
     // Set nonce
 
     it('Should set nonce', async () => {
@@ -234,5 +258,9 @@ contract('Bridge - [admin]', async accounts => {
         const newNonce = 2;
         await DAOInstance.newSetNonceRequest(domainID, newNonce);
         await TruffleAssert.reverts(BridgeInstance.adminSetDepositNonce(2), "Does not allow decrements of the nonce");
+    });
+
+    it('Should require admin role to set nonce', async () => {
+        await assertOnlyAdmin(BridgeInstance.adminSetDepositNonce, 1);
     });
 });

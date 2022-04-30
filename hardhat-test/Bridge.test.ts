@@ -82,6 +82,16 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         expect(bridge.hasRole(ADMIN_ROLE, newVoterFirst.address))
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if owner request is already approved`);
         await expect(dao.connect(owner).isOwnerChangeAvailable(1)).revertedWith("already approved");
+
+        console.log(`${insideTest}Creates new owner change request`);    
+        await dao.connect(owner).newOwnerChangeRequest(owner.address);
+        console.log(`${insideTest}${colorBlue}Changing${colorReset} owner`);
+
+        await bridge.connect(newVoterFirst).renounceAdmin(2);
+        console.log(`${insideTest}Compares admin_role [${colorBlue}${ADMIN_ROLE}${colorReset}] with returned value: [${colorGreen}${newVoterFirst.address}${colorReset}]`);
+        expect(bridge.hasRole(ADMIN_ROLE, owner.address))
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if owner request is already approved`);
+        await expect(dao.connect(owner).isOwnerChangeAvailable(2)).revertedWith("already approved");
     });
 
     it("Pause status(pausing/unpausing) request execution\n", async () => {  
