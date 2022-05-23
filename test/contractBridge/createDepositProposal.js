@@ -24,6 +24,8 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
     const expectedDepositNonce = 1;
     const relayerThreshold = 1;
     const expectedCreateEventStatus = 1;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
     
     let DAOInstance;
     let BridgeInstance;
@@ -35,7 +37,7 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
     beforeEach(async () => {
         await Promise.all([
             ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance),
-            BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance)
+            BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
         DAOInstance = await DAOContract.new();
@@ -163,6 +165,8 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
     const expectedDepositNonce = 1;
     const relayerThreshold = 2;
     const expectedCreateEventStatus = 1;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
 
     let DAOInstance;
     let BridgeInstance;
@@ -175,7 +179,7 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
     beforeEach(async () => {
         await Promise.all([
             ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance),
-            BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance)
+            BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
         DAOInstance = await DAOContract.new();

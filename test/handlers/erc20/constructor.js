@@ -14,6 +14,8 @@ const ERC20HandlerContract = artifacts.require("ERC20Handler");
 contract('ERC20Handler - [constructor]', async () => {
     const relayerThreshold = 2;
     const domainID = 1;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
 
     let DAOInstance;
     let BridgeInstance;
@@ -26,7 +28,7 @@ contract('ERC20Handler - [constructor]', async () => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(domainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance1 = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance2 = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance3 = instance)

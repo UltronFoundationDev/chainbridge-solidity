@@ -21,6 +21,9 @@ contract('ERC721Handler - [Deposit Burn ERC721]', async (accounts) => {
 
     const tokenID = 1;
 
+    const feeMaxValue = 10000;
+    const feePercent = 10;
+
     let DAOInstance;
     let BridgeInstance;
     let ERC721MintableInstance1;
@@ -35,7 +38,7 @@ contract('ERC721Handler - [Deposit Burn ERC721]', async (accounts) => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(domainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance1 = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance2 = instance)
         ])

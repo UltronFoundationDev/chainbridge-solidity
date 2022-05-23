@@ -18,13 +18,15 @@ contract('Gas Benchmark - [contract deployments]', async () => {
     const domainID = 1;
     const relayerThreshold = 1;
     const centrifugeAssetMinCount = 1;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
     const gasBenchmarks = [];
 
     let DAOInstance;
     let BridgeInstance;
 
     it('Should deploy all contracts and print benchmarks', async () => {
-        let contractInstances = [await BridgeContract.new(domainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance)];
+        let contractInstances = [await BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)];
         contractInstances.concat(await DAOContract.new().then(instance => DAOInstance = instance));
         contractInstances = contractInstances.concat(
             await Promise.all([

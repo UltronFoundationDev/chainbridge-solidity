@@ -19,6 +19,8 @@ contract('ERC1155Handler - [Deposit ERC1155]', async (accounts) => {
     const depositerAddress = accounts[1];
     const tokenID = 1;
     const tokenAmount = 100;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
 
     let DAOInstance;
     let BridgeInstance;
@@ -33,7 +35,7 @@ contract('ERC1155Handler - [Deposit ERC1155]', async (accounts) => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(domainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
             ERC1155MintableContract.new("TOK").then(instance => ERC1155MintableInstance = instance)
         ])
 

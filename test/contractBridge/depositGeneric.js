@@ -16,6 +16,8 @@ contract('Bridge - [deposit - Generic]', async () => {
     const originDomainID = 1;
     const destinationDomainID = 2;
     const expectedDepositNonce = 1;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
     
     let DAOInstance;
     let BridgeInstance;
@@ -30,7 +32,7 @@ contract('Bridge - [deposit - Generic]', async () => {
     beforeEach(async () => {
         await Promise.all([
             CentrifugeAssetContract.new().then(instance => CentrifugeAssetInstance = instance),
-            BridgeInstance = BridgeContract.new(originDomainID, [], 0, 0, 100).then(instance => BridgeInstance = instance)
+            BridgeInstance = BridgeContract.new(originDomainID, [], 0, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
         DAOInstance = await DAOContract.new();

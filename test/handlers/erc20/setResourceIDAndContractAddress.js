@@ -16,6 +16,8 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
     
     const relayerThreshold = 2;
     const domainID = 1;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
 
     let DAOInstance;
     let BridgeInstance;
@@ -26,7 +28,7 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
     let burnableContractAddresses;
 
     beforeEach(async () => {
-        BridgeInstance = await BridgeContract.new(domainID, [], relayerThreshold, 0, 100);
+        BridgeInstance = await BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent);
         ERC20MintableInstance1 = await ERC20MintableContract.new("token", "TOK");
 
         DAOInstance = await DAOContract.new();

@@ -28,6 +28,8 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
     const lenRecipientAddress = 20;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
     const gasBenchmarks = [];
 
     const initialRelayers = [relayerAddress];
@@ -65,7 +67,7 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
     before(async () => {
         await Promise.all([
             DAOContract.new().then(instance => DAOInstance = instance),
-            BridgeContract.new(domainID, initialRelayers, relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(domainID, initialRelayers, relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance),
             ERC1155MintableContract.new("TOK").then(instance => ERC1155MintableInstance = instance),

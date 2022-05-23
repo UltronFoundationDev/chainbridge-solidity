@@ -55,7 +55,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
     // destinationDomainID + depositNonce => dataHash => Proposal
     mapping(uint72 => mapping(bytes32 => Proposal)) private _proposals;
     // to be bridged token address => destination chain id => Fee
-    mapping(address => mapping(uint64 => Fee)) private _fees;
+    mapping(address => mapping(uint8 => Fee)) private _fees;
 
     event RelayerThresholdChanged(uint256 newThreshold);
     event RelayerAdded(address relayer);
@@ -105,7 +105,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
 
     function getFee(address tokenAddress, uint64 chainId) external override view returns(uint256, uint256, uint256) {
         require(tokenAddress != address(0), "zero address");
-        require(_fees[tokenAddress][chainId].basicFee > 0 
+        require(_fees[tokenAddress][chainId].basicFee >= 0 
             && _fees[tokenAddress][chainId].minAmount > 0 
             && _fees[tokenAddress][chainId].maxAmount > 0, "fee does not exist");
         return (_fees[tokenAddress][chainId].basicFee,
@@ -391,7 +391,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
     function adminChangeFee(uint256 id) external {
         (address tokenAddress, uint64 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractDAO.isChangeFeeAvailable(id);
 
-        require(_fees[tokenAddress][chainId].basicFee != basicFee 
+        require((_fees[tokenAddress][chainId].basicFee != basicFee || _fees[tokenAddress][chainId].basicFee == 0)
             && _fees[tokenAddress][chainId].minAmount != minAmount 
             && _fees[tokenAddress][chainId].maxAmount != maxAmount, "Current fee = new fee");
 
@@ -546,12 +546,9 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         uint72 nonceAndID = (uint72(depositNonce) << 8) | uint72(domainID);
         bytes32 dataHash = keccak256(abi.encodePacked(handler, data));
         Proposal storage proposal = _proposals[nonceAndID][dataHash];
-
         require(proposal._status == ProposalStatus.Passed, "Proposal must have Passed status");
-
         proposal._status = ProposalStatus.Executed;
         IDepositExecute depositHandler = IDepositExecute(handler);
-
         if (revertOnFail) {
             depositHandler.executeProposal(resourceID, data);
         } else {

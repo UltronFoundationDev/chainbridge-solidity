@@ -27,6 +27,8 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
     const depositAmount = 10;
     const expectedDepositNonce = 1;
     const relayerThreshold = 3;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
 
     let DAOInstance;
     let BridgeInstance;
@@ -46,8 +48,9 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
                 relayer3Address,
                 relayer4Address], 
                 relayerThreshold, 
-                0,
-                10,).then(instance => BridgeInstance = instance),
+                10,
+                feeMaxValue,
+                feePercent).then(instance => BridgeInstance = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance)
         ]);
         

@@ -16,6 +16,8 @@ const ERC721HandlerContract = artifacts.require("ERC721Handler");
 contract('ERC721Handler - [Burn ERC721]', async () => {
     const relayerThreshold = 2;
     const domainID = 1;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
 
     let DAOInstance;
     let BridgeInstance;
@@ -29,7 +31,7 @@ contract('ERC721Handler - [Burn ERC721]', async () => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(domainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance1 = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance2 = instance)
         ])
