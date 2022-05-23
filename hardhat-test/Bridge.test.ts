@@ -27,7 +27,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
     const domainId = 1;
     const initialRelayerThreshold = 2;
-    const fee = ethers.utils.parseEther("4");
+    const feeMaxValue = 10000;
+    const feePercent = 10;
     const expiry = 100;
     let ADMIN_ROLE: utils.BytesLike;
 
@@ -47,7 +48,7 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         console.log(`${beforeTest}Deployed DAO contract: ${colorBlue}${dao.address}${colorReset}`)
         console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
 
-        bridge = await (await new Bridge__factory(owner).deploy(domainId, initialRelayers, initialRelayerThreshold, fee, expiry)).deployed();
+        bridge = await (await new Bridge__factory(owner).deploy(domainId, initialRelayers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed();
         console.log(`${beforeTest}Deployed bridge contract: ${colorBlue}${bridge.address}${colorReset}`);
 
         console.log(`${beforeTest}${colorRed}Reverts${colorReset} if bridge new address is zero address`);
@@ -129,15 +130,33 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
     });
 
     it("Change fee request execution\n", async () => {
-        const fee = ethers.utils.parseEther("10");
+        const ERC20MintableInstance = await (await new ERC20PresetMinterPauser__factory(owner).deploy("token", "TOK")).deployed();
+        const tokenAddress = ERC20MintableInstance.address;
+        const chainId = 0x1;
+        const basicFee = ethers.utils.parseEther("10");
+        const minAmount = ethers.utils.parseEther("10");
+        const maxAmount = ethers.utils.parseEther("100000");
 
         console.log(`${insideTest}Creates new change fee request`);    
-        await dao.connect(owner).newChangeFeeRequest(fee);
+        await dao.connect(owner).newChangeFeeRequest(tokenAddress, chainId, basicFee, minAmount, maxAmount);
 
         console.log(`${insideTest}${colorBlue}Changing fee${colorReset}`);         
         await bridge.connect(owner).adminChangeFee(1);
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if change fee request is already approved`);
         await expect(dao.connect(owner).isChangeFeeAvailable(1)).revertedWith("already approved");
+    });
+
+    it("Change fee percent request execution\n", async () => {
+        const feeMaxValue = 1000;
+        const feePercent = 1;
+
+        console.log(`${insideTest}Creates new change fee percent request`);    
+        await dao.connect(owner).newChangeFeePercentRequest(feeMaxValue, feePercent);
+
+        console.log(`${insideTest}${colorBlue}Changing fee percent${colorReset}`);         
+        await bridge.connect(owner).adminChangeFeePercent(1);
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if change fee percent request is already approved`);
+        await expect(dao.connect(owner).isChangeFeePercentAvailable(1)).revertedWith("already approved");
     });
 
     it("Withdraw request execution\n", async () => {
@@ -266,7 +285,7 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         await dao.connect(owner).newSetGenericResourceRequest(genericHandlerAddress, resourceId,  initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0])
         await bridge.adminSetGenericResource(2);
 
-        await bridge.deposit(destinationDomainID, resourceId, depositData, {value: ethers.utils.parseEther("10")})
+        await bridge.deposit(destinationDomainID, resourceId, depositData, {value: ethers.utils.parseEther("1")})
 
         console.log(`${insideTest}Creates new transfer request`);    
         await dao.connect(owner).newTransferRequest(addreses, amounts);
