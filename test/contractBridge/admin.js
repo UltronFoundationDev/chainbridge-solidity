@@ -24,6 +24,8 @@ contract('Bridge - [admin]', async accounts => {
     const expectedBridgeAdmin = accounts[0];
     const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
     const bytes32 = "0x0";
+    const feeMaxValue = 10000;
+    const feePercent = 10;
     let ADMIN_ROLE;
     
     let BridgeInstance;
@@ -32,7 +34,7 @@ contract('Bridge - [admin]', async accounts => {
     let withdrawData = '';
 
     beforeEach(async () => {
-        BridgeInstance = await BridgeContract.new(domainID, initialRelayers, initialRelayerThreshold, 0, 100);
+        BridgeInstance = await BridgeContract.new(domainID, initialRelayers, initialRelayerThreshold, 0, feeMaxValue, feePercent);
         ADMIN_ROLE = await BridgeInstance.DEFAULT_ADMIN_ROLE();
         DAOInstance = await DAOContract.new();
         await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
@@ -164,21 +166,89 @@ contract('Bridge - [admin]', async accounts => {
         assert.isTrue(await ERC20HandlerInstance._burnList.call(ERC20MintableInstance.address));
     });
 
-    // Set fee
+    // Set fee percent
 
-    it('Should set fee', async () => {
-        assert.equal(await BridgeInstance._fee.call(), 0);
+    it('Should set fee percent', async () => {
+        await DAOInstance.newChangeFeePercentRequest(1000, 1);
+        await BridgeInstance.adminChangeFeePercent(1);
 
-        const fee = Ethers.utils.parseEther("0.05");
-        await DAOInstance.newChangeFeeRequest(fee);
-        await BridgeInstance.adminChangeFee(1);
-        const newFee = await BridgeInstance._fee.call()
-        assert.equal(web3.utils.fromWei(newFee, "ether"), "0.05")
+        assert.equal(await BridgeInstance.getFeeMaxValue(), "1000");
+        assert.equal(await BridgeInstance.getFeePercent(), "1");
     });
 
-    it('Should not set the same fee', async () => {
-        await DAOInstance.newChangeFeeRequest(0);
-        await TruffleAssert.reverts(BridgeInstance.adminChangeFee(1), "Current fee is equal to new fee");
+    it('Should not set the same values', async () => {
+        await DAOInstance.newChangeFeePercentRequest(feeMaxValue, feePercent);
+        await TruffleAssert.reverts(BridgeInstance.adminChangeFeePercent(1), "Current fee percent values = new fee percent");
+    });
+
+    it('Should not set fee percent higher then fee max value', async () => {
+        await DAOInstance.newChangeFeePercentRequest(10, 10000);
+        await TruffleAssert.reverts(BridgeInstance.adminChangeFeePercent(1), "new feePercent >= new feeMaxValue");
+    });
+
+    // Set fee 
+
+    it('Should set fee per token value', async () => {
+        const tokenAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+        const chainId = 0x1;
+        const basicFee = Ethers.utils.parseUnits("0.9", 6);
+        const minAmount = Ethers.utils.parseUnits("10", 6);
+        const maxAmount = Ethers.utils.parseUnits("1000000", 6);
+
+        await DAOInstance.newChangeFeeRequest(tokenAddress, chainId, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
+        
+        const res = await BridgeInstance.getFee(tokenAddress, chainId);
+        const {0: resFee, 1: resMin, 2: resMax} = res;
+        assert.equal(resFee.toString(), basicFee.toString());
+        assert.equal(resMin.toString(), minAmount.toString());
+        assert.equal(resMax.toString(), maxAmount.toString());
+    });
+
+    it('Should not set the same fee values', async () => {
+        const tokenAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+        const chainId = 0x1;
+        const basicFee = Ethers.utils.parseUnits("0.9", 6);
+        const minAmount = Ethers.utils.parseUnits("10", 6);
+        const maxAmount = Ethers.utils.parseUnits("1000000", 6);
+
+        await DAOInstance.newChangeFeeRequest(tokenAddress, chainId, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
+        
+        await DAOInstance.newChangeFeeRequest(tokenAddress, chainId, basicFee, minAmount, maxAmount);
+        await TruffleAssert.reverts(BridgeInstance.adminChangeFee(2), "Current fee = new fee");
+    });
+
+    it('Should not set fee when token address is zero address', async () => {
+        const chainId = 0x1;
+        const basicFee = Ethers.utils.parseUnits("0.9", 6);
+        const minAmount = Ethers.utils.parseUnits("10", 6);
+        const maxAmount = Ethers.utils.parseUnits("1000000", 6);
+        await TruffleAssert.reverts(DAOInstance.newChangeFeeRequest(Ethers.constants.AddressZero, chainId, basicFee, minAmount, maxAmount), "zero address");
+    });
+
+    it('Should not set fee when chain id <= 0', async () => {
+        const tokenAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+        const basicFee = Ethers.utils.parseUnits("0.9", 6);
+        const minAmount = Ethers.utils.parseUnits("10", 6);
+        const maxAmount = Ethers.utils.parseUnits("1000000", 6);
+        await TruffleAssert.reverts(DAOInstance.newChangeFeeRequest(tokenAddress, 0, basicFee, minAmount, maxAmount), "zero chain Id");
+    });
+
+    it('Should not set fee when min/max amounts <= 0', async () => {
+        const tokenAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+        const chainId = 0x1;
+        const basicFee = Ethers.utils.parseUnits("0.9", 6);
+        await TruffleAssert.reverts(DAOInstance.newChangeFeeRequest(tokenAddress, chainId, basicFee, 0, 0), "new min/max amount <= 0");
+    });
+
+    it('Should not set fee when min amount >= max amount', async () => {
+        const tokenAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+        const chainId = 0x1;
+        const basicFee = Ethers.utils.parseUnits("0.9", 6);
+        const minAmount = Ethers.utils.parseUnits("10", 6);
+        const maxAmount = Ethers.utils.parseUnits("1000000", 6);
+        await TruffleAssert.reverts(DAOInstance.newChangeFeeRequest(tokenAddress, chainId, basicFee, maxAmount, minAmount), "max amount <= min amount");
     });
 
     // Withdraw
