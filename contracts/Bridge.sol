@@ -103,7 +103,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         return contractDAO;
     }
 
-    function getFee(address tokenAddress, uint64 chainId) external override view returns(uint256, uint256, uint256) {
+    function getFee(address tokenAddress, uint8 chainId) external override view returns(uint256, uint256, uint256) {
         require(tokenAddress != address(0), "zero address");
         require(_fees[tokenAddress][chainId].basicFee >= 0 
             && _fees[tokenAddress][chainId].minAmount > 0 
@@ -389,7 +389,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         @param id The id of request with new fee value
      */
     function adminChangeFee(uint256 id) external {
-        (address tokenAddress, uint64 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractDAO.isChangeFeeAvailable(id);
+        (address tokenAddress, uint8 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractDAO.isChangeFeeAvailable(id);
 
         require((_fees[tokenAddress][chainId].basicFee != basicFee || _fees[tokenAddress][chainId].basicFee == 0)
             && _fees[tokenAddress][chainId].minAmount != minAmount 

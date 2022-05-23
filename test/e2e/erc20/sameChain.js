@@ -74,15 +74,15 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         depositProposalDataHash = Ethers.utils.keccak256(ERC20HandlerInstance.address + depositProposalData.substr(2));
     });
 
-    // it("[sanity] depositerAddress' balance should be equal to initialTokenAmount", async () => {
-    //     const depositerBalance = await ERC20MintableInstance.balanceOf(depositerAddress);
-    //     assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber());
-    // });
+    it("[sanity] depositerAddress' balance should be equal to initialTokenAmount", async () => {
+        const depositerBalance = await ERC20MintableInstance.balanceOf(depositerAddress);
+        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber());
+    });
 
-    // it("[sanity] ERC20HandlerInstance.address should have an allowance of depositAmount from depositerAddress", async () => {
-    //     const handlerAllowance = await ERC20MintableInstance.allowance(depositerAddress, ERC20HandlerInstance.address);
-    //     assert.strictEqual(handlerAllowance.toNumber(), depositAmount.toNumber());
-    // });
+    it("[sanity] ERC20HandlerInstance.address should have an allowance of depositAmount from depositerAddress", async () => {
+        const handlerAllowance = await ERC20MintableInstance.allowance(depositerAddress, ERC20HandlerInstance.address);
+        assert.strictEqual(handlerAllowance.toNumber(), depositAmount.toNumber());
+    });
 
     it("depositAmount of Destination ERC20 should be transferred to recipientAddress", async () => {
         // depositerAddress makes initial deposit of depositAmount

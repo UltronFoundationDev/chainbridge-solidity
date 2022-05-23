@@ -83,7 +83,7 @@ contract DAO is Multisig, IDAO {
 
     struct ChangeFeeRequest {
         address tokenAddress;
-        uint64 chainId; 
+        uint8 chainId; 
         uint256 basicFee;
         uint256 minAmount;
         uint256 maxAmount;
@@ -712,7 +712,7 @@ contract DAO is Multisig, IDAO {
         external 
         view 
         override
-        returns (address, uint64, uint256, uint256, uint256)
+        returns (address, uint8, uint256, uint256, uint256)
     {
         require(!changeFeeRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
@@ -776,7 +776,7 @@ contract DAO is Multisig, IDAO {
      * @param minAmount minimal bridged tokens value amount
      * @param maxAmount maximal bridged tokens value amount
     */
-    function newChangeFeeRequest(address tokenAddress, uint64 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount)
+    function newChangeFeeRequest(address tokenAddress, uint8 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount)
         external
         onlyVoter(msg.sender)
         returns (uint256)
