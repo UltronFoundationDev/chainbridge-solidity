@@ -8,6 +8,7 @@ import "./utils/SafeMath.sol";
 import "./utils/SafeCast.sol";
 import "./interfaces/IDepositExecute.sol";
 import "./interfaces/IERCHandler.sol";
+import "./interfaces/IBridge.sol";
 import "./interfaces/IGenericHandler.sol";
 import "./DAO.sol";
 
@@ -15,7 +16,7 @@ import "./DAO.sol";
     @title Facilitates deposits, creation and voting of deposit proposals, and deposit executions.
     @author ChainSafe Systems.
  */
-contract Bridge is Pausable, AccessControl, SafeMath {
+contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
     using SafeCast for *;
 
     // Limit relayers number because proposal can fit only so much votes
@@ -23,8 +24,9 @@ contract Bridge is Pausable, AccessControl, SafeMath {
 
     uint8   public _domainID;
     uint8   public _relayerThreshold;
-    uint128 public _fee;
     uint40  public _expiry;
+    uint128 private feeMaxValue; /// @notice e.g. 10000 = 100% => 1(feePercent) = 0.01% 
+    uint64 private feePercent;
 
     address private addressDAO;
     IDAO private contractDAO;
@@ -38,6 +40,12 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         uint40  _proposedBlock; // 1099511627775 maximum block
     }
 
+    struct Fee { 
+        uint256 basicFee;
+        uint256 minAmount;
+        uint256 maxAmount;
+    }
+
     // destinationDomainID => number of deposits
     mapping(uint8 => uint64) public _depositCounts;
     // resourceID => handler address
@@ -46,6 +54,8 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     mapping(address => bool) public isValidForwarder;
     // destinationDomainID + depositNonce => dataHash => Proposal
     mapping(uint72 => mapping(bytes32 => Proposal)) private _proposals;
+    // to be bridged token address => destination chain id => Fee
+    mapping(address => mapping(uint8 => Fee)) private _fees;
 
     event RelayerThresholdChanged(uint256 newThreshold);
     event RelayerAdded(address relayer);
@@ -81,10 +91,32 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         _;
     }
 
+    function getFeeMaxValue() external override view returns(uint128) {
+        return feeMaxValue;
+    }
+
+    function getFeePercent() external override view returns(uint64) {
+        return feePercent;
+    }
+
     function getContractDAO() external view returns(IDAO) {
         return contractDAO;
     }
 
+    function getFee(address tokenAddress, uint8 chainId) external override view returns(uint256, uint256, uint256) {
+        require(tokenAddress != address(0), "zero address");
+        require(_fees[tokenAddress][chainId].basicFee > 0 
+            && _fees[tokenAddress][chainId].minAmount > 0 
+            && _fees[tokenAddress][chainId].maxAmount > 0, "fee does not exist");
+        return (_fees[tokenAddress][chainId].basicFee,
+                _fees[tokenAddress][chainId].minAmount,
+                _fees[tokenAddress][chainId].maxAmount);
+    }
+
+    /**
+        @notice Sets DAO contract address only once
+        @param _address The DAO address
+     */
     function setDAOContractInitial(address _address) external {
         require(addressDAO == address(0), "already set");
         require(_address != address(0), "zero address");
@@ -120,12 +152,15 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         @param domainID ID of chain the Bridge contract exists on.
         @param initialRelayers Addresses that should be initially granted the relayer role.
         @param initialRelayerThreshold Number of votes needed for a deposit proposal to be considered passed.
+        @param _feeMaxValue The maximum number of percent. This value will be used as divisor(100% value)
+        @param _feePercent The value of percent fee, which is used as multiplier (n * multiplier / delimeter = 10 * 30 / 100)
      */
-    constructor (uint8 domainID, address[] memory initialRelayers, uint256 initialRelayerThreshold, uint256 fee, uint256 expiry) public {
+    constructor (uint8 domainID, address[] memory initialRelayers, uint256 initialRelayerThreshold, uint256 expiry, uint128 _feeMaxValue, uint64 _feePercent) public {
         _domainID = domainID;
         _relayerThreshold = initialRelayerThreshold.toUint8();
-        _fee = fee.toUint128();
         _expiry = expiry.toUint40();
+        feeMaxValue= _feeMaxValue;
+        feePercent = _feePercent;
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
@@ -332,15 +367,37 @@ contract Bridge is Pausable, AccessControl, SafeMath {
     }
 
     /**
+        @notice Changes deposit fee percent.
+        @notice Only callable by admin.
+        @param id The id of request with new fee percent values
+     */
+    function adminChangeFeePercent(uint256 id) external {
+        (uint128 newFeeMaxValue, uint64 newFeePercent) = contractDAO.isChangeFeePercentAvailable(id);
+        
+        require(feeMaxValue != newFeeMaxValue && feePercent != newFeePercent, "Current fee percent values = new fee percent");
+        require(newFeePercent <= newFeeMaxValue, "new feePercent >= new feeMaxValue");
+        
+        feeMaxValue = newFeeMaxValue;
+        feePercent = newFeePercent;
+
+        require(contractDAO.confirmChangeFeePercentRequest(id), "confirmed");
+    } 
+
+    /**
         @notice Changes deposit fee.
         @notice Only callable by admin.
         @param id The id of request with new fee value
      */
     function adminChangeFee(uint256 id) external {
-        uint256 newFee = contractDAO.isChangeFeeAvailable(id);
+        (address tokenAddress, uint8 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractDAO.isChangeFeeAvailable(id);
 
-        require(_fee != newFee, "Current fee is equal to new fee");
-        _fee = newFee.toUint128();
+        require(_fees[tokenAddress][chainId].basicFee != basicFee 
+            && _fees[tokenAddress][chainId].minAmount != minAmount 
+            && _fees[tokenAddress][chainId].maxAmount != maxAmount, "Current fee = new fee");
+
+        _fees[tokenAddress][chainId].basicFee = basicFee;
+        _fees[tokenAddress][chainId].minAmount = minAmount;
+        _fees[tokenAddress][chainId].maxAmount = maxAmount;
 
         require(contractDAO.confirmChangeFeeRequest(id), "confirmed");
     }
@@ -370,8 +427,6 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         - GenericHandler: responds with the raw bytes returned from the call to the target contract.
      */
     function deposit(uint8 destinationDomainID, bytes32 resourceID, bytes calldata data) external payable whenNotPaused {
-        require(msg.value == _fee, "Incorrect fee supplied");
-
         address handler = _resourceIDToHandlerAddress[resourceID];
         require(handler != address(0), "resourceID not mapped to handler");
 
@@ -379,7 +434,7 @@ contract Bridge is Pausable, AccessControl, SafeMath {
         address sender = _msgSender();
 
         IDepositExecute depositHandler = IDepositExecute(handler);
-        bytes memory handlerResponse = depositHandler.deposit(resourceID, sender, data);
+        bytes memory handlerResponse = depositHandler.deposit(destinationDomainID, resourceID, sender, data);
 
         emit Deposit(destinationDomainID, resourceID, depositNonce, sender, data, handlerResponse);
     }

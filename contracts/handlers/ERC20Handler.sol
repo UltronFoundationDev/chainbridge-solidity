@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import "../interfaces/IDepositExecute.sol";
 import "./HandlerHelpers.sol";
 import "../ERC20Safe.sol";
+import "../interfaces/IBridge.sol";
 
 /**
     @title Handles ERC20 deposits and deposit executions.
@@ -12,16 +13,19 @@ import "../ERC20Safe.sol";
     @notice This contract is intended to be used with the Bridge contract.
  */
 contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
+    IBridge private contractBridge;
     /**
         @param bridgeAddress Contract address of previously deployed Bridge.
      */
     constructor(
         address          bridgeAddress
     ) public HandlerHelpers(bridgeAddress) {
+        contractBridge = IBridge(bridgeAddress);
     }
 
     /**
         @notice A deposit is initiatied by making a deposit in the Bridge contract.
+        @param destinationDomainID ID of chain deposit will be bridged to.
         @param resourceID ResourceID used to find address of token to be used for deposit.
         @param depositer Address of account making the deposit in the Bridge contract.
         @param data Consists of {amount} padded to 32 bytes.
@@ -32,6 +36,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         @return an empty data.
      */
     function deposit(
+        uint8 destinationDomainID,
         bytes32 resourceID,
         address depositer,
         bytes   calldata data
@@ -42,10 +47,23 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         address tokenAddress = _resourceIDToTokenContractAddress[resourceID];
         require(_contractWhitelist[tokenAddress], "provided tokenAddress is not whitelisted");
 
+        (uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractBridge.getFee(tokenAddress, destinationDomainID);
+        require(minAmount <= amount, "amount < min amount");
+        require(maxAmount <= amount, "amount > max amount");
+        require(basicFee > 0 || minAmount > 0 || maxAmount > 0, "add token to the mapping!");
+
+        uint256 feeValue = amount * contractBridge.getFeePercent() / contractBridge.getFeeMaxValue() ;
+        if(feeValue < basicFee) {
+            feeValue = basicFee;
+        }
+
+        uint256 transferAmount = amount - feeValue;
+
+        lockERC20(tokenAddress, depositer, _bridgeAddress, feeValue);
         if (_burnList[tokenAddress]) {
-            burnERC20(tokenAddress, depositer, amount);
+            burnERC20(tokenAddress, depositer, transferAmount);
         } else {
-            lockERC20(tokenAddress, depositer, address(this), amount);
+            lockERC20(tokenAddress, depositer, address(this), transferAmount);
         }
     }
 

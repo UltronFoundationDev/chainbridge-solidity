@@ -18,6 +18,7 @@ contract DAO is Multisig, IDAO {
         SetNonce,
         SetForwarder,
         ChangeFee,
+        ChangeFeePercent,
         Withdraw
     }
 
@@ -81,7 +82,17 @@ contract DAO is Multisig, IDAO {
     }
 
     struct ChangeFeeRequest {
-        uint256 amount;
+        address tokenAddress;
+        uint8 chainId; 
+        uint256 basicFee;
+        uint256 minAmount;
+        uint256 maxAmount;
+        bool status;
+    }
+
+    struct ChangeFeePercentRequest {
+        uint128 feeMaxValue;
+        uint64 feePercent;
         bool status;
     }
 
@@ -160,6 +171,13 @@ contract DAO is Multisig, IDAO {
     mapping(uint256 => mapping(address => bool)) private changeFeeRequestConfirmations;
     // id for new change fee request
     uint256 private changeFeeRequestCounter;
+
+     // mapping of change fee percent requests
+    mapping(uint256 => ChangeFeePercentRequest) private changeFeePercentRequests;
+    // mapping of change fee percent confirmations
+    mapping(uint256 => mapping(address => bool)) private changeFeePercentRequestConfirmations;
+    // id for new change fee percent request
+    uint256 private changeFeePercentRequestCounter;
 
     // mapping of withdraw requests
     mapping(uint256 => WithdrawRequest) private withdrawRequests;
@@ -603,6 +621,90 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Allows changing fee percent request if it is not approved and there are enough votes
+     * @param id the id of change fee percent request
+    */
+    function isChangeFeePercentAvailable(uint256 id) 
+        external 
+        view 
+        override
+        returns (uint128, uint64)
+    {
+        require(!changeFeePercentRequests[id].status, "already approved");
+        uint256 consensus = (getActiveVotersCount() * 100) / 2;
+        uint256 affirmativeVotesCount = 0;
+        
+        for(uint256 i = 0; i <= getVotersCounter(); i++) {
+            if(changeFeePercentRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
+                affirmativeVotesCount++;
+            }
+        }
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
+        
+        return (changeFeePercentRequests[id].feeMaxValue, 
+                changeFeePercentRequests[id].feePercent);
+    }
+
+    /**
+     * @notice Approves change fee percent request if it is not approved
+     * @param id the id of change fee percent request
+    */
+    function confirmChangeFeePercentRequest(uint256 id) 
+        external 
+        override
+        onlyBridge
+        returns (bool)
+    {
+        require(!changeFeePercentRequests[id].status, "already approved");
+        changeFeePercentRequests[id].status = true;
+        return true;
+    }
+
+    /**
+     * @notice Allows a voter to insert a confirmation for change fee percent request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of change fee percent request
+    */
+    function newVoteForChangeFeePercentRequest(bool voteType, uint256 id) 
+        external 
+        onlyVoter(msg.sender)
+    {
+        require(!changeFeePercentRequests[id].status, "already approved");
+        if(voteType) {
+            require(!changeFeePercentRequestConfirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(changeFeePercentRequestConfirmations[id][msg.sender], "not confirmed");
+        }
+        changeFeePercentRequestConfirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(RequestType.ChangeFeePercent, voteType, msg.sender, id);
+    }
+
+    /**
+     * @notice Creation of change fee percent request by any voter
+     * @param feeMaxValue The maximum number of percent. This value will be used as divisor(100% value)
+     * @param feePercent The value of percent fee, which is used as multiplier (n * multiplier / delimeter = 10 * 30 / 100)
+    */
+    function newChangeFeePercentRequest(uint128 feeMaxValue, uint64 feePercent)
+        external
+        onlyVoter(msg.sender)
+        returns (uint256)
+    {
+        changeFeePercentRequestCounter = changeFeePercentRequestCounter + 1;
+        changeFeePercentRequests[changeFeePercentRequestCounter] = ChangeFeePercentRequest({
+            feeMaxValue: feeMaxValue,
+            feePercent: feePercent,
+            status: false
+        });
+        
+        changeFeePercentRequestConfirmations[changeFeePercentRequestCounter][msg.sender] = true;
+        emit NewVoteForRequest(RequestType.ChangeFeePercent, true, msg.sender, changeFeePercentRequestCounter);
+
+        return changeFeePercentRequestCounter;
+    }
+
+     /**
      * @notice Allows changing fee request if it is not approved and there are enough votes
      * @param id the id of change fee request
     */
@@ -610,7 +712,7 @@ contract DAO is Multisig, IDAO {
         external 
         view 
         override
-        returns (uint256)
+        returns (address, uint8, uint256, uint256, uint256)
     {
         require(!changeFeeRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
@@ -624,7 +726,11 @@ contract DAO is Multisig, IDAO {
         }
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
         
-        return changeFeeRequests[id].amount;
+        return (changeFeeRequests[id].tokenAddress, 
+                changeFeeRequests[id].chainId, 
+                changeFeeRequests[id].basicFee,
+                changeFeeRequests[id].minAmount,
+                changeFeeRequests[id].maxAmount);
     }
 
     /**
@@ -664,16 +770,29 @@ contract DAO is Multisig, IDAO {
 
     /**
      * @notice Creation of change fee request by any voter
-     * @param amount new fee value to be set
+     * @param tokenAddress the address of bridged token
+     * @param chainId the id of chain, which token should be bridged
+     * @param basicFee basic bridged tokens fee(amount)
+     * @param minAmount minimal bridged tokens value amount
+     * @param maxAmount maximal bridged tokens value amount
     */
-    function newChangeFeeRequest(uint256 amount)
+    function newChangeFeeRequest(address tokenAddress, uint8 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount)
         external
         onlyVoter(msg.sender)
         returns (uint256)
     {
+        require(tokenAddress!= address(0), "zero address"); 
+        require(chainId > 0, "zero chain Id");
+        require(minAmount > 0 || maxAmount > 0, "new min/max amount <= 0");
+        require(maxAmount > minAmount, "max amount <= min amount");
+
         changeFeeRequestCounter = changeFeeRequestCounter + 1;
         changeFeeRequests[changeFeeRequestCounter] = ChangeFeeRequest({
-            amount: amount,
+            tokenAddress: tokenAddress,
+            chainId: chainId,
+            basicFee: basicFee,
+            minAmount: minAmount,
+            maxAmount: maxAmount,
             status: false
         });
         
