@@ -81,12 +81,11 @@ contract('E2E ERC20 - Same Chain', async accounts => {
 
     it("[sanity] ERC20HandlerInstance.address should have an allowance of depositAmount from depositerAddress", async () => {
         const handlerAllowance = await ERC20MintableInstance.allowance(depositerAddress, ERC20HandlerInstance.address);
-        assert.strictEqual(handlerAllowance.toNumber(), depositAmount.toNumber());
+        assert.strictEqual(handlerAllowance.toNumber(), depositAmountApprove.toNumber());
     });
 
     it("depositAmount of Destination ERC20 should be transferred to recipientAddress", async () => {
         // depositerAddress makes initial deposit of depositAmount
-        console.log(`depositData = ${depositData}`)
         await TruffleAssert.passes(BridgeInstance.deposit(
             domainID,
             resourceID,
@@ -98,7 +97,6 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         const handlerBalance = await ERC20MintableInstance.balanceOf(ERC20HandlerInstance.address);
         assert.strictEqual(handlerBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
         
-        console.log(`depositProposalData = ${depositProposalData}`)
         // relayer1 creates the deposit proposal
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
