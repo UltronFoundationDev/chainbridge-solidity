@@ -28,7 +28,7 @@ interface IDAO {
     function isSetForwarderAvailable(uint256 id) external view returns (address, bool);
     function confirmSetForwarderRequest(uint256 id) external returns (bool);
 
-    function isChangeFeeAvailable(uint256 id) external view returns (address, uint8, uint256, uint256, uint256);
+    function isChangeFeeAvailable(uint256 id) external view returns (address, uint64, uint256, uint256, uint256);
     function confirmChangeFeeRequest(uint256 id) external returns (bool);
 
     function isChangeFeePercentAvailable(uint256 id) external view returns (uint128, uint64);

@@ -17,7 +17,7 @@ interface IBridge {
         @param chainId The Id of bridged concrete chain
         @return fee values on concrete token and chain
      */
-    function getFee(address tokenAddress, uint8 chainId) external view returns(uint256, uint256, uint256);
+    function getFee(address tokenAddress, uint64 chainId) external view returns(uint256, uint256, uint256);
     /**
         @notice Exposing getter for fee max percent value
         @return fee max percent value

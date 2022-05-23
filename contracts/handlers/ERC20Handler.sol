@@ -49,8 +49,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
 
         (uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractBridge.getFee(tokenAddress, destinationDomainID);
         require(minAmount <= amount, "amount < min amount");
-        require(maxAmount <= amount, "amount > max amount");
-        require(basicFee > 0 || minAmount > 0 || maxAmount > 0, "add token to the mapping!");
+        require(maxAmount > amount, "amount > max amount");
 
         uint256 feeValue = amount * contractBridge.getFeePercent() / contractBridge.getFeeMaxValue() ;
         if(feeValue < basicFee) {

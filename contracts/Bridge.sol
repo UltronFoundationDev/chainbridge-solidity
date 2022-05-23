@@ -55,7 +55,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
     // destinationDomainID + depositNonce => dataHash => Proposal
     mapping(uint72 => mapping(bytes32 => Proposal)) private _proposals;
     // to be bridged token address => destination chain id => Fee
-    mapping(address => mapping(uint8 => Fee)) private _fees;
+    mapping(address => mapping(uint64 => Fee)) private _fees;
 
     event RelayerThresholdChanged(uint256 newThreshold);
     event RelayerAdded(address relayer);
@@ -103,7 +103,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         return contractDAO;
     }
 
-    function getFee(address tokenAddress, uint8 chainId) external override view returns(uint256, uint256, uint256) {
+    function getFee(address tokenAddress, uint64 chainId) external override view returns(uint256, uint256, uint256) {
         require(tokenAddress != address(0), "zero address");
         require(_fees[tokenAddress][chainId].basicFee > 0 
             && _fees[tokenAddress][chainId].minAmount > 0 
@@ -155,12 +155,12 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         @param _feeMaxValue The maximum number of percent. This value will be used as divisor(100% value)
         @param _feePercent The value of percent fee, which is used as multiplier (n * multiplier / delimeter = 10 * 30 / 100)
      */
-    constructor (uint8 domainID, address[] memory initialRelayers, uint256 initialRelayerThreshold, uint256 expiry, uint128 _feeMaxValue, uint64 _feePercent) public {
+    constructor (uint8 domainID, address[] memory initialRelayers, uint256 initialRelayerThreshold, uint256 expiry, uint256 _feeMaxValue, uint256 _feePercent) public {
         _domainID = domainID;
         _relayerThreshold = initialRelayerThreshold.toUint8();
         _expiry = expiry.toUint40();
-        feeMaxValue= _feeMaxValue;
-        feePercent = _feePercent;
+        feeMaxValue= _feeMaxValue.toUint128();
+        feePercent = _feePercent.toUint64();
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
@@ -389,7 +389,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         @param id The id of request with new fee value
      */
     function adminChangeFee(uint256 id) external {
-        (address tokenAddress, uint8 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractDAO.isChangeFeeAvailable(id);
+        (address tokenAddress, uint64 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractDAO.isChangeFeeAvailable(id);
 
         require(_fees[tokenAddress][chainId].basicFee != basicFee 
             && _fees[tokenAddress][chainId].minAmount != minAmount 
