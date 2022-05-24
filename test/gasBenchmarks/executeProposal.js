@@ -140,6 +140,10 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
         await BridgeInstance.adminSetResource(1);
         await BridgeInstance.adminSetResource(2);
         await BridgeInstance.adminSetResource(3);
+
+        await DAOInstance.newChangeFeeRequest(ERC20MintableInstance.address, domainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
+
         await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, centrifugeAssetResourceID, genericInitialContractAddresses[0], genericInitialDepositFunctionSignatures[0], genericInitialDepositFunctionDepositerOffsets[0], genericInitialExecuteFunctionSignatures[0]);
         await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, noArgumentResourceID, genericInitialContractAddresses[1], genericInitialDepositFunctionSignatures[1], genericInitialDepositFunctionDepositerOffsets[1], genericInitialExecuteFunctionSignatures[1]);
         await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, oneArgumentResourceID, genericInitialContractAddresses[2], genericInitialDepositFunctionSignatures[2], genericInitialDepositFunctionDepositerOffsets[2], genericInitialExecuteFunctionSignatures[2]);
