@@ -34,7 +34,7 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
 
     let erc20ResourceID;
 
-    const vote = (resourceID, depositNonce, depositData, relayer) => BridgeInstance.voteProposal(domainID, depositNonce, resourceID, depositData, { from: relayer });
+    const vote = (resourceID, depositNonce, depositData, relayer) => BridgeInstance.voteProposal(domainID, domainID, depositNonce, resourceID, depositData, { from: relayer });
 
     before(async () => {
         await Promise.all([

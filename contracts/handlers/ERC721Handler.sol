@@ -70,6 +70,8 @@ contract ERC721Handler is IDepositExecute, HandlerHelpers, ERC721Safe {
     /**
         @notice Proposal execution should be initiated when a proposal is finalized in the Bridge contract.
         by a relayer on the deposit's destination chain.
+        @param destinationDomainID ID of chain deposit will be bridged to.
+        @param resourceID ResourceID used to find address of token to be used for deposit.
         @param data Consists of {tokenID}, {resourceID}, {lenDestinationRecipientAddress},
         {destinationRecipientAddress}, {lenMeta}, and {metaData} all padded to 32 bytes.
         @notice Data passed into the function should be constructed as follows:
@@ -79,7 +81,7 @@ contract ERC721Handler is IDepositExecute, HandlerHelpers, ERC721Safe {
         metadata                        length      uint256    bytes    (64 + len(destinationRecipientAddress)) - (64 + len(destinationRecipientAddress) + 32)
         metadata                                      bytes    bytes    (64 + len(destinationRecipientAddress) + 32) - END
      */
-    function executeProposal(bytes32 resourceID, bytes calldata data) external override onlyBridge {
+    function executeProposal(uint8 destinationDomainID, bytes32 resourceID, bytes calldata data) external override onlyBridge {
         uint         tokenID;
         uint         lenDestinationRecipientAddress;
         bytes memory destinationRecipientAddress;

@@ -33,12 +33,17 @@ contract('Bridge - [voteProposal through forwarder]', async (accounts) => {
     const depositer = Wallet.generate();
     const depositerAddress = depositer.getAddressString();
     const destinationChainRecipientAddress = accounts[4];
-    const depositAmount = 10;
+    const depositAmount = Ethers.utils.parseUnits("10", 6);
     const expectedDepositNonce = 1;
     const relayerThreshold = 3;
     const expectedFinalizedEventStatus = 2;
+    
     const feeMaxValue = 10000;
     const feePercent = 10;
+
+    const basicFee = Ethers.utils.parseUnits("0.9", 6);
+    const minAmount = Ethers.utils.parseUnits("10", 6);
+    const maxAmount = Ethers.utils.parseUnits("1000000", 6);
 
     const STATUS = {
         Inactive : '0',
@@ -87,7 +92,7 @@ contract('Bridge - [voteProposal through forwarder]', async (accounts) => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(destinationDomainID, [
+            BridgeContract.new(originDomainID, [
                 relayer1Address,
                 relayer2Address,
                 relayer3Address,
@@ -123,8 +128,11 @@ contract('Bridge - [voteProposal through forwarder]', async (accounts) => {
         await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
         await BridgeInstance.adminSetResource(2);   
 
-        voteCallData = Helpers.createCallData(BridgeInstance, 'voteProposal', ["uint8", "uint64", "bytes32", "bytes"], [originDomainID, expectedDepositNonce, resourceID, depositData]);
-        executeCallData = Helpers.createCallData(BridgeInstance, 'executeProposal', ["uint8", "uint64", "bytes", "bytes32", "bool"], [originDomainID, expectedDepositNonce, depositData, resourceID, true]);
+        await DAOInstance.newChangeFeeRequest(DestinationERC20MintableInstance.address, destinationDomainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
+
+        voteCallData = Helpers.createCallData(BridgeInstance, 'voteProposal', ["uint8", "uint8", "uint64", "bytes32", "bytes"], [destinationDomainID, originDomainID, expectedDepositNonce, resourceID, depositData]);
+        executeCallData = Helpers.createCallData(BridgeInstance, 'executeProposal', ["uint8", "uint8", "uint64", "bytes", "bytes32", "bool"], [destinationDomainID, originDomainID, expectedDepositNonce, depositData, resourceID, true]);
         await DAOInstance.newSetForwarderRequest(ForwarderInstance.address, true);
         await BridgeInstance.adminSetForwarder(1);
 
@@ -146,7 +154,7 @@ contract('Bridge - [voteProposal through forwarder]', async (accounts) => {
     });
 
     it ('[sanity] bridge configured with threshold and relayers', async () => {
-        assert.equal(await BridgeInstance._domainID(), destinationDomainID)
+        assert.equal(await BridgeInstance._domainID(), originDomainID)
 
         assert.equal(await BridgeInstance._relayerThreshold(), relayerThreshold)
 

@@ -129,6 +129,7 @@ contract('E2E ERC1155 - Two EVM Chains', async accounts => {
 
         // // destinationRelayer1 creates the deposit proposal
         await TruffleAssert.passes(DestinationBridgeInstance.voteProposal(
+            destinationDomainID,
             originDomainID,
             expectedDepositNonce,
             destinationResourceID,
@@ -141,6 +142,7 @@ contract('E2E ERC1155 - Two EVM Chains', async accounts => {
         // // into a finalized state
         // // and then automatically executes the proposal
         await TruffleAssert.passes(DestinationBridgeInstance.voteProposal(
+            destinationDomainID,
             originDomainID,
             expectedDepositNonce,
             destinationResourceID,
@@ -170,6 +172,7 @@ contract('E2E ERC1155 - Two EVM Chains', async accounts => {
 
         // destinationRelayer1 creates the deposit proposal
         await TruffleAssert.passes(OriginBridgeInstance.voteProposal(
+            originDomainID,
             destinationDomainID,
             expectedDepositNonce,
             originResourceID,
@@ -182,6 +185,7 @@ contract('E2E ERC1155 - Two EVM Chains', async accounts => {
         // into a finalized state
         // and then automatically executes the proposal
         await TruffleAssert.passes(OriginBridgeInstance.voteProposal(
+            originDomainID,
             destinationDomainID,
             expectedDepositNonce,
             originResourceID,

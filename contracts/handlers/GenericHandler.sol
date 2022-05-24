@@ -76,7 +76,6 @@ contract GenericHandler is IGenericHandler {
 
     /**
         @notice A deposit is initiatied by making a deposit in the Bridge contract.
-        @param destinationDomainID ID of chain deposit will be bridged to.
         @param resourceID ResourceID used to find address of contract to be used for deposit.
         @param depositer Address of the account making deposit in the Bridge contract.
         @param data Consists of: {resourceID}, {lenMetaData}, and {metaData} all padded to 32 bytes.
@@ -88,7 +87,7 @@ contract GenericHandler is IGenericHandler {
         {metaData} is expected to consist of needed function arguments.
         @return Returns the raw bytes returned from the call to {contractAddress}.
      */
-    function deposit(uint8 destinationDomainID, bytes32 resourceID, address depositer, bytes calldata data) external onlyBridge returns (bytes memory) {
+    function deposit(bytes32 resourceID, address depositer, bytes calldata data) external onlyBridge returns (bytes memory) {
         uint256      lenMetadata;
         bytes memory metadata;
 

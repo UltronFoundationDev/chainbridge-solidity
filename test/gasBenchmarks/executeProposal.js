@@ -64,8 +64,8 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
     let threeArgumentsResourceID;
 
     const deposit = (resourceID, depositData) => BridgeInstance.deposit(domainID, resourceID, depositData, { from: depositerAddress });
-    const vote = (resourceID, depositNonce, depositData) => BridgeInstance.voteProposal(domainID, depositNonce, resourceID, depositData, { from: relayerAddress });
-    const execute = (depositNonce, depositData, resourceID) => BridgeInstance.executeProposal(domainID, depositNonce, depositData, resourceID, true);
+    const vote = (resourceID, depositNonce, depositData) => BridgeInstance.voteProposal(domainID, domainID, depositNonce, resourceID, depositData, { from: relayerAddress });
+    const execute = (depositNonce, depositData, resourceID) => BridgeInstance.executeProposal(domainID, domainID, depositNonce, depositData, resourceID, true);
 
     before(async () => {
         await Promise.all([

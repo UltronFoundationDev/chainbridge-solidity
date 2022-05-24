@@ -25,13 +25,18 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
     const relayer3Bit = 1 << 2;
     const depositerAddress = accounts[4];
     const destinationChainRecipientAddress = accounts[4];
-    const depositAmount = 10;
+    const depositAmount = Ethers.utils.parseUnits("10", 6);
     const expectedDepositNonce = 1;
     const relayerThreshold = 3;
     const expectedFinalizedEventStatus = 2;
     const expectedExecutedEventStatus = 3;
+
     const feeMaxValue = 10000;
     const feePercent = 10;
+
+    const basicFee = Ethers.utils.parseUnits("0.9", 6);
+    const minAmount = Ethers.utils.parseUnits("10", 6);
+    const maxAmount = Ethers.utils.parseUnits("1000000", 6);
 
     const STATUS = {
         Inactive : '0',
@@ -56,7 +61,7 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(destinationDomainID, [
+            BridgeContract.new(originDomainID, [
                 relayer1Address,
                 relayer2Address,
                 relayer3Address,
@@ -92,12 +97,15 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
         await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
         await BridgeInstance.adminSetResource(2);
 
-        vote = (relayer) => BridgeInstance.voteProposal(originDomainID, expectedDepositNonce, resourceID, depositData, { from: relayer });
-        executeProposal = (relayer) => BridgeInstance.executeProposal(originDomainID, expectedDepositNonce, depositData, resourceID, { from: relayer });
+        await DAOInstance.newChangeFeeRequest(DestinationERC20MintableInstance.address, destinationDomainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
+
+        vote = (relayer) => BridgeInstance.voteProposal(destinationDomainID, originDomainID, expectedDepositNonce, resourceID, depositData, { from: relayer });
+        executeProposal = (relayer) => BridgeInstance.executeProposal(destinationDomainID, originDomainID, expectedDepositNonce, depositData, resourceID, { from: relayer });
     });
 
     it ('[sanity] bridge configured with threshold and relayers', async () => {
-        assert.equal(await BridgeInstance._domainID(), destinationDomainID)
+        assert.equal(await BridgeInstance._domainID(), originDomainID)
 
         assert.equal(await BridgeInstance._relayerThreshold(), relayerThreshold)
 
@@ -157,7 +165,7 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
 
         await TruffleAssert.passes(
             BridgeInstance.voteProposal(
-                originDomainID, expectedDepositNonce,
+                destinationDomainID, originDomainID, expectedDepositNonce,
                 resourceID, Ethers.utils.keccak256(depositDataHash),
                 { from: relayer2Address }));
     });
@@ -243,10 +251,10 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
     });
 
     it('Execution requires active proposal', async () => {
-        await TruffleAssert.reverts(BridgeInstance.executeProposal(originDomainID, expectedDepositNonce, depositData, '0x0', { from: relayer1Address }), "Proposal must have Passed status");
+        await TruffleAssert.reverts(BridgeInstance.executeProposal(destinationDomainID, originDomainID, expectedDepositNonce, depositData, '0x0', { from: relayer1Address }), "Proposal must have Passed status");
     });
 
     it('Voting requires resourceID that is mapped to a handler', async () => {
-        await TruffleAssert.reverts(BridgeInstance.voteProposal(originDomainID, expectedDepositNonce, '0x0', depositDataHash, { from: relayer1Address }), "no handler for resourceID");
+        await TruffleAssert.reverts(BridgeInstance.voteProposal(destinationDomainID, originDomainID, expectedDepositNonce, '0x0', depositDataHash, { from: relayer1Address }), "no handler for resourceID");
     });
 });
