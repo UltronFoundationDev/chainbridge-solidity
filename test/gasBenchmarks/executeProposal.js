@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 const Ethers = require('ethers');
-
 const Helpers = require('../helpers');
 
 const DAOContract = artifacts.require("DAO");
@@ -33,10 +32,14 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
     const gasBenchmarks = [];
 
     const initialRelayers = [relayerAddress];
-    const erc20TokenAmount = 100;
+    const erc20TokenAmount = Ethers.utils.parseUnits("100", 6);;
     const erc721TokenID = 1;
     const erc1155TokenID = 1;
     const erc1155TokenAmount = 100;
+
+    const basicFee = Ethers.utils.parseUnits("0.9", 6);
+    const minAmount = Ethers.utils.parseUnits("10", 6);
+    const maxAmount = Ethers.utils.parseUnits("1000000", 6);
 
     let DAOInstance;
     let BridgeInstance;
