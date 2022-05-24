@@ -13,6 +13,7 @@ import "../interfaces/IBridge.sol";
     @notice This contract is intended to be used with the Bridge contract.
  */
 contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
+    event DepositERC20(address indexed tokenAddress, uint8 indexed destinationDomainID, address indexed sender, uint256 amount, uint256 fee, uint256 amountWithFee);
     IBridge private contractBridge;
     /**
         @param bridgeAddress Contract address of previously deployed Bridge.
@@ -56,6 +57,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         } else {
             lockERC20(tokenAddress, depositer, address(this), transferAmount);
         }
+        emit DepositERC20(tokenAddress, destinationDomainID, depositer, amount, feeValue, transferAmount);
     }
 
     /**
