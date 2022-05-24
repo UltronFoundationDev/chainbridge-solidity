@@ -112,7 +112,7 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         await DestinationBridgeInstance.adminChangeFee(1);
 
         originDepositData = Helpers.createERCDepositData(depositAmount.toNumber(), 20, recipientAddress);
-        originDepositProposalData = Helpers.createERCDepositData(depositAmount.toNumber() - basicFee.toNumber(), 20, recipientAddress);
+        originDepositProposalData = Helpers.createERCDepositData(depositAmount.toNumber(), 20, recipientAddress);
         originDepositProposalDataHash = Ethers.utils.keccak256(DestinationERC20HandlerInstance.address + originDepositProposalData.substr(2));
         
         destinationDepositData = Helpers.createERCDepositData(depositAmount.toNumber(), 20, depositerAddress);
@@ -150,6 +150,7 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         // destinationRelayer1 creates the deposit proposal
         await TruffleAssert.passes(DestinationBridgeInstance.voteProposal(
             originDomainID,
+            destinationDomainID,
             expectedDepositNonce,
             destinationResourceID,
             originDepositProposalData,
@@ -163,6 +164,7 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         // And then automatically executes the proposal.
         await TruffleAssert.passes(DestinationBridgeInstance.voteProposal(
             originDomainID,
+            destinationDomainID,
             expectedDepositNonce,
             destinationResourceID,
             originDepositProposalData,
@@ -197,6 +199,7 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         // destinationRelayer1 creates the deposit proposal
         await TruffleAssert.passes(OriginBridgeInstance.voteProposal(
             destinationDomainID,
+            originDomainID,
             expectedDepositNonce,
             originResourceID,
             destinationDepositProposalData,
@@ -209,6 +212,7 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         // and then automatically executes the proposal
         await TruffleAssert.passes(OriginBridgeInstance.voteProposal(
             destinationDomainID,
+            originDomainID,
             expectedDepositNonce,
             originResourceID,
             destinationDepositProposalData,
@@ -221,6 +225,6 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         
         // Assert ERC20 balance was transferred to recipientAddress
         depositerBalance = await OriginERC20MintableInstance.balanceOf(depositerAddress);
-        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber() - basicFee.toNumber());
+        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber() - (basicFee.toNumber() * 2));
     });
 });

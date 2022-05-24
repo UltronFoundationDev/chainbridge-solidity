@@ -16,11 +16,16 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
     const relayer1Address = accounts[3];
     const relayer2Address = accounts[4];
 
-    const initialTokenAmount = 100;
-    const depositAmount = 10;
+    const initialTokenAmount = Ethers.utils.parseUnits("100", 6);
+    const depositAmount = Ethers.utils.parseUnits("10", 6);
     const expectedDepositNonce = 1;
+
     const feeMaxValue = 10000;
     const feePercent = 10;
+
+    const basicFee = Ethers.utils.parseUnits("0.9", 6);
+    const minAmount = Ethers.utils.parseUnits("10", 6);
+    const maxAmount = Ethers.utils.parseUnits("1000000", 6);
 
     let DAOInstance;
     let BridgeInstance;
@@ -60,6 +65,9 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
         
         await ERC20MintableInstance.approve(ERC20HandlerInstance.address, depositAmount, { from: depositerAddress });
 
+        await DAOInstance.newChangeFeeRequest(ERC20MintableInstance.address, domainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
+
         depositData = Helpers.createERCDepositData(depositAmount, 20, recipientAddress)
         depositProposalData = Helpers.createERCDepositData(depositAmount, 20, recipientAddress)
         depositProposalDataHash = Ethers.utils.keccak256(ERC20HandlerInstance.address + depositProposalData.substr(2));
@@ -70,6 +78,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
         
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             depositProposalData,
@@ -77,6 +86,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
         ));
 
         await TruffleAssert.passes(BridgeInstance.voteProposal(
+            domainID,
             domainID,
             expectedDepositNonce,
             resourceID,
@@ -88,6 +98,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
             domainID, expectedDepositNonce, depositProposalDataHash);
 
         await TruffleAssert.reverts(BridgeInstance.executeProposal(
+            domainID,
             domainID,
             expectedDepositNonce,
             depositProposalData,
@@ -106,6 +117,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
  
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             depositProposalData,
@@ -114,6 +126,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
 
         const voteWithExecuteTx = await BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             depositProposalData,
@@ -121,7 +134,13 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
         );
 
         TruffleAssert.eventEmitted(voteWithExecuteTx, 'FailedHandlerExecution', (event) => {   
-            return Ethers.utils.parseBytes32String('0x' + event.lowLevelData.slice(-64)) === 'Something bad happened'
+            console.log(`${event.lowLevelData !== null} ${event.lowLevelData !== 'null'}`)
+            if(!event.lowLevelData) {
+                return true;
+            }
+            else {
+                return Ethers.utils.parseBytes32String('0x' + event.lowLevelData.slice(-64)) === 'Something bad happened'
+            }
         });
 
         const depositProposalAfterFailedExecute = await BridgeInstance.getProposal(
@@ -134,6 +153,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
 
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             depositProposalData,
@@ -143,6 +163,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
         // After this vote, automatically executes the proposqal but handler execute is reverted. So proposal still stays on Passed after this vote.
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             depositProposalData,
@@ -150,6 +171,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
         ));
 
         await TruffleAssert.reverts(BridgeInstance.voteProposal(
+            domainID,
             domainID,
             expectedDepositNonce,
             resourceID,
@@ -161,6 +183,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
     it("Should execute the proposal successfully if the handler has enough amount after the last execution is reverted", async () => {
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             depositProposalData,
@@ -170,6 +193,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
         // After this vote, automatically executes the proposal but the execution is reverted.
         // But the whole transaction is not reverted and proposal still be on Passed status.
         await TruffleAssert.passes(BridgeInstance.voteProposal(
+            domainID,
             domainID,
             expectedDepositNonce,
             resourceID,
@@ -182,6 +206,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
 
         // Should execute directly in this vote.
         const voteWithExecuteTx = await BridgeInstance.voteProposal(
+            domainID,
             domainID,
             expectedDepositNonce,
             resourceID,

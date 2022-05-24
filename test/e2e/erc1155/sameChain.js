@@ -11,7 +11,6 @@ const ERC1155HandlerContract = artifacts.require("ERC1155Handler");
 contract('E2E ERC1155 - Same Chain', async accounts => {
     const relayerThreshold = 2;
     const domainID = 1;
-    const destinationDomainId = 2;
 
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
@@ -86,6 +85,7 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
         // relayer1 creates the deposit proposal
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             proposalData,
@@ -97,6 +97,7 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
         // into a finalized state
         // and then automatically executes the proposal
         await TruffleAssert.passes(BridgeInstance.voteProposal(
+            domainID,
             domainID,
             expectedDepositNonce,
             resourceID,
@@ -114,11 +115,11 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
     });
 
     it("Handler's deposit function can be called by only bridge", async () => {
-        await TruffleAssert.reverts(ERC1155HandlerInstance.deposit(destinationDomainId, resourceID, depositerAddress, depositData, { from: depositerAddress }), "sender must be bridge contract");
+        await TruffleAssert.reverts(ERC1155HandlerInstance.deposit(domainID, resourceID, depositerAddress, depositData, { from: depositerAddress }), "sender must be bridge contract");
     });
 
     it("Handler's executeProposal function can be called by only bridge", async () => {
-        await TruffleAssert.reverts(ERC1155HandlerInstance.executeProposal(resourceID, proposalData, { from: depositerAddress }), "sender must be bridge contract");
+        await TruffleAssert.reverts(ERC1155HandlerInstance.executeProposal(domainID, resourceID, proposalData, { from: depositerAddress }), "sender must be bridge contract");
     });
 
     it("Handler's withdraw function can be called by only bridge", async () => {

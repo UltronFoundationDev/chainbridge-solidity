@@ -24,11 +24,14 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
     const relayer2Bit = 1 << 1;
     const relayer3Bit = 1 << 2;
     const destinationChainRecipientAddress = accounts[4];
-    const depositAmount = 10;
+    const depositAmount = Ethers.utils.parseUnits("10", 6);
     const expectedDepositNonce = 1;
     const relayerThreshold = 3;
     const feeMaxValue = 10000;
     const feePercent = 10;
+    const basicFee = Ethers.utils.parseUnits("0.9", 6);
+    const minAmount = Ethers.utils.parseUnits("10", 6);
+    const maxAmount = Ethers.utils.parseUnits("1000000", 6);
 
     let DAOInstance;
     let BridgeInstance;
@@ -42,7 +45,7 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(destinationDomainID, [
+            BridgeContract.new(originDomainID, [
                 relayer1Address,
                 relayer2Address,
                 relayer3Address,
@@ -73,12 +76,15 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
         await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
         await BridgeInstance.adminSetResource(2);
 
-        vote = (relayer) => BridgeInstance.voteProposal(originDomainID, expectedDepositNonce, resourceID, depositData, { from: relayer });
-        executeProposal = (relayer) => BridgeInstance.executeProposal(originDomainID, expectedDepositNonce, depositData, { from: relayer });
+        await DAOInstance.newChangeFeeRequest(DestinationERC20MintableInstance.address, destinationDomainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
+
+        vote = (relayer) => BridgeInstance.voteProposal(destinationDomainID, originDomainID, expectedDepositNonce, resourceID, depositData, { from: relayer });
+        executeProposal = (relayer) => BridgeInstance.executeProposal(destinationDomainID, originDomainID, expectedDepositNonce, depositData, { from: relayer });
     });
 
     it ('[sanity] bridge configured with threshold, relayers, and expiry', async () => {
-        assert.equal(await BridgeInstance._domainID(), destinationDomainID)
+        assert.equal(await BridgeInstance._domainID(), originDomainID)
 
         assert.equal(await BridgeInstance._relayerThreshold(), relayerThreshold)
 

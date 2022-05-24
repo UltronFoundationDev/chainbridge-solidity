@@ -11,6 +11,7 @@ const ERC721HandlerContract = artifacts.require("ERC721Handler");
 contract('E2E ERC721 - Same Chain', async accounts => {
     const relayerThreshold = 2;
     const domainID = 1;
+    const destinationDomainID = 2;
 
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
@@ -91,6 +92,7 @@ contract('E2E ERC721 - Same Chain', async accounts => {
         // relayer1 creates the deposit proposal
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             proposalData,
@@ -102,6 +104,7 @@ contract('E2E ERC721 - Same Chain', async accounts => {
         // into a finalized state
         // and then automatically executes the proposal
         await TruffleAssert.passes(BridgeInstance.voteProposal(
+            domainID,
             domainID,
             expectedDepositNonce,
             resourceID,
