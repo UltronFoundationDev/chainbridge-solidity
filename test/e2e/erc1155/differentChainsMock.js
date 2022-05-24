@@ -26,6 +26,9 @@ contract('E2E ERC1155 - Two EVM Chains', async accounts => {
     const depositAmount = 10; 
     const expectedDepositNonce = 1;
 
+    const feeMaxValue = 10000;
+    const feePercent = 10;
+
     let OriginDAOInstance;
     let OriginBridgeInstance;
     let OriginERC1155MintableInstance;
@@ -46,8 +49,8 @@ contract('E2E ERC1155 - Two EVM Chains', async accounts => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(originDomainID, [originRelayer1Address, originRelayer2Address], originRelayerThreshold, 0, 100).then(instance => OriginBridgeInstance = instance),
-            BridgeContract.new(destinationDomainID, [destinationRelayer1Address, destinationRelayer2Address], destinationRelayerThreshold, 0, 100).then(instance => DestinationBridgeInstance = instance),
+            BridgeContract.new(originDomainID, [originRelayer1Address, originRelayer2Address], originRelayerThreshold, 100, feeMaxValue, feePercent).then(instance => OriginBridgeInstance = instance),
+            BridgeContract.new(destinationDomainID, [destinationRelayer1Address, destinationRelayer2Address], destinationRelayerThreshold, 100, feeMaxValue, feePercent).then(instance => DestinationBridgeInstance = instance),
             ERC1155MintableContract.new("TOK").then(instance => OriginERC1155MintableInstance = instance),
             ERC1155MintableContract.new("TOK").then(instance => DestinationERC1155MintableInstance = instance)
         ]);

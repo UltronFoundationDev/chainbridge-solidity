@@ -29,6 +29,8 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
     const initialRelayerThreshold = 2;
     const fee = 0;
     const expiry = 100;
+    const feeMaxValue = 10000;
+    const feePercent = 1;
 
     let dao: DAO;
     let bridge: Bridge;
@@ -46,7 +48,7 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
         console.log(`${beforeTest}Deployed DAO contract: ${colorBlue}${dao.address}${colorReset}`)
         console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
 
-        bridge = await (await new Bridge__factory(owner).deploy(domainId, initialRelayers, initialRelayerThreshold, fee, expiry)).deployed();
+        bridge = await (await new Bridge__factory(owner).deploy(domainId, initialRelayers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed();
         console.log(`${beforeTest}Deployed bridge contract: ${colorBlue}${bridge.address}${colorReset}`);
 
         console.log(`${beforeTest}${colorRed}Reverts${colorReset} if bridge new address is zero address`);
@@ -196,14 +198,48 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
         expect(res[1]).equals(resourceId);
         expect(res[2]).equals(tokenAddress);
     });
+    
+    it("Change fee percent request is available and returns correct value\n", async () => {
+        const feeMaxValue = 1000;
+        const feePercent = 1;
+
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender is not a voter`);
+        await expect(dao.connect(newVoterSecond).newChangeFeePercentRequest(feeMaxValue, feePercent)).revertedWith("not a voter"); 
+       
+        console.log(`${insideTest}Creates new change fee request`);
+        await dao.connect(owner).newChangeFeePercentRequest(feeMaxValue, feePercent);
+
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already confirmed(true)`);
+        await expect(dao.connect(owner).newVoteForChangeFeePercentRequest(true, 1)).revertedWith("already confirmed");
+        
+        await dao.connect(owner).newVoteForChangeFeePercentRequest(false, 1); 
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if not enough votes`);
+        await expect(dao.connect(owner).isChangeFeePercentAvailable(1)).revertedWith("not enough votes");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already removed(false)`);
+        await expect(dao.connect(owner).newVoteForChangeFeePercentRequest(false, 1)).revertedWith("not confirmed");
+        
+        await dao.connect(owner).newVoteForChangeFeePercentRequest(true, 1);
+
+        const res = await dao.connect(owner).isChangeFeePercentAvailable(1);
+        console.log(`${insideTest}Compares feeMaxValue [${colorBlue}${feeMaxValue}${colorReset}] with returned value [${colorGreen}${res[0]}${colorReset}]`);
+        console.log(`${insideTest}Compares feePercent [${colorBlue}${feePercent}${colorReset}] with returned value [${colorGreen}${res[1]}${colorReset}]`);
+        expect(res[0]).equals(feeMaxValue);
+        expect(res[1]).equals(feePercent);
+    });
 
     it("Change fee request is available and returns correct value\n", async () => {
-        const fee = 10;
+        const ERC20MintableInstance = await (await new ERC20PresetMinterPauser__factory(owner).deploy("token", "TOK")).deployed();
+        const tokenAddress = ERC20MintableInstance.address;
+        const chainId = 0x1;
+        const basicFee = ethers.utils.parseUnits("0.9", 6);
+        const minAmount = ethers.utils.parseUnits("10", 6);
+        const maxAmount = ethers.utils.parseUnits("100000", 6);
+
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender is not a voter`);
-        await expect(dao.connect(newVoterSecond).newChangeFeeRequest(fee)).revertedWith("not a voter"); 
+        await expect(dao.connect(newVoterSecond).newChangeFeeRequest(tokenAddress, chainId, basicFee, minAmount, maxAmount)).revertedWith("not a voter"); 
        
-        console.log(`${insideTest}Creates new chnage fee request`);
-        await dao.connect(owner).newChangeFeeRequest(fee);
+        console.log(`${insideTest}Creates new change fee request`);
+        await dao.connect(owner).newChangeFeeRequest(tokenAddress, chainId, basicFee, minAmount, maxAmount);
 
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already confirmed(true)`);
         await expect(dao.connect(owner).newVoteForChangeFeeRequest(true, 1)).revertedWith("already confirmed");
@@ -217,8 +253,16 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
         await dao.connect(owner).newVoteForChangeFeeRequest(true, 1);
 
         const res = await dao.connect(owner).isChangeFeeAvailable(1);
-        console.log(`${insideTest}Compares fee [${colorBlue}${fee}${colorReset}] with returned value [${colorGreen}${res}${colorReset}]`);
-        expect(res).equals(fee);
+        console.log(`${insideTest}Compares token Address [${colorBlue}${tokenAddress}${colorReset}] with returned value [${colorGreen}${res[0]}${colorReset}]`);
+        console.log(`${insideTest}Compares chain Id [${colorBlue}${fee}${colorReset}] with returned value [${colorGreen}${res[1]}${colorReset}]`);
+        console.log(`${insideTest}Compares basic fee [${colorBlue}${fee}${colorReset}] with returned value [${colorGreen}${res[2]}${colorReset}]`);
+        console.log(`${insideTest}Compares min amount [${colorBlue}${fee}${colorReset}] with returned value [${colorGreen}${res[3]}${colorReset}]`);
+        console.log(`${insideTest}Compares max amount [${colorBlue}${fee}${colorReset}] with returned value [${colorGreen}${res[4]}${colorReset}]`);
+        expect(res[0]).equals(tokenAddress);
+        expect(res[1]).equals(chainId);
+        expect(res[2]).equals(basicFee);
+        expect(res[3]).equals(minAmount);
+        expect(res[4]).equals(maxAmount);
     });
 
     it("Withdraw request is available and returns correct value\n", async () => {

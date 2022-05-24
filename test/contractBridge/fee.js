@@ -19,6 +19,15 @@ contract('Bridge - [fee]', async (accounts) => {
     const blankFunctionSig = '0x00000000';
     const blankFunctionDepositerOffset = 0;
     const relayer = accounts[0];
+    const feeMaxValue = 10000;
+    const feePercent = 10;
+
+    const depositAmount = Ethers.utils.parseEther("1.5");
+    const depositAmountApprove = Ethers.utils.parseEther("2");
+
+    const basicFee = Ethers.utils.parseEther("0.9");
+    const minAmount = Ethers.utils.parseEther("1");
+    const maxAmount = Ethers.utils.parseEther("5");
 
     let DAOInstance;
     let BridgeInstance;
@@ -34,7 +43,7 @@ contract('Bridge - [fee]', async (accounts) => {
     beforeEach(async () => {
         await Promise.all([
             CentrifugeAssetContract.new().then(instance => CentrifugeAssetInstance = instance),
-            BridgeInstance = BridgeContract.new(originDomainID, [relayer], 0, 0, 100).then(instance => BridgeInstance = instance)
+            BridgeInstance = BridgeContract.new(originDomainID, [relayer], 0, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
         DAOInstance = await DAOContract.new();
@@ -53,8 +62,11 @@ contract('Bridge - [fee]', async (accounts) => {
 
         await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, resourceID,  initialContractAddresses[0], initialDepositFunctionSignatures[0], initialDepositFunctionDepositerOffsets[0], initialExecuteFunctionSignatures[0]);
         await BridgeInstance.adminSetGenericResource(1);
-            
+
         depositData = Helpers.createGenericDepositData('0xdeadbeef');
+
+        await DAOInstance.newChangeFeeRequest("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", destinationDomainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
     });
 
     it('[sanity] Generic deposit can be made', async () => {
@@ -65,47 +77,17 @@ contract('Bridge - [fee]', async (accounts) => {
         ));
     });
 
-    it('deposit reverts if invalid amount supplied', async () => {
-        // current fee is set to 0
-        assert.equal(await BridgeInstance._fee.call(), 0)
-        
-        await TruffleAssert.reverts(
-            BridgeInstance.deposit(
-                destinationDomainID,
-                resourceID,
-                depositData,
-                {
-                    value: Ethers.utils.parseEther("1.0")
-                }
-            )
-        )
-    });
-
     it('deposit passes if valid amount supplied', async () => {
-        // current fee is set to 0
-        assert.equal(await BridgeInstance._fee.call(), 0)
-        // Change fee to 0.5 ether
-        await DAOInstance.newChangeFeeRequest(Ethers.utils.parseEther("0.5"), { from: relayer });
-        await BridgeInstance.adminChangeFee(1);
-        assert.equal(web3.utils.fromWei((await BridgeInstance._fee.call()), "ether"), "0.5");
-
         await TruffleAssert.passes(
             BridgeInstance.deposit(
                 destinationDomainID,
                 resourceID,
-                depositData,
-                {
-                    value: Ethers.utils.parseEther("0.5")
-                }
+                depositData
             )
         )
     });
 
     it('distribute fees', async () => {
-        await DAOInstance.newChangeFeeRequest(Ethers.utils.parseEther("1"), { from: relayer });
-        await BridgeInstance.adminChangeFee(1);
-        assert.equal(web3.utils.fromWei((await BridgeInstance._fee.call()), "ether"), "1");
-
         // check the balance is 0
         assert.equal(web3.utils.fromWei((await web3.eth.getBalance(BridgeInstance.address)), "ether"), "0");
         await BridgeInstance.deposit(destinationDomainID, resourceID, depositData, {value: Ethers.utils.parseEther("1")})

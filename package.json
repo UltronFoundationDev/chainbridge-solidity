@@ -51,7 +51,7 @@
     "ethers": "^5.5.4",
     "ganache-cli": "^6.9.1",
     "hardhat": "^2.9.3",
-    "hardhat-contract-sizer": "^2.0.3",
+    "hardhat-contract-sizer": "^2.5.1",
     "hardhat-gas-reporter": "^1.0.4",
     "hardhat-typechain": "^0.3.5",
     "lodash.template": "^4.5.0",
@@ -77,6 +77,7 @@
     "@typechain/truffle-v4": "^4.1.0",
     "@typechain/truffle-v5": "^5.1.0",
     "hardhat-typechain": "^0.3.5",
+    "mocha": "^10.0.0",
     "ts-generator": "^0.1.1"
   }
 }

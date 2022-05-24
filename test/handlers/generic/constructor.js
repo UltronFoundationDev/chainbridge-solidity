@@ -20,6 +20,8 @@ contract('GenericHandler - [constructor]', async () => {
     const blankFunctionSig = '0x00000000';
     const blankFunctionDepositerOffset = 0;
     const centrifugeAssetStoreFuncSig = 'store(bytes32)';
+    const feeMaxValue = 10000;
+    const feePercent = 10;
 
     let DAOInstance;
     let BridgeInstance;
@@ -34,7 +36,7 @@ contract('GenericHandler - [constructor]', async () => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(domainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
             CentrifugeAssetContract.new(centrifugeAssetMinCount).then(instance => CentrifugeAssetInstance1 = instance),
             CentrifugeAssetContract.new(centrifugeAssetMinCount).then(instance => CentrifugeAssetInstance2 = instance),
             CentrifugeAssetContract.new(centrifugeAssetMinCount).then(instance => CentrifugeAssetInstance3 = instance)

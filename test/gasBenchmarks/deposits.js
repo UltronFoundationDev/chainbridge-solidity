@@ -18,6 +18,7 @@ const TwoArgumentsContract = artifacts.require("TwoArguments");
 const ThreeArgumentsContract = artifacts.require("ThreeArguments");
 
 const Helpers = require('../helpers');
+const Ethers = require('ethers');
 
 contract('Gas Benchmark - [Deposits]', async (accounts) => {
     const domainID = 1;
@@ -25,12 +26,18 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
     const lenRecipientAddress = 20;
+    const feeMaxValue = 10000;
+    const feePercent = 10;
     const gasBenchmarks = [];
 
-    const erc20TokenAmount = 100;
+    const erc20TokenAmount = Ethers.utils.parseUnits("100", 6);;
     const erc721TokenID = 1;
     const erc1155TokenID = 1;
     const erc1155TokenAmount = 100;
+
+    const basicFee = Ethers.utils.parseUnits("0.9", 6);
+    const minAmount = Ethers.utils.parseUnits("10", 6);
+    const maxAmount = Ethers.utils.parseUnits("1000000", 6);
 
     let DAOInstance;
     let BridgeInstance;
@@ -58,7 +65,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
     before(async () => {
         await Promise.all([
             DAOContract.new().then(instance => DAOInstance = instance),
-            BridgeContract.new(domainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance),
             ERC1155MintableContract.new("TOK").then(instance => ERC1155MintableInstance = instance),
@@ -132,6 +139,9 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
         await BridgeInstance.adminSetResource(1);
         await BridgeInstance.adminSetResource(2);
         await BridgeInstance.adminSetResource(3);
+
+        await DAOInstance.newChangeFeeRequest(ERC20MintableInstance.address, domainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
 
         await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, centrifugeAssetResourceID, genericInitialContractAddresses[0], genericInitialDepositFunctionSignatures[0], genericInitialDepositFunctionDepositerOffsets[0], genericInitialExecuteFunctionSignatures[0]);
         await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, noArgumentResourceID, genericInitialContractAddresses[1], genericInitialDepositFunctionSignatures[1], genericInitialDepositFunctionDepositerOffsets[1], genericInitialExecuteFunctionSignatures[1]);

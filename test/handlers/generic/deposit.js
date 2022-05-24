@@ -24,6 +24,9 @@ contract('GenericHandler - [deposit]', async (accounts) => {
 
     const depositerAddress = accounts[1];
 
+    const feeMaxValue = 10000;
+    const feePercent = 10;
+
     let DAOInstance;
     let BridgeInstance;
     let CentrifugeAssetInstance;
@@ -44,7 +47,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(domainID, [], relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
             CentrifugeAssetContract.new().then(instance => CentrifugeAssetInstance = instance),
             NoArgumentContract.new().then(instance => NoArgumentInstance = instance),
             OneArgumentContract.new().then(instance => OneArgumentInstance = instance),

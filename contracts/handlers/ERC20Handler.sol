@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import "../interfaces/IDepositExecute.sol";
 import "./HandlerHelpers.sol";
 import "../ERC20Safe.sol";
+import "../interfaces/IBridge.sol";
 
 /**
     @title Handles ERC20 deposits and deposit executions.
@@ -12,16 +13,20 @@ import "../ERC20Safe.sol";
     @notice This contract is intended to be used with the Bridge contract.
  */
 contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
+    event DepositERC20(address indexed tokenAddress, uint8 indexed destinationDomainID, address indexed sender, uint256 amount, uint256 fee, uint256 amountWithFee);
+    IBridge private contractBridge;
     /**
         @param bridgeAddress Contract address of previously deployed Bridge.
      */
     constructor(
         address          bridgeAddress
     ) public HandlerHelpers(bridgeAddress) {
+        contractBridge = IBridge(bridgeAddress);
     }
 
     /**
         @notice A deposit is initiatied by making a deposit in the Bridge contract.
+        @param destinationDomainID ID of chain deposit will be bridged to.
         @param resourceID ResourceID used to find address of token to be used for deposit.
         @param depositer Address of account making the deposit in the Bridge contract.
         @param data Consists of {amount} padded to 32 bytes.
@@ -32,6 +37,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         @return an empty data.
      */
     function deposit(
+        uint8 destinationDomainID,
         bytes32 resourceID,
         address depositer,
         bytes   calldata data
@@ -42,11 +48,16 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         address tokenAddress = _resourceIDToTokenContractAddress[resourceID];
         require(_contractWhitelist[tokenAddress], "provided tokenAddress is not whitelisted");
 
+        uint256 feeValue = evaluateFee(destinationDomainID, tokenAddress, amount);
+        uint256 transferAmount = amount - feeValue;
+
+        lockERC20(tokenAddress, depositer, _bridgeAddress, feeValue);
         if (_burnList[tokenAddress]) {
-            burnERC20(tokenAddress, depositer, amount);
+            burnERC20(tokenAddress, depositer, transferAmount);
         } else {
-            lockERC20(tokenAddress, depositer, address(this), amount);
+            lockERC20(tokenAddress, depositer, address(this), transferAmount);
         }
+        emit DepositERC20(tokenAddress, destinationDomainID, depositer, amount, feeValue, transferAmount);
     }
 
     /**
@@ -99,5 +110,16 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         (tokenAddress, recipient, amount) = abi.decode(data, (address, address, uint));
 
         releaseERC20(tokenAddress, recipient, amount);
+    }
+
+    function evaluateFee(uint8 destinationDomainID, address tokenAddress, uint256 amount) private view returns (uint256 fee) {
+        (uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractBridge.getFee(tokenAddress, destinationDomainID);
+        require(minAmount <= amount, "amount < min amount");
+        require(maxAmount >= amount, "amount > max amount");
+
+        fee = amount * contractBridge.getFeePercent() / contractBridge.getFeeMaxValue();
+        if(fee < basicFee) {
+            fee = basicFee;
+        }
     }
 }

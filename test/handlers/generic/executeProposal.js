@@ -27,6 +27,9 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
     const centrifugeAssetMinCount = 10;
     const hashOfCentrifugeAsset = Ethers.utils.keccak256('0xc0ffee');
 
+    const feeMaxValue = 10000;
+    const feePercent = 10;
+
     let DAOInstance;
     let BridgeInstance;
     let CentrifugeAssetInstance;
@@ -41,7 +44,7 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
 
     beforeEach(async () => {
         await Promise.all([
-            BridgeContract.new(domainID, initialRelayers, relayerThreshold, 0, 100).then(instance => BridgeInstance = instance),
+            BridgeContract.new(domainID, initialRelayers, relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
             CentrifugeAssetContract.new(centrifugeAssetMinCount).then(instance => CentrifugeAssetInstance = instance)
         ]);
 
