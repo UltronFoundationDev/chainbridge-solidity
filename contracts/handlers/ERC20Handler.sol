@@ -70,7 +70,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         destinationRecipientAddress length     uint256     bytes  32 - 64
         destinationRecipientAddress            bytes       bytes  64 - END
      */
-    function executeProposal(bytes32 resourceID, bytes calldata data) external override onlyBridge {
+    function executeProposal(uint8 destinationDomainID, bytes32 resourceID, bytes calldata data) external override onlyBridge {
         uint256       amount;
         uint256       lenDestinationRecipientAddress;
         bytes  memory destinationRecipientAddress;
@@ -87,10 +87,13 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
 
         require(_contractWhitelist[tokenAddress], "provided tokenAddress is not whitelisted");
 
+        uint256 feeValue = evaluateFee(destinationDomainID, tokenAddress, amount);
+        uint256 transferAmount = amount - feeValue;
+
         if (_burnList[tokenAddress]) {
-            mintERC20(tokenAddress, address(recipientAddress), amount);
+            mintERC20(tokenAddress, address(recipientAddress), transferAmount);
         } else {
-            releaseERC20(tokenAddress, address(recipientAddress), amount);
+            releaseERC20(tokenAddress, address(recipientAddress), transferAmount);
         }
     }
 

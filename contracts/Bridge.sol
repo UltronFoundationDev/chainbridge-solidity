@@ -450,7 +450,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         @notice Emits {ProposalEvent} event with status indicating the proposal status.
         @notice Emits {ProposalVote} event.
      */
-    function voteProposal(uint8 domainID, uint64 depositNonce, bytes32 resourceID, bytes calldata data) external onlyRelayers whenNotPaused {
+    function voteProposal(uint8 destinationDomainID, uint8 domainID, uint64 depositNonce, bytes32 resourceID, bytes calldata data) external onlyRelayers whenNotPaused {
         address handler = _resourceIDToHandlerAddress[resourceID];
         uint72 nonceAndID = (uint72(depositNonce) << 8) | uint72(domainID);
         bytes32 dataHash = keccak256(abi.encodePacked(handler, data));
@@ -459,7 +459,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         require(_resourceIDToHandlerAddress[resourceID] != address(0), "no handler for resourceID");
 
         if (proposal._status == ProposalStatus.Passed) {
-            executeProposal(domainID, depositNonce, data, resourceID, true);
+            executeProposal(destinationDomainID, domainID, depositNonce, data, resourceID, true);
             return;
         }
 
@@ -500,7 +500,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         _proposals[nonceAndID][dataHash] = proposal;
 
         if (proposal._status == ProposalStatus.Passed) {
-            executeProposal(domainID, depositNonce, data, resourceID, false);
+            executeProposal(destinationDomainID, domainID, depositNonce, data, resourceID, false);
         }
     }
 
@@ -541,7 +541,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         @notice Emits {ProposalEvent} event with status {Executed}.
         @notice Emits {FailedExecution} event with the failed reason.
      */
-    function executeProposal(uint8 domainID, uint64 depositNonce, bytes calldata data, bytes32 resourceID, bool revertOnFail) public onlyRelayers whenNotPaused {
+    function executeProposal(uint8 destinationDomainID, uint8 domainID, uint64 depositNonce, bytes calldata data, bytes32 resourceID, bool revertOnFail) public onlyRelayers whenNotPaused {
         address handler = _resourceIDToHandlerAddress[resourceID];
         uint72 nonceAndID = (uint72(depositNonce) << 8) | uint72(domainID);
         bytes32 dataHash = keccak256(abi.encodePacked(handler, data));
@@ -550,9 +550,9 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         proposal._status = ProposalStatus.Executed;
         IDepositExecute depositHandler = IDepositExecute(handler);
         if (revertOnFail) {
-            depositHandler.executeProposal(resourceID, data);
+            depositHandler.executeProposal(destinationDomainID, resourceID, data);
         } else {
-            try depositHandler.executeProposal(resourceID, data) {
+            try depositHandler.executeProposal(destinationDomainID, resourceID, data) {
             } catch (bytes memory lowLevelData) {
                 proposal._status = ProposalStatus.Passed;
                 emit FailedHandlerExecution(lowLevelData);
