@@ -18,6 +18,7 @@ const TwoArgumentsContract = artifacts.require("TwoArguments");
 const ThreeArgumentsContract = artifacts.require("ThreeArguments");
 
 const Helpers = require('../helpers');
+const Ethers = require('ethers');
 
 contract('Gas Benchmark - [Deposits]', async (accounts) => {
     const domainID = 1;
@@ -29,10 +30,14 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
     const feePercent = 10;
     const gasBenchmarks = [];
 
-    const erc20TokenAmount = 100;
+    const erc20TokenAmount = Ethers.utils.parseUnits("100", 6);;
     const erc721TokenID = 1;
     const erc1155TokenID = 1;
     const erc1155TokenAmount = 100;
+
+    const basicFee = Ethers.utils.parseUnits("0.9", 6);
+    const minAmount = Ethers.utils.parseUnits("10", 6);
+    const maxAmount = Ethers.utils.parseUnits("1000000", 6);
 
     let DAOInstance;
     let BridgeInstance;
@@ -134,6 +139,9 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
         await BridgeInstance.adminSetResource(1);
         await BridgeInstance.adminSetResource(2);
         await BridgeInstance.adminSetResource(3);
+
+        await DAOInstance.newChangeFeeRequest(ERC20MintableInstance.address, domainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1);
 
         await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, centrifugeAssetResourceID, genericInitialContractAddresses[0], genericInitialDepositFunctionSignatures[0], genericInitialDepositFunctionDepositerOffsets[0], genericInitialExecuteFunctionSignatures[0]);
         await DAOInstance.newSetGenericResourceRequest(GenericHandlerInstance.address, noArgumentResourceID, genericInitialContractAddresses[1], genericInitialDepositFunctionSignatures[1], genericInitialDepositFunctionDepositerOffsets[1], genericInitialExecuteFunctionSignatures[1]);

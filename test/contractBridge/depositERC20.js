@@ -58,7 +58,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
 
         depositData = Helpers.createERCDepositData(
             depositAmount,
-            depositAmountApprove,
+            20,
             recipientAddress);
         
         await DAOInstance.newChangeFeeRequest(OriginERC20MintableInstance.address, destinationDomainID, basicFee, minAmount, maxAmount);
@@ -113,7 +113,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
     it('ERC20 deposit fails if amount > max Amount', async () => {
         const maxDepositData = Helpers.createERCDepositData(
             Ethers.utils.parseUnits("1000001", 6),
-            Ethers.utils.parseUnits("1000001", 6),
+            20,
             recipientAddress);
 
         await TruffleAssert.reverts(BridgeInstance.deposit(

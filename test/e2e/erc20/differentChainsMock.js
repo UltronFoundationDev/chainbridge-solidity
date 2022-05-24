@@ -24,7 +24,6 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
 
     const initialTokenAmount = Ethers.utils.parseUnits("100", 6);;
     const depositAmount = Ethers.utils.parseUnits("20", 6);
-    const depositAmountApprove = Ethers.utils.parseUnits("40", 6);
     const expectedDepositNonce = 1;
     const feeMaxValue = 10000;
     const feePercent = 10;
@@ -112,29 +111,29 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         await DestinationDAOInstance.newChangeFeeRequest(DestinationERC20MintableInstance.address, originDomainID, basicFee, minAmount, maxAmount);
         await DestinationBridgeInstance.adminChangeFee(1);
 
-        originDepositData = Helpers.createERCDepositData(depositAmount.toNumber(), depositAmountApprove.toNumber(), recipientAddress);
-        originDepositProposalData = Helpers.createERCDepositData(depositAmount.toNumber(), depositAmountApprove.toNumber(), recipientAddress);
+        originDepositData = Helpers.createERCDepositData(depositAmount.toNumber(), 20, recipientAddress);
+        originDepositProposalData = Helpers.createERCDepositData(depositAmount.toNumber() - basicFee.toNumber(), 20, recipientAddress);
         originDepositProposalDataHash = Ethers.utils.keccak256(DestinationERC20HandlerInstance.address + originDepositProposalData.substr(2));
         
-        destinationDepositData = Helpers.createERCDepositData(depositAmount.toNumber(), depositAmountApprove.toNumber(), depositerAddress);
-        destinationDepositProposalData = Helpers.createERCDepositData(depositAmount.toNumber(), depositAmountApprove.toNumber(), depositerAddress);
+        destinationDepositData = Helpers.createERCDepositData(depositAmount.toNumber(), 20, depositerAddress);
+        destinationDepositProposalData = Helpers.createERCDepositData(depositAmount.toNumber() - basicFee.toNumber(), 20, depositerAddress);
         destinationDepositProposalDataHash = Ethers.utils.keccak256(OriginERC20HandlerInstance.address + destinationDepositProposalData.substr(2));
     });
     
-    // it("[sanity] depositerAddress' balance should be equal to initialTokenAmount", async () => {
-    //     const depositerBalance = await OriginERC20MintableInstance.balanceOf(depositerAddress);
-    //     assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber());
-    // });
+    it("[sanity] depositerAddress' balance should be equal to initialTokenAmount", async () => {
+        const depositerBalance = await OriginERC20MintableInstance.balanceOf(depositerAddress);
+        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber());
+    });
 
-    // it("[sanity] OriginERC20HandlerInstance.address should have an allowance of depositAmount from depositerAddress", async () => {
-    //     const handlerAllowance = await OriginERC20MintableInstance.allowance(depositerAddress, OriginERC20HandlerInstance.address);
-    //     assert.strictEqual(handlerAllowance.toNumber(), depositAmount.toNumber());
-    // });
+    it("[sanity] OriginERC20HandlerInstance.address should have an allowance of depositAmount from depositerAddress", async () => {
+        const handlerAllowance = await OriginERC20MintableInstance.allowance(depositerAddress, OriginERC20HandlerInstance.address);
+        assert.strictEqual(handlerAllowance.toNumber(), depositAmount.toNumber());
+    });
 
-    // it("[sanity] DestinationERC20HandlerInstance.address should have minterRole for DestinationERC20MintableInstance", async () => {
-    //     const isMinter = await DestinationERC20MintableInstance.hasRole(await DestinationERC20MintableInstance.MINTER_ROLE(), DestinationERC20HandlerInstance.address);
-    //     assert.isTrue(isMinter);
-    // });
+    it("[sanity] DestinationERC20HandlerInstance.address should have minterRole for DestinationERC20MintableInstance", async () => {
+        const isMinter = await DestinationERC20MintableInstance.hasRole(await DestinationERC20MintableInstance.MINTER_ROLE(), DestinationERC20HandlerInstance.address);
+        assert.isTrue(isMinter);
+    });
 
     it("E2E: depositAmount of Origin ERC20 owned by depositAddress to Destination ERC20 owned by recipientAddress and back again", async () => {
         let depositerBalance;
@@ -174,23 +173,20 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         depositerBalance = await OriginERC20MintableInstance.balanceOf(depositerAddress);
         assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber() - depositAmount.toNumber(), "depositAmount wasn't transferred from depositerAddress");
 
-        
         // Assert ERC20 balance was transferred to recipientAddress
         recipientBalance = await DestinationERC20MintableInstance.balanceOf(recipientAddress);
         assert.strictEqual(recipientBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber(), "depositAmount wasn't transferred to recipientAddress");
 
-
         // At this point a representation of OriginERC20Mintable has been transferred from
         // depositer to the recipient using Both Bridges and DestinationERC20Mintable.
         // Next we will transfer DestinationERC20Mintable back to the depositer
-
         await DestinationERC20MintableInstance.approve(DestinationERC20HandlerInstance.address, depositAmount, { from: recipientAddress });
-
+        
         // recipientAddress makes a deposit of the received depositAmount
         await TruffleAssert.passes(DestinationBridgeInstance.deposit(
             originDomainID,
             destinationResourceID,
-            destinationDepositData,
+            destinationDepositProposalData,
             { from: recipientAddress }
         ));
 
@@ -225,6 +221,6 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         
         // Assert ERC20 balance was transferred to recipientAddress
         depositerBalance = await OriginERC20MintableInstance.balanceOf(depositerAddress);
-        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber());
+        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber() - basicFee.toNumber());
     });
 });

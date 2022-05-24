@@ -47,15 +47,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         address tokenAddress = _resourceIDToTokenContractAddress[resourceID];
         require(_contractWhitelist[tokenAddress], "provided tokenAddress is not whitelisted");
 
-        (uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractBridge.getFee(tokenAddress, destinationDomainID);
-        require(minAmount <= amount, "amount < min amount");
-        require(maxAmount > amount, "amount > max amount");
-
-        uint256 feeValue = amount * contractBridge.getFeePercent() / contractBridge.getFeeMaxValue() ;
-        if(feeValue < basicFee) {
-            feeValue = basicFee;
-        }
-
+        uint256 feeValue = evaluateFee(destinationDomainID, tokenAddress, amount);
         uint256 transferAmount = amount - feeValue;
 
         lockERC20(tokenAddress, depositer, _bridgeAddress, feeValue);
@@ -116,5 +108,16 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         (tokenAddress, recipient, amount) = abi.decode(data, (address, address, uint));
 
         releaseERC20(tokenAddress, recipient, amount);
+    }
+
+    function evaluateFee(uint8 destinationDomainID, address tokenAddress, uint256 amount) private view returns (uint256 fee) {
+        (uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractBridge.getFee(tokenAddress, destinationDomainID);
+        require(minAmount <= amount, "amount < min amount");
+        require(maxAmount >= amount, "amount > max amount");
+
+        fee = amount * contractBridge.getFeePercent() / contractBridge.getFeeMaxValue();
+        if(fee < basicFee) {
+            fee = basicFee;
+        }
     }
 }

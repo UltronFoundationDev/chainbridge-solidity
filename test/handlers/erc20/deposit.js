@@ -17,9 +17,14 @@ contract('ERC20Handler - [Deposit ERC20]', async (accounts) => {
     const domainID = 1;
     const expectedDepositNonce = 1;
     const depositerAddress = accounts[1];
-    const tokenAmount = 100;
+    const tokenAmount = Ethers.utils.parseUnits("100", 6);
+
     const feeMaxValue = 10000;
     const feePercent = 10;
+
+    const basicFee = Ethers.utils.parseUnits("0.9", 6);
+    const minAmount = Ethers.utils.parseUnits("10", 6);
+    const maxAmount = Ethers.utils.parseUnits("1000000", 6);
 
     let DAOInstance;
     let BridgeInstance;
@@ -54,16 +59,19 @@ contract('ERC20Handler - [Deposit ERC20]', async (accounts) => {
         await ERC20MintableInstance.approve(ERC20HandlerInstance.address, tokenAmount, { from: depositerAddress });
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);
         await BridgeInstance.adminSetResource(1);
+
+        await DAOInstance.newChangeFeeRequest(ERC20MintableInstance.address, domainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(1)
     });
 
     it('[sanity] depositer owns tokenAmount of ERC20', async () => {
         const depositerBalance = await ERC20MintableInstance.balanceOf(depositerAddress);
-        assert.equal(tokenAmount, depositerBalance);
+        assert.equal(tokenAmount.toNumber(), depositerBalance.toNumber());
     });
 
     it('[sanity] ERC20HandlerInstance.address has an allowance of tokenAmount from depositerAddress', async () => {
         const handlerAllowance = await ERC20MintableInstance.allowance(depositerAddress, ERC20HandlerInstance.address);
-        assert.equal(tokenAmount, handlerAllowance);
+        assert.equal(tokenAmount.toNumber(), handlerAllowance.toNumber());
     });
 
     it('Varied recipient address with length 40', async () => {
@@ -127,6 +135,9 @@ contract('ERC20Handler - [Deposit ERC20]', async (accounts) => {
         const resourceID_EOA_Address = Helpers.createResourceID(EOA_Address, domainID);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID_EOA_Address, EOA_Address);
         await BridgeInstance.adminSetResource(2);
+        
+        await DAOInstance.newChangeFeeRequest(EOA_Address, domainID, basicFee, minAmount, maxAmount);
+        await BridgeInstance.adminChangeFee(2)
 
         const recipientAddress = accounts[0] + accounts[1].substr(2);
         const lenRecipientAddress = 40;

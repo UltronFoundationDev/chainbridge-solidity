@@ -17,9 +17,8 @@ contract('E2E ERC20 - Same Chain', async accounts => {
     const relayer1Address = accounts[3];
     const relayer2Address = accounts[4];
 
-    const initialTokenAmount = Ethers.utils.parseUnits("100", 6);;
+    const initialTokenAmount = Ethers.utils.parseUnits("100", 6);
     const depositAmount = Ethers.utils.parseUnits("20", 6);
-    const depositAmountApprove = Ethers.utils.parseUnits("40", 6);
     const expectedDepositNonce = 1;
 
     const feeMaxValue = 10000;
@@ -67,10 +66,10 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         await DAOInstance.newChangeFeeRequest(ERC20MintableInstance.address, domainID, basicFee, minAmount, maxAmount);
         await BridgeInstance.adminChangeFee(1);
 
-        await ERC20MintableInstance.approve(ERC20HandlerInstance.address, depositAmountApprove, { from: depositerAddress });
+        await ERC20MintableInstance.approve(ERC20HandlerInstance.address, depositAmount, { from: depositerAddress });
 
-        depositData = Helpers.createERCDepositData(depositAmount, depositAmountApprove, recipientAddress);
-        depositProposalData = Helpers.createERCDepositData(depositAmount, depositAmountApprove, recipientAddress)
+        depositData = Helpers.createERCDepositData(depositAmount.toNumber(), 20, recipientAddress);
+        depositProposalData = Helpers.createERCDepositData(depositAmount.toNumber() - basicFee.toNumber(), 20, recipientAddress)
         depositProposalDataHash = Ethers.utils.keccak256(ERC20HandlerInstance.address + depositProposalData.substr(2));
     });
 
@@ -81,7 +80,7 @@ contract('E2E ERC20 - Same Chain', async accounts => {
 
     it("[sanity] ERC20HandlerInstance.address should have an allowance of depositAmount from depositerAddress", async () => {
         const handlerAllowance = await ERC20MintableInstance.allowance(depositerAddress, ERC20HandlerInstance.address);
-        assert.strictEqual(handlerAllowance.toNumber(), depositAmountApprove.toNumber());
+        assert.strictEqual(handlerAllowance.toNumber(), depositAmount.toNumber());
     });
 
     it("depositAmount of Destination ERC20 should be transferred to recipientAddress", async () => {

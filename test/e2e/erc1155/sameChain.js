@@ -11,6 +11,7 @@ const ERC1155HandlerContract = artifacts.require("ERC1155Handler");
 contract('E2E ERC1155 - Same Chain', async accounts => {
     const relayerThreshold = 2;
     const domainID = 1;
+    const destinationDomainId = 2;
 
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
@@ -113,7 +114,7 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
     });
 
     it("Handler's deposit function can be called by only bridge", async () => {
-        await TruffleAssert.reverts(ERC1155HandlerInstance.deposit(resourceID, depositerAddress, depositData, { from: depositerAddress }), "sender must be bridge contract");
+        await TruffleAssert.reverts(ERC1155HandlerInstance.deposit(destinationDomainId, resourceID, depositerAddress, depositData, { from: depositerAddress }), "sender must be bridge contract");
     });
 
     it("Handler's executeProposal function can be called by only bridge", async () => {
