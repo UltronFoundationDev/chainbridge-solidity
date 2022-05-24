@@ -63,6 +63,8 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     /**
         @notice Proposal execution should be initiated when a proposal is finalized in the Bridge contract.
         by a relayer on the deposit's destination chain.
+        @param destinationDomainID ID of chain deposit will be bridged to.
+        @param resourceID ResourceID used to find address of token to be used for deposit.
         @param data Consists of {resourceID}, {amount}, {lenDestinationRecipientAddress},
         and {destinationRecipientAddress} all padded to 32 bytes.
         @notice Data passed into the function should be constructed as follows:
