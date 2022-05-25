@@ -20,6 +20,8 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
     const depositAmount = Ethers.utils.parseUnits("10", 6);
     const expectedDepositNonce = 1;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const feeMaxValue = 10000;
     const feePercent = 10;
 
@@ -57,7 +59,7 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
         
         resourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
     
-        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await ERC20MintableInstance.mint(depositerAddress, initialTokenAmount);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);

@@ -19,6 +19,8 @@ contract('ERC20Handler - [isWhitelisted]', async () => {
     const feeMaxValue = 10000;
     const feePercent = 10;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     let DAOInstance;
     let BridgeInstance;
     let ERC20MintableInstance1;
@@ -46,11 +48,11 @@ contract('ERC20Handler - [isWhitelisted]', async () => {
     });
 
     it('[sanity] contract should be deployed successfully', async () => {
-        await TruffleAssert.passes(ERC20HandlerContract.new(BridgeInstance.address));
+        await TruffleAssert.passes(ERC20HandlerContract.new(BridgeInstance.address, someAddress));
     });
 
     it('initialContractAddress should be whitelisted', async () => {
-        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID1, ERC20MintableInstance1.address);
         await BridgeInstance.adminSetResource(1);
         const isWhitelisted = await ERC20HandlerInstance._contractWhitelist.call(ERC20MintableInstance1.address);

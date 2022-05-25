@@ -118,7 +118,7 @@ contract('Bridge - [admin]', async accounts => {
     it('Should set a Resource ID for handler address', async () => {
         const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK");
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
-        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         assert.equal(await BridgeInstance._resourceIDToHandlerAddress.call(resourceID), Ethers.constants.AddressZero);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);
@@ -131,7 +131,7 @@ contract('Bridge - [admin]', async accounts => {
     it('Should set a ERC20 Resource ID and contract address', async () => {
         const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK");
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
-        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
         
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);
         await TruffleAssert.passes(BridgeInstance.adminSetResource(1));
@@ -157,7 +157,7 @@ contract('Bridge - [admin]', async accounts => {
     it('Should set ERC20MintableInstance.address as burnable', async () => {
         const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK");
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
-        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);
         await DAOInstance.newSetBurnableRequest(ERC20HandlerInstance.address, ERC20MintableInstance.address);
@@ -262,7 +262,7 @@ contract('Bridge - [admin]', async accounts => {
 
         const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK");
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
-        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);
         await TruffleAssert.passes(BridgeInstance.adminSetResource(1));

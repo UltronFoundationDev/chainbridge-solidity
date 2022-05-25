@@ -31,6 +31,8 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
     const expectedFinalizedEventStatus = 2;
     const expectedExecutedEventStatus = 3;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const feeMaxValue = 10000;
     const feePercent = 10;
 
@@ -82,7 +84,7 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
         initialContractAddresses = [DestinationERC20MintableInstance.address];
         burnableContractAddresses = [DestinationERC20MintableInstance.address];
 
-        DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, initialContractAddresses[0]);
         await DAOInstance.newSetBurnableRequest(DestinationERC20HandlerInstance.address, burnableContractAddresses[0]);

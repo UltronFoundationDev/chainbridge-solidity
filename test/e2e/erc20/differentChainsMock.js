@@ -28,6 +28,9 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
     const feeMaxValue = 10000;
     const feePercent = 10;
 
+    const someAddressOrigin = "0xcafecafecafecafecafecafecafecafecafecafe";
+    const someAddressDestination = "0xcafecafecafecafecafecafecafecafecafeca11";
+
     const basicFee = Ethers.utils.parseUnits("0.9", 6);
     const minAmount = Ethers.utils.parseUnits("10", 6);
     const maxAmount = Ethers.utils.parseUnits("1000000", 6);
@@ -83,9 +86,9 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         destinationBurnableContractAddresses = [DestinationERC20MintableInstance.address];
 
         await Promise.all([
-            ERC20HandlerContract.new(OriginBridgeInstance.address)
+            ERC20HandlerContract.new(OriginBridgeInstance.address, someAddressOrigin)
                 .then(instance => OriginERC20HandlerInstance = instance),
-            ERC20HandlerContract.new(DestinationBridgeInstance.address)
+            ERC20HandlerContract.new(DestinationBridgeInstance.address, someAddressDestination)
                 .then(instance => DestinationERC20HandlerInstance = instance),
         ]);
 

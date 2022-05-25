@@ -19,9 +19,13 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
     const relayerThreshold = 0;
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
-    const originChainInitialTokenAmount = Ethers.utils.parseUnits("100", 6);;
+
+    const originChainInitialTokenAmount = Ethers.utils.parseUnits("100", 6);
     const depositAmount = Ethers.utils.parseUnits("20", 6);
     const depositAmountApprove = Ethers.utils.parseUnits("40", 6);
+
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const expectedDepositNonce = 1;
     const feeMaxValue = 10000;
     const feePercent = 10;
@@ -48,7 +52,7 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
 
         resourceID = Helpers.createResourceID(OriginERC20MintableInstance.address, originDomainID);
 
-        OriginERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        OriginERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await DAOInstance.newSetResourceRequest(OriginERC20HandlerInstance.address, resourceID, OriginERC20MintableInstance.address);
         await BridgeInstance.adminSetResource(1);
@@ -138,8 +142,8 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
         const originChainHandlerBalance = await OriginERC20MintableInstance.balanceOf(OriginERC20HandlerInstance.address);
         assert.strictEqual(originChainHandlerBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
 
-        const originChainBridgeBalance = await OriginERC20MintableInstance.balanceOf(BridgeInstance.address);
-        assert.strictEqual(originChainBridgeBalance.toNumber(), basicFee.toNumber());
+        const originTreasuryBalance = await OriginERC20MintableInstance.balanceOf(someAddress);
+        assert.strictEqual(originTreasuryBalance.toNumber(), basicFee.toNumber());
     });
 
     it('Deposit event is fired with expected value', async () => {

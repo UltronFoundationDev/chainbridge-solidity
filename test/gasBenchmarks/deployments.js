@@ -22,6 +22,8 @@ contract('Gas Benchmark - [contract deployments]', async () => {
     const feePercent = 10;
     const gasBenchmarks = [];
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     let DAOInstance;
     let BridgeInstance;
 
@@ -30,7 +32,7 @@ contract('Gas Benchmark - [contract deployments]', async () => {
         contractInstances.concat(await DAOContract.new().then(instance => DAOInstance = instance));
         contractInstances = contractInstances.concat(
             await Promise.all([
-                ERC20HandlerContract.new(BridgeInstance.address),
+                ERC20HandlerContract.new(BridgeInstance.address, someAddress),
                 ERC721HandlerContract.new(BridgeInstance.address),
                 ERC1155HandlerContract.new(BridgeInstance.address),
                 GenericHandlerContract.new(BridgeInstance.address),

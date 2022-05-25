@@ -65,7 +65,7 @@ contract HandlerRevert is HandlerHelpers {
     uint private _totalAmount;
 
     constructor(
-        address          bridgeAddress
+        address          bridgeAddress, address treasuryAddress
     ) public HandlerHelpers(bridgeAddress) {
     }
 

@@ -17,6 +17,8 @@ contract('ERC20Handler - [constructor]', async () => {
     const feeMaxValue = 10000;
     const feePercent = 10;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     let DAOInstance;
     let BridgeInstance;
     let ERC20MintableInstance1;
@@ -49,11 +51,11 @@ contract('ERC20Handler - [constructor]', async () => {
     });
 
     it('[sanity] contract should be deployed successfully', async () => {
-        await TruffleAssert.passes(ERC20HandlerContract.new(BridgeInstance.address));
+        await TruffleAssert.passes(ERC20HandlerContract.new(BridgeInstance.address, someAddress));
     });
 
     it('initialResourceIDs should be parsed correctly and corresponding resourceID mappings should have expected values', async () => {
-        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
 
         for (i = 0; i < initialResourceIDs.length; i++) {
