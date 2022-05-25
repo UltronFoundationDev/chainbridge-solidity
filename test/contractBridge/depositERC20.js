@@ -142,8 +142,8 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
         const originChainHandlerBalance = await OriginERC20MintableInstance.balanceOf(OriginERC20HandlerInstance.address);
         assert.strictEqual(originChainHandlerBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
 
-        const originChainBridgeBalance = await OriginERC20MintableInstance.balanceOf(BridgeInstance.address);
-        assert.strictEqual(originChainBridgeBalance.toNumber(), basicFee.toNumber());
+        const originTreasuryBalance = await OriginERC20MintableInstance.balanceOf(someAddress);
+        assert.strictEqual(originTreasuryBalance.toNumber(), basicFee.toNumber());
     });
 
     it('Deposit event is fired with expected value', async () => {

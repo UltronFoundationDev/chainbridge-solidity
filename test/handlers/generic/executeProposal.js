@@ -22,6 +22,8 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
     const relayer1Address = accounts[2];
     const relayer2Address = accounts[3];
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const initialRelayers = [relayer1Address, relayer2Address];
 
     const centrifugeAssetMinCount = 10;
@@ -82,6 +84,7 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
         // relayer1 creates the deposit proposal
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             depositData,
@@ -93,6 +96,7 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
         // into a finalized state
         // and then automatically executes the proposal
         await TruffleAssert.passes(BridgeInstance.voteProposal(
+            domainID,
             domainID,
             expectedDepositNonce,
             resourceID,
@@ -115,6 +119,7 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
         // relayer1 creates the deposit proposal
         await TruffleAssert.passes(BridgeInstance.voteProposal(
             domainID,
+            domainID,
             expectedDepositNonce,
             resourceID,
             depositData,
@@ -126,6 +131,7 @@ contract('GenericHandler - [Execute Proposal]', async (accounts) => {
         // into a finalized state
         // and then automatically executes the proposal
         const voteWithExecuteTx = await BridgeInstance.voteProposal(
+            domainID,
             domainID,
             expectedDepositNonce,
             resourceID,

@@ -89,7 +89,7 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
 
         const ERC20MintableInstance2 = await ERC20MintableContract.new("token", "TOK");
         const secondERC20ResourceID = [Ethers.utils.hexZeroPad((ERC20MintableInstance2.address + Ethers.utils.hexlify(domainID).substr(2)), 32)];
-        ERC20HandlerInstance2 = await ERC20HandlerContract.new(BridgeInstance.address);
+        ERC20HandlerInstance2 = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance2.address, initialResourceIDs[0], ERC20MintableInstance2.address);
         await BridgeInstance.adminSetResource(3);
