@@ -200,20 +200,27 @@ contract Multisig {
     }
 
     /**
+     * @notice Counts and gets affirmative votes for voter request
+     * @param voterRequestId request id to be executed
+    */
+    function countGetVotersAffirmativeVotes(uint256 voterRequestId) public view returns(uint256 affirmativeVotesCount) {
+        for(uint256 i = 0; i < votersCounter; i++) {
+            if(voterConfirmations[voterRequestId][voterIds[i]] && voters[voterIds[i]]) {
+                    affirmativeVotesCount++;
+            }
+        }
+    }
+
+    /**
      * @notice Approves voter request if there is enough votes and request is not executed 
-     * @param voterRequestId request is to executed
+     * @param voterRequestId request id to be executed
     */
     function votersRequestConclusion(uint256 voterRequestId)
         external
         notExecuted(voterRequestId)
     {
         uint256 requiredVotesAmount = (activeVotersCount * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
-        for(uint256 i = 0; i < votersCounter; i++) {
-            if(voterConfirmations[voterRequestId][voterIds[i]] && voters[voterIds[i]]) {
-                    affirmativeVotesCount++;
-            }
-        }
+        uint256 affirmativeVotesCount = countGetVotersAffirmativeVotes(voterRequestId);
 
         require(affirmativeVotesCount * 100 > requiredVotesAmount, "not enough votes");
         if(voterRequests[voterRequestId].include) {

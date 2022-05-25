@@ -217,16 +217,23 @@ contract DAO is Multisig, IDAO {
     {
         require(!ownerChangeRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countGetChangeOwnerAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
+
+        return ownerChangeRequests[id].newOwner;
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for change owner request
+     * @param id request id to be executed
+    */
+    function countGetChangeOwnerAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(ownerChangesRequestConfirmations[id][getVoterById(i)] 
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-
-        return ownerChangeRequests[id].newOwner;
     }
 
     /**
@@ -299,17 +306,23 @@ contract DAO is Multisig, IDAO {
     {
         require(!transferRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countGetTransferAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
 
+        return (transferRequests[id].addresses, transferRequests[id].amounts);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for transfer request
+     * @param id request id to be executed
+    */
+    function countGetTransferAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(transferRequestConfirmations[id][getVoterById(i)]
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-
-        return (transferRequests[id].addresses, transferRequests[id].amounts);
     }
 
     /**
@@ -384,17 +397,23 @@ contract DAO is Multisig, IDAO {
     {
         require(!pauseStatusRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countGetPauseStatusAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
+        
+        return pauseStatusRequests[id].mode;
+    }
 
+    /**
+     * @notice Counts and gets affirmative votes for pause status request
+     * @param id request id to be executed
+    */
+    function countGetPauseStatusAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(pauseStatusRequestConfirmations[id][getVoterById(i)]
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-        
-        return pauseStatusRequests[id].mode;
     }
 
     /**
@@ -465,17 +484,23 @@ contract DAO is Multisig, IDAO {
     {
         require(!changeRelayerThresholdRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countGetChangeRelayerThresholdAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
 
+        return changeRelayerThresholdRequests[id].amount;
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for change relayer threshold request
+     * @param id request id to be executed
+    */
+    function countGetChangeRelayerThresholdAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(changeRelayerThresholdRequestConfirmations[id][getVoterById(i)]
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-
-        return changeRelayerThresholdRequests[id].amount;
     }
 
     /**
@@ -546,17 +571,23 @@ contract DAO is Multisig, IDAO {
     {
         require(!setResourceRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countGetSetResourceAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
 
+        return (setResourceRequests[id].handlerAddress, setResourceRequests[id].resourceId, setResourceRequests[id].tokenAddress);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for set resource request
+     * @param id request id to be executed
+    */
+    function countGetSetResourceAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(setResourceRequestConfirmations[id][getVoterById(i)]
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-
-        return (setResourceRequests[id].handlerAddress, setResourceRequests[id].resourceId, setResourceRequests[id].tokenAddress);
     }
 
     /**
@@ -632,18 +663,24 @@ contract DAO is Multisig, IDAO {
     {
         require(!changeFeePercentRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countGetChangeFeePercentAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
         
+        return (changeFeePercentRequests[id].feeMaxValue, 
+                changeFeePercentRequests[id].feePercent);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for change fee percent request
+     * @param id request id to be executed
+    */
+    function countGetChangeFeePercentAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(changeFeePercentRequestConfirmations[id][getVoterById(i)] 
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-        
-        return (changeFeePercentRequests[id].feeMaxValue, 
-                changeFeePercentRequests[id].feePercent);
     }
 
     /**
@@ -716,14 +753,7 @@ contract DAO is Multisig, IDAO {
     {
         require(!changeFeeRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
-        
-        for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(changeFeeRequestConfirmations[id][getVoterById(i)] 
-            && getVoterStatusByAddress(getVoterById(i))) {
-                affirmativeVotesCount++;
-            }
-        }
+        uint256 affirmativeVotesCount = countGetChangeFeeAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
         
         return (changeFeeRequests[id].tokenAddress, 
@@ -731,6 +761,19 @@ contract DAO is Multisig, IDAO {
                 changeFeeRequests[id].basicFee,
                 changeFeeRequests[id].minAmount,
                 changeFeeRequests[id].maxAmount);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for change fee request
+     * @param id request id to be executed
+    */
+    function countGetChangeFeeAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
+        for(uint256 i = 0; i <= getVotersCounter(); i++) {
+            if(changeFeeRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
+                affirmativeVotesCount++;
+            }
+        }
     }
 
     /**
@@ -814,17 +857,23 @@ contract DAO is Multisig, IDAO {
     {
         require(!withdrawRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countGetWithdrawAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
         
+        return (withdrawRequests[id].handlerAddress, withdrawRequests[id].data);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for withdraw request
+     * @param id request id to be executed
+    */
+    function countGetWithdrawAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(withdrawRequestConfirmations[id][getVoterById(i)] 
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-        
-        return (withdrawRequests[id].handlerAddress, withdrawRequests[id].data);
     }
 
     /**
@@ -900,17 +949,23 @@ contract DAO is Multisig, IDAO {
     {
         require(!setBurnableRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countSetBurnableAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
         
+        return (setBurnableRequests[id].handlerAddress, setBurnableRequests[id].tokenAddress);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for set burnable request
+     * @param id request id to be executed
+    */
+    function countSetBurnableAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(setBurnableRequestConfirmations[id][getVoterById(i)] 
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-        
-        return (setBurnableRequests[id].handlerAddress, setBurnableRequests[id].tokenAddress);
     }
 
     /**
@@ -984,17 +1039,23 @@ contract DAO is Multisig, IDAO {
     {
         require(!setNonceRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countSetNonceAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
         
+        return (setNonceRequests[id].domainId, setNonceRequests[id].nonce);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for set nonce request
+     * @param id request id to be executed
+    */
+    function countSetNonceAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(setNonceRequestConfirmations[id][getVoterById(i)] 
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-        
-        return (setNonceRequests[id].domainId, setNonceRequests[id].nonce);
     }
 
     /**
@@ -1067,17 +1128,23 @@ contract DAO is Multisig, IDAO {
     {
         require(!setForwarderRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
+        uint256 affirmativeVotesCount = countSetForwarderAffirmativeVotes(id);
+        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
         
+        return (setForwarderRequests[id].forwarder, setForwarderRequests[id].valid);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for set forwarder request
+     * @param id request id to be executed
+    */
+    function countSetForwarderAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
         for(uint256 i = 0; i <= getVotersCounter(); i++) {
             if(setForwarderRequestConfirmations[id][getVoterById(i)] 
             && getVoterStatusByAddress(getVoterById(i))) {
                 affirmativeVotesCount++;
             }
         }
-        require(affirmativeVotesCount * 100 > consensus, "not enough votes");
-        
-        return (setForwarderRequests[id].forwarder, setForwarderRequests[id].valid);
     }
 
     /**
@@ -1151,14 +1218,7 @@ contract DAO is Multisig, IDAO {
     {
         require(!setGenericResourceRequests[id].status, "already approved");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
-        
-        for(uint256 i = 0; i <= getVotersCounter(); i++) {
-            if(setGenericResourceRequestConfirmations[id][getVoterById(i)] 
-            && getVoterStatusByAddress(getVoterById(i))) {
-                affirmativeVotesCount++;
-            }
-        }
+        uint256 affirmativeVotesCount = countSetGenericResourceAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
         
         return (setGenericResourceRequests[id].handlerAddress, 
@@ -1167,6 +1227,19 @@ contract DAO is Multisig, IDAO {
                 setGenericResourceRequests[id].depositFunctionSig,
                 setGenericResourceRequests[id].depositFunctionDepositerOffset,
                 setGenericResourceRequests[id].executeFunctionSig);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for set generic resource request
+     * @param id request id to be executed
+    */
+    function countSetGenericResourceAffirmativeVotes(uint256 id) public view returns(uint256 affirmativeVotesCount) {
+        for(uint256 i = 0; i <= getVotersCounter(); i++) {
+            if(setGenericResourceRequestConfirmations[id][getVoterById(i)] 
+            && getVoterStatusByAddress(getVoterById(i))) {
+                affirmativeVotesCount++;
+            }
+        }
     }
 
     /**
