@@ -17,6 +17,8 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
     const feeMaxValue = 10000;
     const feePercent = 10;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     let DAOInstance;
     let RelayerInstance;
     let BridgeInstance;
@@ -47,11 +49,11 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
     });
 
     it('[sanity] contract should be deployed successfully', async () => {
-        await TruffleAssert.passes(ERC20HandlerContract.new(BridgeInstance.address));
+        await TruffleAssert.passes(ERC20HandlerContract.new(BridgeInstance.address, someAddress));
     });
 
     it('burnableContractAddresses should be marked true in _burnList', async () => {
-        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
         
         for (i = 0; i < initialResourceIDs.length; i++) {
             await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
@@ -70,7 +72,7 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
     });
 
     it('ERC20MintableInstance2.address should not be marked true in _burnList', async () => {
-        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         for (i = 0; i < initialResourceIDs.length; i++) {
             await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
@@ -87,7 +89,7 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
     });
 
     it('ERC20MintableInstance2.address should be marked true in _burnList after setBurnable is called', async () => {
-        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         for (i = 0; i < initialResourceIDs.length; i++) {
             await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])

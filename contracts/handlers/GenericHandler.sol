@@ -121,6 +121,8 @@ contract GenericHandler is IGenericHandler {
 
     /**
         @notice Proposal execution should be initiated when a proposal is finalized in the Bridge contract.
+        @param destinationDomainID ID of chain deposit will be bridged to.
+        @param resourceID ResourceID used to find address of contract to be used for deposit.
         @param data Consists of {resourceID}, {lenMetaData}, and {metaData}.
         @notice Data passed into the function should be constructed as follows:
         len(data)                              uint256     bytes  0  - 32
@@ -129,7 +131,7 @@ contract GenericHandler is IGenericHandler {
         @notice If {_contractAddressToExecuteFunctionSignature}[{contractAddress}] is set,
         {metaData} is expected to consist of needed function arguments.
      */
-    function executeProposal(bytes32 resourceID, bytes calldata data) external onlyBridge {
+    function executeProposal(uint8 destinationDomainID, bytes32 resourceID, bytes calldata data) external onlyBridge {
         uint256      lenMetadata;
         bytes memory metaData;
 

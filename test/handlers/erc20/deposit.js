@@ -19,6 +19,8 @@ contract('ERC20Handler - [Deposit ERC20]', async (accounts) => {
     const depositerAddress = accounts[1];
     const tokenAmount = Ethers.utils.parseUnits("100", 6);
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const feeMaxValue = 10000;
     const feePercent = 10;
 
@@ -52,7 +54,7 @@ contract('ERC20Handler - [Deposit ERC20]', async (accounts) => {
         burnableContractAddresses = []
 
         await Promise.all([
-            ERC20HandlerContract.new(BridgeInstance.address).then(instance => ERC20HandlerInstance = instance),
+            ERC20HandlerContract.new(BridgeInstance.address, someAddress).then(instance => ERC20HandlerInstance = instance),
             ERC20MintableInstance.mint(depositerAddress, tokenAmount)
         ]);
 

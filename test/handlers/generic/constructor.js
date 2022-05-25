@@ -20,8 +20,11 @@ contract('GenericHandler - [constructor]', async () => {
     const blankFunctionSig = '0x00000000';
     const blankFunctionDepositerOffset = 0;
     const centrifugeAssetStoreFuncSig = 'store(bytes32)';
+
     const feeMaxValue = 10000;
     const feePercent = 10;
+
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
 
     let DAOInstance;
     let BridgeInstance;

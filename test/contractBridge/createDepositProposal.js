@@ -24,8 +24,12 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
     const expectedDepositNonce = 1;
     const relayerThreshold = 1;
     const expectedCreateEventStatus = 1;
+
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const feeMaxValue = 10000;
     const feePercent = 10;
+
     const basicFee = Ethers.utils.parseUnits("0.9", 6);
     const minAmount = Ethers.utils.parseUnits("10", 6);
     const maxAmount = Ethers.utils.parseUnits("1000000", 6);
@@ -49,7 +53,7 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
 
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originDomainID);
 
-        DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
         await BridgeInstance.adminSetResource(1);
@@ -179,6 +183,8 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
     const relayerThreshold = 2;
     const expectedCreateEventStatus = 1;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const feeMaxValue = 10000;
     const feePercent = 10;
 
@@ -206,7 +212,7 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
 
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originDomainID);
 
-        DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
         await BridgeInstance.adminSetResource(1);

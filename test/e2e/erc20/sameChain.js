@@ -21,6 +21,8 @@ contract('E2E ERC20 - Same Chain', async accounts => {
     const depositAmount = Ethers.utils.parseUnits("20", 6);
     const expectedDepositNonce = 1;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const feeMaxValue = 10000;
     const feePercent = 10;
 
@@ -57,7 +59,7 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         initialContractAddresses = [ERC20MintableInstance.address];
         burnableContractAddresses = [];
 
-        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await ERC20MintableInstance.mint(depositerAddress, initialTokenAmount);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);

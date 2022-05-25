@@ -16,6 +16,7 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
     const colorReset = "\x1b[0m";
 
     const zeroAddress = "0x0000000000000000000000000000000000000000";
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
     let provider: any;
     let accounts: SignerWithAddress[];
 
@@ -165,7 +166,7 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
 
     it("Set resource request is available and returns correct value\n", async () => {
         const ERC20MintableInstance = await (await new ERC20PresetMinterPauser__factory(owner).deploy("token", "TOK")).deployed();
-        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address)).deployed();
+        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address, someAddress)).deployed();
         const handlerAddress = ERC20HandlerInstance.address;
         const tokenAddress = ERC20MintableInstance.address;
         const resourceId = Helpers.createResourceID(tokenAddress, domainId);
@@ -267,7 +268,7 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
 
     it("Withdraw request is available and returns correct value\n", async () => {
         const ERC20MintableInstance = await (await new ERC20PresetMinterPauser__factory(owner).deploy("token", "TOK")).deployed();
-        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address)).deployed();
+        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address, someAddress)).deployed();
         const handlerAddress = ERC20HandlerInstance.address;
         const tokenAddress = ERC20MintableInstance.address;
         const numTokens = 10;
@@ -319,7 +320,7 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
 
     it("Set burnable request is available and returns correct value\n", async () => {
         const ERC20MintableInstance = await (await new ERC20PresetMinterPauser__factory(owner).deploy("token", "TOK")).deployed();
-        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address)).deployed();
+        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address, someAddress)).deployed();
         const handlerAddress = ERC20HandlerInstance.address;
         const tokenAddress = ERC20MintableInstance.address;
 

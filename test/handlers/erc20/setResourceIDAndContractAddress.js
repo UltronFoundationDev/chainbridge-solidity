@@ -19,6 +19,8 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
     const feeMaxValue = 10000;
     const feePercent = 10;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     let DAOInstance;
     let BridgeInstance;
     let ERC20MintableInstance1;
@@ -39,7 +41,7 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
         initialContractAddresses = [ERC20MintableInstance1.address];
         burnableContractAddresses = [];
 
-        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[0], initialContractAddresses[0]);
         await BridgeInstance.adminSetResource(1);
     });
@@ -87,7 +89,7 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
 
         const ERC20MintableInstance2 = await ERC20MintableContract.new("token", "TOK");
         const secondERC20ResourceID = [Ethers.utils.hexZeroPad((ERC20MintableInstance2.address + Ethers.utils.hexlify(domainID).substr(2)), 32)];
-        ERC20HandlerInstance2 = await ERC20HandlerContract.new(BridgeInstance.address);
+        ERC20HandlerInstance2 = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
 
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance2.address, initialResourceIDs[0], ERC20MintableInstance2.address);
         await BridgeInstance.adminSetResource(3);

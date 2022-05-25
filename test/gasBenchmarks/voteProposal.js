@@ -20,9 +20,12 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
     const recipientAddress = accounts[3];
     const lenRecipientAddress = 20;
     const depositNonce = 1;
+    
     const feeMaxValue = 10000;
     const feePercent = 10;
     const gasBenchmarks = [];
+
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
     
     const initialRelayers = [relayer1Address, relayer2Address];
     const erc20TokenAmount = 100;
@@ -48,7 +51,7 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
 
         erc20ResourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
 
-        await ERC20HandlerContract.new(BridgeInstance.address).then(instance => ERC20HandlerInstance = instance);
+        await ERC20HandlerContract.new(BridgeInstance.address, someAddress).then(instance => ERC20HandlerInstance = instance);
 
         await ERC20MintableInstance.approve(ERC20HandlerInstance.address, erc20TokenAmount, { from: depositerAddress });
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, erc20ResourceID, ERC20MintableInstance.address);
