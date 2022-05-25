@@ -26,25 +26,25 @@ contract DAO is Multisig, IDAO {
 
     struct OwnerChangeRequest {
         address newOwner;
-        bool status;
+        RequestStatus status;
     }
 
     struct TransferRequest {
         address payable[] addresses;
         uint[] amounts;
-        bool status;
+        RequestStatus status;
     }
 
     struct ChangeRelayerThresholdRequest {
         uint256 amount;
-        bool status;
+        RequestStatus status;
     }
 
     struct SetResourceRequest {
         address handlerAddress; 
         bytes32 resourceId; 
         address tokenAddress;
-        bool status;
+        RequestStatus status;
     }
 
     struct SetGenericResourceRequest {
@@ -54,31 +54,31 @@ contract DAO is Multisig, IDAO {
         bytes4 depositFunctionSig;
         uint256 depositFunctionDepositerOffset;
         bytes4 executeFunctionSig;
-        bool status;
+        RequestStatus status;
     }
 
     struct SetBurnableRequest {
         address handlerAddress; 
         address tokenAddress;
-        bool status;
+        RequestStatus status;
     }
 
     struct SetNonceRequest {
         uint8 domainId; 
         uint64 nonce;
-        bool status;
+        RequestStatus status;
     }
 
     struct SetForwarderRequest {
         address forwarder;
         bool valid;
-        bool status;
+        RequestStatus status;
     }
 
     /// @notice Mode means the desiring status of contract(true for pause, false for unpause)
     struct PauseStatusRequest {
         bool mode;
-        bool status;
+        RequestStatus status;
     }
 
     struct ChangeFeeRequest {
@@ -87,19 +87,19 @@ contract DAO is Multisig, IDAO {
         uint256 basicFee;
         uint256 minAmount;
         uint256 maxAmount;
-        bool status;
+        RequestStatus status;
     }
 
     struct ChangeFeePercentRequest {
         uint128 feeMaxValue;
         uint64 feePercent;
-        bool status;
+        RequestStatus status;
     }
 
     struct WithdrawRequest {
         address handlerAddress;
         bytes data;
-        bool status;
+        RequestStatus status;
     }
 
     // mapping of owner change requests
@@ -186,23 +186,129 @@ contract DAO is Multisig, IDAO {
     // id for new withdraw request
     uint256 private withdrawRequestCounter;
 
-    address private bridgeContract;
+    address private immutable bridgeAddress;
 
     /**
      * @notice Throws error if any contract except bridge trys to call the function
     */
     modifier onlyBridge() {
-        require(bridgeContract == msg.sender, "not bridge address");
+        require(bridgeAddress == msg.sender, "not bridge address");
         _;
     }
 
     /**
-     * @notice Throws error if any contract except bridge trys to call the function
+     * @param _bridgeAddress the address of bridge
     */
-    function setBridgeContractInitial(address _address) external {
-        require(bridgeContract == address(0), "already set");
-        require(_address != address(0), "zero address");
-        bridgeContract = _address;
+    constructor(address _bridgeAddress) public {
+        bridgeAddress = _bridgeAddress;
+    }
+
+    /**
+     * @notice Gets owner change request count
+     * @return Returns owner change request count 
+    */
+    function getOwnerChangeRequestCount() external view returns(uint256) 
+    {
+        return ownerChangeRequestCounter;
+    }
+
+    /**
+     * @notice Gets transfer request count
+     * @return Returns transfer request count 
+    */
+    function getTransferRequestCount() external view returns(uint256) 
+    {
+        return transferRequestCounter;
+    }
+
+    /**
+     * @notice Gets pause status request count
+     * @return Returns pause status request count 
+    */
+    function getPauseStatusRequestCount() external view returns(uint256) 
+    {
+        return pauseStatusRequestCounter;
+    }
+
+    /**
+     * @notice Gets change relayer threshold request count
+     * @return Returns change relayer threshold count 
+    */
+    function getChangeRelayerThresholdRequestCount() external view returns(uint256) 
+    {
+        return changeRelayerThresholdRequestCounter;
+    }
+
+    /**
+     * @notice Gets set resource request count
+     * @return Returns set resource request count 
+    */
+    function getSetResourceRequestCount() external view returns(uint256) 
+    {
+        return setResourceRequestCounter;
+    }
+
+    /**
+     * @notice Gets set generic resource request count
+     * @return Returns set generic resource request count 
+    */
+    function getSetGenericResourceRequestCount() external view returns(uint256) 
+    {
+        return setGenericResourceRequestCounter;
+    }
+
+    /**
+     * @notice Gets set burnable request count
+     * @return Returns set burnable request count 
+    */
+    function getSetBurnableRequestCount() external view returns(uint256) 
+    {
+        return setBurnableRequestCounter;
+    }
+
+    /**
+     * @notice Gets set nonce request count
+     * @return Returns set nonce request count 
+    */
+    function getSetNonceRequestCount() external view returns(uint256) 
+    {
+        return setNonceRequestCounter;
+    }
+
+    /**
+     * @notice Gets set forwarder request count
+     * @return Returns set forwarder request count 
+    */
+    function getSetForwarderRequestCount() external view returns(uint256) 
+    {
+        return setForwarderRequestCounter;
+    }
+
+    /**
+     * @notice Gets change fee request count
+     * @return Returns change fee request count 
+    */
+    function getChangeFeeRequestCount() external view returns(uint256) 
+    {
+        return changeFeeRequestCounter;
+    }
+
+    /**
+     * @notice Gets change fee percent request count
+     * @return Returns change fee percent request count 
+    */
+    function getChangeFeePercentRequestCount() external view returns(uint256) 
+    {
+        return changeFeePercentRequestCounter;
+    }
+
+    /**
+     * @notice Gets withdraw request count
+     * @return Returns withdraw request count 
+    */
+    function getWithdrawRequestCount() external view returns(uint256) 
+    {
+        return withdrawRequestCounter;
     }
 
     /**
@@ -215,7 +321,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (address)
     {
-        require(!ownerChangeRequests[id].status, "already approved");
+        require(ownerChangeRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countGetChangeOwnerAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -237,6 +343,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels owner change request if it is active
+     * @param id the id of owner change request
+    */
+    function cancelOwnerChangeRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(ownerChangeRequests[id].status == RequestStatus.Active, "not active");
+        ownerChangeRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves changing owner request if it is not approved
      * @param id the id of owner change request
     */
@@ -246,8 +364,8 @@ contract DAO is Multisig, IDAO {
         onlyBridge
         returns (bool)
     {
-        require(!ownerChangeRequests[id].status, "already approved");
-        ownerChangeRequests[id].status = true;
+        require(ownerChangeRequests[id].status == RequestStatus.Active, "not active");
+        ownerChangeRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -261,7 +379,7 @@ contract DAO is Multisig, IDAO {
         external 
         onlyVoter(msg.sender)
     {
-        require(!ownerChangeRequests[id].status, "already approved");
+        require(ownerChangeRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!ownerChangesRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -286,7 +404,7 @@ contract DAO is Multisig, IDAO {
         
         ownerChangeRequests[ownerChangeRequestCounter] = OwnerChangeRequest({
             newOwner: _address,
-            status: false
+            status: RequestStatus.Active
         });
         
         ownerChangesRequestConfirmations[ownerChangeRequestCounter][msg.sender] = true;
@@ -304,7 +422,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (address payable[] memory, uint[] memory)
     {
-        require(!transferRequests[id].status, "already approved");
+        require(transferRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countGetTransferAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -326,6 +444,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels transfer request if it is active
+     * @param id the id of transfer request
+    */
+    function cancelTransferRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(transferRequests[id].status == RequestStatus.Active, "not active");
+        transferRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves transfer request if it is not approved
      * @param id the id of transfer request
     */
@@ -335,8 +465,8 @@ contract DAO is Multisig, IDAO {
         onlyBridge
         returns (bool)
     {
-        require(!transferRequests[id].status, "already approved");
-        transferRequests[id].status = true;
+        require(transferRequests[id].status == RequestStatus.Active, "not active");
+        transferRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -349,7 +479,7 @@ contract DAO is Multisig, IDAO {
         external
         onlyVoter(msg.sender)
     {
-        require(!transferRequests[id].status, "already approved");
+        require(transferRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!transferRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -376,7 +506,7 @@ contract DAO is Multisig, IDAO {
         transferRequests[transferRequestCounter] = TransferRequest({
             addresses: addresses,
             amounts: amounts,
-            status: false
+            status: RequestStatus.Active
         });
 
         transferRequestConfirmations[transferRequestCounter][msg.sender] = true;
@@ -395,7 +525,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (bool)
     {
-        require(!pauseStatusRequests[id].status, "already approved");
+        require(pauseStatusRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countGetPauseStatusAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -417,6 +547,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels pause status request if it is active
+     * @param id the id of pause status request
+    */
+    function cancelPauseStatusRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(pauseStatusRequests[id].status == RequestStatus.Active, "not active");
+        pauseStatusRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves pause status request if it is not approved
      * @param id the id of pause status request
     */
@@ -426,8 +568,8 @@ contract DAO is Multisig, IDAO {
         override
         returns (bool) 
     {
-        require(!pauseStatusRequests[id].status, "already approved");
-        pauseStatusRequests[id].status = true;
+        require(pauseStatusRequests[id].status == RequestStatus.Active, "not active");
+        pauseStatusRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -440,7 +582,7 @@ contract DAO is Multisig, IDAO {
         external
         onlyVoter(msg.sender)
     {
-        require(!pauseStatusRequests[id].status, "already approved");
+        require(pauseStatusRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!pauseStatusRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -463,7 +605,7 @@ contract DAO is Multisig, IDAO {
         pauseStatusRequestCounter = pauseStatusRequestCounter + 1;   
         pauseStatusRequests[pauseStatusRequestCounter] = PauseStatusRequest({
             mode: mode,
-            status: false
+            status: RequestStatus.Active
         });
 
         pauseStatusRequestConfirmations[pauseStatusRequestCounter][msg.sender] = true;
@@ -482,7 +624,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (uint256) 
     {
-        require(!changeRelayerThresholdRequests[id].status, "already approved");
+        require(changeRelayerThresholdRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countGetChangeRelayerThresholdAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -504,6 +646,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels change relayer threshold request if it is active
+     * @param id the id of change relayer threshold request
+    */
+    function cancelChangeRelayerThresholdRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(changeRelayerThresholdRequests[id].status == RequestStatus.Active, "not active");
+        changeRelayerThresholdRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves change relayer threshold request if it is not approved
      * @param id the id of change relayer threshold request
     */
@@ -513,8 +667,8 @@ contract DAO is Multisig, IDAO {
         onlyBridge
         returns (bool)
     {
-        require(!changeRelayerThresholdRequests[id].status, "already approved");
-        changeRelayerThresholdRequests[id].status = true;
+        require(changeRelayerThresholdRequests[id].status == RequestStatus.Active, "not active");
+        changeRelayerThresholdRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -527,7 +681,7 @@ contract DAO is Multisig, IDAO {
         external
         onlyVoter(msg.sender)
     {
-        require(!changeRelayerThresholdRequests[id].status, "already approved");
+        require(changeRelayerThresholdRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!changeRelayerThresholdRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -550,7 +704,7 @@ contract DAO is Multisig, IDAO {
         changeRelayerThresholdRequestCounter = changeRelayerThresholdRequestCounter + 1;     
         changeRelayerThresholdRequests[changeRelayerThresholdRequestCounter] = ChangeRelayerThresholdRequest ({
             amount: amount,
-            status: false
+            status: RequestStatus.Active
         });
 
         changeRelayerThresholdRequestConfirmations[changeRelayerThresholdRequestCounter][msg.sender] = true;
@@ -569,7 +723,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (address, bytes32, address)
     {
-        require(!setResourceRequests[id].status, "already approved");
+        require(setResourceRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countGetSetResourceAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -591,6 +745,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels set resource request if it is active
+     * @param id the id of set resource request
+    */
+    function cancelSetResourcRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(setResourceRequests[id].status == RequestStatus.Active, "not active");
+        setResourceRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves set resource request if it is not approved
      * @param id the id of set resource status request
     */
@@ -600,8 +766,8 @@ contract DAO is Multisig, IDAO {
         override
         returns (bool)
     {
-        require(!setResourceRequests[id].status, "already approved");
-        setResourceRequests[id].status = true;
+        require(setResourceRequests[id].status == RequestStatus.Active, "not active");
+        setResourceRequests[id].status = RequestStatus.Executed;
         return true;
     }
     
@@ -614,7 +780,7 @@ contract DAO is Multisig, IDAO {
         external
         onlyVoter(msg.sender)
     {
-        require(!setResourceRequests[id].status, "already approved");
+        require(setResourceRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!setResourceRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -642,7 +808,7 @@ contract DAO is Multisig, IDAO {
             handlerAddress: handlerAddress,
             resourceId: resourceId,
             tokenAddress: tokenAddress,
-            status: false
+            status: RequestStatus.Active
         });
 
         setResourceRequestConfirmations[setResourceRequestCounter][msg.sender] = true;
@@ -661,7 +827,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (uint128, uint64)
     {
-        require(!changeFeePercentRequests[id].status, "already approved");
+        require(changeFeePercentRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countGetChangeFeePercentAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -684,6 +850,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels change fee percent request if it is active
+     * @param id the id of change fee percent request
+    */
+    function cancelChangeFeePercentRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(changeFeePercentRequests[id].status == RequestStatus.Active, "not active");
+        changeFeePercentRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves change fee percent request if it is not approved
      * @param id the id of change fee percent request
     */
@@ -693,8 +871,8 @@ contract DAO is Multisig, IDAO {
         onlyBridge
         returns (bool)
     {
-        require(!changeFeePercentRequests[id].status, "already approved");
-        changeFeePercentRequests[id].status = true;
+        require(changeFeePercentRequests[id].status == RequestStatus.Active, "not active");
+        changeFeePercentRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -707,7 +885,7 @@ contract DAO is Multisig, IDAO {
         external 
         onlyVoter(msg.sender)
     {
-        require(!changeFeePercentRequests[id].status, "already approved");
+        require(changeFeePercentRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!changeFeePercentRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -732,7 +910,7 @@ contract DAO is Multisig, IDAO {
         changeFeePercentRequests[changeFeePercentRequestCounter] = ChangeFeePercentRequest({
             feeMaxValue: feeMaxValue,
             feePercent: feePercent,
-            status: false
+            status: RequestStatus.Active
         });
         
         changeFeePercentRequestConfirmations[changeFeePercentRequestCounter][msg.sender] = true;
@@ -741,7 +919,7 @@ contract DAO is Multisig, IDAO {
         return changeFeePercentRequestCounter;
     }
 
-     /**
+    /**
      * @notice Allows changing fee request if it is not approved and there are enough votes
      * @param id the id of change fee request
     */
@@ -751,7 +929,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (address, uint8, uint256, uint256, uint256)
     {
-        require(!changeFeeRequests[id].status, "already approved");
+        require(changeFeeRequests[id].status ==  RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countGetChangeFeeAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -777,6 +955,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels change fee request if it is active
+     * @param id the id of change fee request
+    */
+    function cancelChangeFeeRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(changeFeeRequests[id].status == RequestStatus.Active, "not active");
+        changeFeeRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves change fee request if it is not approved
      * @param id the id of change fee request
     */
@@ -786,8 +976,8 @@ contract DAO is Multisig, IDAO {
         onlyBridge
         returns (bool)
     {
-        require(!changeFeeRequests[id].status, "already approved");
-        changeFeeRequests[id].status = true;
+        require(changeFeeRequests[id].status == RequestStatus.Active, "already approved");
+        changeFeeRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -800,7 +990,7 @@ contract DAO is Multisig, IDAO {
         external 
         onlyVoter(msg.sender)
     {
-        require(!changeFeeRequests[id].status, "already approved");
+        require(changeFeeRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!changeFeeRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -836,7 +1026,7 @@ contract DAO is Multisig, IDAO {
             basicFee: basicFee,
             minAmount: minAmount,
             maxAmount: maxAmount,
-            status: false
+            status: RequestStatus.Active
         });
         
         changeFeeRequestConfirmations[changeFeeRequestCounter][msg.sender] = true;
@@ -855,7 +1045,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (address, bytes memory)
     {
-        require(!withdrawRequests[id].status, "already approved");
+        require(withdrawRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countGetWithdrawAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -877,6 +1067,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels withdraw request if it is active
+     * @param id the id of withdraw request
+    */
+    function cancelWithdrawRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(withdrawRequests[id].status == RequestStatus.Active, "not active");
+        changeFeeRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves withdraw request if it is not approved
      * @param id the id of withdraw request
     */
@@ -886,8 +1088,8 @@ contract DAO is Multisig, IDAO {
         onlyBridge
         returns (bool)
     {
-        require(!withdrawRequests[id].status, "already approved");
-        withdrawRequests[id].status = true;
+        require(withdrawRequests[id].status == RequestStatus.Active, "not active");
+        withdrawRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -900,7 +1102,7 @@ contract DAO is Multisig, IDAO {
         external 
         onlyVoter(msg.sender)
     {
-        require(!withdrawRequests[id].status, "already approved");
+        require(withdrawRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!withdrawRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -928,7 +1130,7 @@ contract DAO is Multisig, IDAO {
         withdrawRequests[withdrawRequestCounter] = WithdrawRequest({
             handlerAddress: handlerAddress,
             data: data,
-            status: false
+            status: RequestStatus.Active
         });
         
         withdrawRequestConfirmations[withdrawRequestCounter][msg.sender] = true;
@@ -947,7 +1149,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (address, address)
     {
-        require(!setBurnableRequests[id].status, "already approved");
+        require(setBurnableRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countSetBurnableAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -969,6 +1171,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels set burnable request if it is active
+     * @param id the id of set burnable request
+    */
+    function cancelSetBurnableRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(setBurnableRequests[id].status == RequestStatus.Active, "not active");
+        setBurnableRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves set burnable request if it is not approved
      * @param id the id of set burnable request
     */
@@ -978,8 +1192,8 @@ contract DAO is Multisig, IDAO {
         onlyBridge
         returns (bool)
     {
-        require(!setBurnableRequests[id].status, "already approved");
-        setBurnableRequests[id].status = true;
+        require(setBurnableRequests[id].status == RequestStatus.Active, "not active");
+        setBurnableRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -992,7 +1206,7 @@ contract DAO is Multisig, IDAO {
         external 
         onlyVoter(msg.sender)
     {
-        require(!setBurnableRequests[id].status, "already approved");
+        require(setBurnableRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!setBurnableRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -1018,7 +1232,7 @@ contract DAO is Multisig, IDAO {
         setBurnableRequests[setBurnableRequestCounter] = SetBurnableRequest({
             handlerAddress: handlerAddress,
             tokenAddress: tokenAddress,
-            status: false
+            status: RequestStatus.Active
         });
         
         setBurnableRequestConfirmations[setBurnableRequestCounter][msg.sender] = true;
@@ -1037,7 +1251,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (uint8, uint64)
     {
-        require(!setNonceRequests[id].status, "already approved");
+        require(setNonceRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countSetNonceAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -1059,6 +1273,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels set nonce request if it is active 
+     * @param id the id of set nonce request
+    */
+    function cancelSetNonceRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(setNonceRequests[id].status == RequestStatus.Active, "not active");
+        setNonceRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves set nonce request if it is not approved
      * @param id the id of set nonce request
     */
@@ -1068,8 +1294,8 @@ contract DAO is Multisig, IDAO {
         onlyBridge
         returns (bool)
     {
-        require(!setNonceRequests[id].status, "already approved");
-        setNonceRequests[id].status = true;
+        require(setNonceRequests[id].status == RequestStatus.Active, "not active");
+        setNonceRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -1082,7 +1308,7 @@ contract DAO is Multisig, IDAO {
         external 
         onlyVoter(msg.sender)
     {
-        require(!setNonceRequests[id].status, "already approved");
+        require(setNonceRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!setNonceRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -1107,7 +1333,7 @@ contract DAO is Multisig, IDAO {
         setNonceRequests[setNonceRequestCounter] = SetNonceRequest({
             domainId: domainId,
             nonce: nonce,
-            status: false
+            status: RequestStatus.Active
         });
         
         setNonceRequestConfirmations[setNonceRequestCounter][msg.sender] = true;
@@ -1126,7 +1352,7 @@ contract DAO is Multisig, IDAO {
         override 
         returns (address, bool)
     {
-        require(!setForwarderRequests[id].status, "already approved");
+        require(setForwarderRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countSetForwarderAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -1148,6 +1374,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels set forwarder request if it is active
+     * @param id the id of set forwarder request
+    */
+    function cancelSetForwarderRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(setForwarderRequests[id].status == RequestStatus.Active, "not active");
+        setForwarderRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves set forwarder request if it is not approved
      * @param id the id of set forwarder request
     */
@@ -1157,8 +1395,8 @@ contract DAO is Multisig, IDAO {
         override
         returns (bool)
     {
-        require(!setForwarderRequests[id].status, "already approved");
-        setForwarderRequests[id].status = true;
+        require(setForwarderRequests[id].status == RequestStatus.Active, "not active");
+        setForwarderRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -1171,7 +1409,7 @@ contract DAO is Multisig, IDAO {
         external
         onlyVoter(msg.sender)
     {
-        require(!setForwarderRequests[id].status, "already approved");
+        require(setForwarderRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!setForwarderRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -1197,7 +1435,7 @@ contract DAO is Multisig, IDAO {
         setForwarderRequests[setForwarderRequestCounter] = SetForwarderRequest({
             forwarder: forwarder,
             valid: valid,
-            status: false
+            status: RequestStatus.Active
         });
         
         setForwarderRequestConfirmations[setForwarderRequestCounter][msg.sender] = true;
@@ -1216,7 +1454,7 @@ contract DAO is Multisig, IDAO {
         override
         returns (address, bytes32, address, bytes4, uint256, bytes4)
     {
-        require(!setGenericResourceRequests[id].status, "already approved");
+        require(setGenericResourceRequests[id].status == RequestStatus.Active, "not active");
         uint256 consensus = (getActiveVotersCount() * 100) / 2;
         uint256 affirmativeVotesCount = countSetGenericResourceAffirmativeVotes(id);
         require(affirmativeVotesCount * 100 > consensus, "not enough votes");
@@ -1243,6 +1481,18 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Cancels set generic resource request if it is active
+     * @param id the id of set generic resource request
+    */
+    function cancelSetGenericResourceRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(setGenericResourceRequests[id].status == RequestStatus.Active, "not active");
+        setGenericResourceRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
      * @notice Approves set generic resource request if it is not approved
      * @param id the id of set generic resource request
     */
@@ -1251,8 +1501,8 @@ contract DAO is Multisig, IDAO {
         onlyBridge 
         returns (bool)
     {
-        require(!setGenericResourceRequests[id].status, "already approved");
-        setGenericResourceRequests[id].status = true;
+        require(setGenericResourceRequests[id].status == RequestStatus.Active, "not active");
+        setGenericResourceRequests[id].status = RequestStatus.Executed;
         return true;
     }
 
@@ -1265,7 +1515,7 @@ contract DAO is Multisig, IDAO {
         external
         onlyVoter(msg.sender)
     {
-        require(!setGenericResourceRequests[id].status, "already approved");
+        require(setGenericResourceRequests[id].status == RequestStatus.Active, "not active");
         if(voteType) {
             require(!setGenericResourceRequestConfirmations[id][msg.sender], "already confirmed");
         }
@@ -1306,7 +1556,7 @@ contract DAO is Multisig, IDAO {
             depositFunctionSig: depositFunctionSig,
             depositFunctionDepositerOffset: depositFunctionDepositerOffset,
             executeFunctionSig: executeFunctionSig,
-            status: false
+            status: RequestStatus.Active
         });
         
         setGenericResourceRequestConfirmations[setGenericResourceRequestCounter][msg.sender] = true;

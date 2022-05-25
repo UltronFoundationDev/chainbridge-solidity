@@ -3,6 +3,12 @@ pragma solidity 0.8.11;
 /// @title Multisignature contract implementation
 /// @notice Multisig contract, which provides multisig functions that could be implemented when needed
 contract Multisig {
+    enum RequestStatus {
+        Canceled,
+        Active,
+        Executed
+    }
+
     event InsertingVoter(address indexed _address);
     event RemovingVoter(address indexed _address);
     event VoteForVoterRequest(bool indexed voteType, address indexed sender, uint256 indexed requestId);
@@ -18,9 +24,9 @@ contract Multisig {
 
     // vote request for inserting/removing voters
     struct VoterRequest {
-        bool executed;
         address candidate;
         bool include;
+        RequestStatus status;
     }
 
     // mapping of voter requests in order to insert/remove voters
@@ -57,16 +63,7 @@ contract Multisig {
         _;
     }
 
-    /**
-     * @notice Throws if request is already approved(executed)
-     * @param requestId the checking id of request
-    */
-    modifier notExecuted(uint256 requestId) {
-        require(!voterRequests[requestId].executed, "already executed");
-        _;
-    }
-
-    constructor() {
+    constructor() public {
         insertVoter(msg.sender);
     }
     
@@ -160,8 +157,8 @@ contract Multisig {
         external
         onlyVoter(msg.sender)
         voterRequestExists(voterRequestId)
-        notExecuted(voterRequestId)
     {
+        require(voterRequests[voterRequestId].status == RequestStatus.Active, "already executed");
         if(voteType) {
             require(!voterConfirmations[voterRequestId][msg.sender], "already confirmed");
         }
@@ -191,9 +188,9 @@ contract Multisig {
         }
         voterRequestsCounter = voterRequestsCounter + 1;
         voterRequests[voterRequestsCounter] = VoterRequest({
-            executed: false,
             candidate: voterAddress,
-            include: include
+            include: include,
+            status: RequestStatus.Active
         });
         voterConfirmations[voterRequestsCounter][msg.sender] = true;
         emit VoteForVoterRequest(true, msg.sender, voterRequestsCounter);
@@ -217,8 +214,8 @@ contract Multisig {
     */
     function votersRequestConclusion(uint256 voterRequestId)
         external
-        notExecuted(voterRequestId)
     {
+        require(voterRequests[voterRequestId].status == RequestStatus.Active, "not active");
         uint256 requiredVotesAmount = (activeVotersCount * 100) / 2;
         uint256 affirmativeVotesCount = countGetVotersAffirmativeVotes(voterRequestId);
 
@@ -230,6 +227,18 @@ contract Multisig {
             removeVoter(voterRequests[voterRequestId].candidate);
         }
 
-        voterRequests[voterRequestId].executed = true;
+        voterRequests[voterRequestId].status = RequestStatus.Executed;
+    }
+
+    /**
+     * @notice Cancels voter request 
+     * @param id request id to be canceled
+    */
+    function cancelVoterRequest(uint256 id)
+        external
+        onlyVoter(msg.sender)
+    {
+        require(voterRequests[id].status == RequestStatus.Active, "not active");
+        voterRequests[id].status = RequestStatus.Canceled;
     }
 }
