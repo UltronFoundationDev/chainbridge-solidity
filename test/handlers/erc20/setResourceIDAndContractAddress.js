@@ -19,6 +19,8 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
     const feeMaxValue = 10000;
     const feePercent = 10;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     let DAOInstance;
     let BridgeInstance;
     let ERC20MintableInstance1;
@@ -39,7 +41,7 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
         initialContractAddresses = [ERC20MintableInstance1.address];
         burnableContractAddresses = [];
 
-        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address);
+        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[0], initialContractAddresses[0]);
         await BridgeInstance.adminSetResource(1);
     });

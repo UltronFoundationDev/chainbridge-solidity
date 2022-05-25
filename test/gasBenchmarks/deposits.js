@@ -30,6 +30,8 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
     const feePercent = 10;
     const gasBenchmarks = [];
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const erc20TokenAmount = Ethers.utils.parseUnits("100", 6);;
     const erc721TokenID = 1;
     const erc1155TokenID = 1;
@@ -120,7 +122,7 @@ contract('Gas Benchmark - [Deposits]', async (accounts) => {
             Helpers.blankFunctionSig];
 
         await Promise.all([
-            ERC20HandlerContract.new(BridgeInstance.address).then(instance => ERC20HandlerInstance = instance),
+            ERC20HandlerContract.new(BridgeInstance.address, someAddress).then(instance => ERC20HandlerInstance = instance),
             ERC20MintableInstance.mint(depositerAddress, erc20TokenAmount),
             ERC721HandlerContract.new(BridgeInstance.address).then(instance => ERC721HandlerInstance = instance),
             ERC721MintableInstance.mint(depositerAddress, erc721TokenID, ""),
