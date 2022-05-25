@@ -15,13 +15,25 @@ import "../interfaces/IBridge.sol";
 contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     event DepositERC20(address indexed tokenAddress, uint8 indexed destinationDomainID, address indexed sender, uint256 amount, uint256 fee, uint256 amountWithFee);
     IBridge private contractBridge;
+    address private immutable treasuryAddress;
+
     /**
         @param bridgeAddress Contract address of previously deployed Bridge.
+        @param _treasuryAddress Contract address of previously deployed Treasury.
      */
     constructor(
-        address          bridgeAddress
+        address          bridgeAddress, address _treasuryAddress
     ) public HandlerHelpers(bridgeAddress) {
         contractBridge = IBridge(bridgeAddress);
+        treasuryAddress = _treasuryAddress;
+    }
+
+    /**
+        @notice Gets treasury address, which will receive fee from custom bridged ERC20 tokens
+        @return Treasury address
+    */
+    function getTreasuryAddress() external view returns(address) {
+        return treasuryAddress;
     }
 
     /**
@@ -51,7 +63,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         uint256 feeValue = evaluateFee(destinationDomainID, tokenAddress, amount);
         uint256 transferAmount = amount - feeValue;
 
-        lockERC20(tokenAddress, depositer, _bridgeAddress, feeValue);
+        lockERC20(tokenAddress, depositer, treasuryAddress, feeValue);
         if (_burnList[tokenAddress]) {
             burnERC20(tokenAddress, depositer, transferAmount);
         } else {
