@@ -246,7 +246,7 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
     it("Set generic resource request is available and returns correct value\n", async () => {
         const CentrifugeAssetInstance = await (await new CentrifugeAsset__factory(owner).deploy()).deployed();
-        const ERC20HandlerInstance = await (await new GenericHandler__factory(owner).deploy(bridge.address, someAddress)).deployed();
+        const ERC20HandlerInstance = await (await new GenericHandler__factory(owner).deploy(bridge.address)).deployed();
         const genericHandlerAddress = ERC20HandlerInstance.address;
         const assetAddress = CentrifugeAssetInstance.address;
         const resourceId = Helpers.createResourceID(assetAddress, domainId);
@@ -270,7 +270,7 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         const CentrifugeAssetInstance = await (await new CentrifugeAsset__factory(owner).deploy()).deployed();
         const assetAddress = CentrifugeAssetInstance.address;
-        const ERC20HandlerInstance = await (await new GenericHandler__factory(owner).deploy(bridge.address, someAddress)).deployed();
+        const ERC20HandlerInstance = await (await new GenericHandler__factory(owner).deploy(bridge.address)).deployed();
         const genericHandlerAddress = ERC20HandlerInstance.address;
         const blankFunctionSig = '0x00000000';
         const blankFunctionDepositerOffset = 0;

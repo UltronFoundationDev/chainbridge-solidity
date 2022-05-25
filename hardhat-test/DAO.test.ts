@@ -406,7 +406,7 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
 
     it("Set generic resource request is available and returns correct value\n", async () => {
         const CentrifugeAssetInstance = await (await new CentrifugeAsset__factory(owner).deploy()).deployed();
-        const ERC20HandlerInstance = await (await new GenericHandler__factory(owner).deploy(bridge.address, someAddress)).deployed();
+        const ERC20HandlerInstance = await (await new GenericHandler__factory(owner).deploy(bridge.address)).deployed();
         const genericHandlerAddress = ERC20HandlerInstance.address;
         const assetAddress = CentrifugeAssetInstance.address;
         const resourceId = Helpers.createResourceID(assetAddress, domainId);
