@@ -50,7 +50,15 @@ const config: HardhatUserConfig = {
       chainId: 5,
       gas: 2100000,
       gasPrice: 8000000000
-    }
+    },
+    ultron: {
+      url: `http://ultron-rpc.net:18545/`,
+      chainId: 1230,
+    },
+    bsc-testnet: {
+      url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
+      chainId: 97,
+    },
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY

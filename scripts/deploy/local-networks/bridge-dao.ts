@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 import { Bridge, Bridge__factory, DAO, DAO__factory } from "../../../typechain";
 import * as dotenv from 'dotenv';
+import * as Helpers from "../../../hardhat-test/helpers";
 import { BigNumberish } from "ethers";
 
 async function main() { 
@@ -20,18 +21,25 @@ async function main() {
   console.log(`${colorYellow}The User Account is being initialized...${colorReset}`);
   const [signer, user1, user2, user3] = await ethers.getSigners();
 
+  const domainId:BigNumberish = 1;
+  const initialRealyers:string[] = [user1.address, user2.address, user3.address];
+  const initialRelayerThreshold:BigNumberish = initialRealyers.length;
+  const feeMaxValue:BigNumberish = 10000;
+  const feePercent:BigNumberish = 10;
+  const expiry:BigNumberish = 0;
+
+  const tokenAddress = "0x853D98d7B260832A55F254bBcF51216fD3a13804";
+  const destinationId:BigNumberish = 2;
+  const basicFee = ethers.utils.parseUnits("0.1", 18);
+  const minAmount = ethers.utils.parseUnits("1", 18);
+  const maxAmount = ethers.utils.parseUnits("100000", 18);
+
   const DAOContract = await (await (new DAO__factory(signer)).deploy()).deployed() as DAO;
   
   console.log(`\nThe ${colorYellow}DAO${colorReset} address: ${colorBlue}${DAOContract.address}${colorReset}`);
 
-  const domainId:BigNumberish = 1;
-  const initialRealyers:string[] = [user1.address, user2.address, user3.address];
-  const initialRelayerThreshold:BigNumberish = initialRealyers.length;
-  const fee:BigNumberish = 100;
-  const expiry:BigNumberish = 0;
-
   const BridgeContract = await (await (new Bridge__factory(signer))
-        .deploy(domainId, initialRealyers, initialRelayerThreshold, fee, expiry)).deployed() as Bridge;
+        .deploy(domainId, initialRealyers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed() as Bridge;
 
   console.log(`The ${colorYellow}Bridge${colorReset} address: ${colorBlue}${BridgeContract.address}${colorReset}`);
 
@@ -39,6 +47,16 @@ async function main() {
   console.log(`\nSetted ${colorYellow}Bridge${colorReset} contract ${colorGreen}in DAO${colorReset}: ${colorBlue}${BridgeContract.address}${colorReset}`);
   await BridgeContract.setDAOContractInitial(DAOContract.address);
   console.log(`\nSetted ${colorYellow}DAO${colorReset} contract ${colorGreen}in Bridge${colorReset}: ${colorBlue}${DAOContract.address}${colorReset}`);
+
+  await DAOContract.newChangeFeeRequest(tokenAddress, destinationId, basicFee, minAmount, maxAmount);
+  await BridgeContract.adminChangeFee(1);
+
+  const treasuryAddress = signer.address;
+  const ERC20HandlerContract = await (await (new ERC20Handler__factory(signer)).deploy(BridgeContract.address, treasuryAddress)).deployed() as ERC20Handler;
+
+  const resourceID = Helpers.createResourceID(tokenAddress, domainId);
+  await DAOContract.newSetResourceRequest(ERC20HandlerContract.address, resourceID, tokenAddress);
+  await BridgeContract.adminSetResource(1);
 }
 main()
   .then(() => process.exit(0))
