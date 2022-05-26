@@ -43,19 +43,19 @@ const config: HardhatUserConfig = {
         blockNumber: 11095000,
       },
       gas: 2100000,
-      gasPrice: 8000000000
+      gasPrice: 8000000000,
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
       chainId: 5,
       gas: 2100000,
-      gasPrice: 8000000000
+      gasPrice: 8000000000,
     },
     ultron: {
       url: `http://ultron-rpc.net:18545/`,
       chainId: 1230,
     },
-    bsc-testnet: {
+    bsc_testnet: {
       url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
       chainId: 97,
     },
