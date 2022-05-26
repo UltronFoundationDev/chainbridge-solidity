@@ -15,7 +15,7 @@ async function main() {
   console.log(`${colorYellow}The Network is being installed...${colorReset}`);
   let networkName: string = "ultron";
   console.log(`Current Network Name: ${colorBlue}${networkName}${colorReset}`);
-  const provider = new ethers.providers.JsonRpcProvider(`http://51.250.34.31:18545`);
+  const provider = new ethers.providers.JsonRpcProvider(`https://data-seed-prebsc-1-s1.binance.org:8545/`);
   console.log(`${colorGreen}The Network is installed successfully.${colorReset}`);
 
   console.log(`${colorYellow}The User Account is being initialized...${colorReset}`);
@@ -24,13 +24,13 @@ async function main() {
   const signer = new ethers.Wallet(userPrivateKey, provider);
 
   const domainId:BigNumberish = 1;
-  const initialRealyers:string[] = [""];
+  const initialRealyers:string[] = [`${signer.address}`];
   const initialRelayerThreshold:BigNumberish = initialRealyers.length;
   const feeMaxValue:BigNumberish = 10000;
   const feePercent:BigNumberish = 10;
   const expiry:BigNumberish = 40;
   
-  const tokenAddress = "0x853D98d7B260832A55F254bBcF51216fD3a13804";
+  const tokenAddress = "0xb0549050f6337DFF95cDb09352e7DA7a916794F1";
   const destinationId:BigNumberish = 2;
   const basicFee = ethers.utils.parseUnits("0.1", 18);
   const minAmount = ethers.utils.parseUnits("1", 18);
