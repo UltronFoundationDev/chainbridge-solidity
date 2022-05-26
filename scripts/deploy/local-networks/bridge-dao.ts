@@ -1,8 +1,9 @@
 import { ethers } from "hardhat";
-import { Bridge, Bridge__factory, DAO, DAO__factory } from "../../../typechain";
+import { Bridge, Bridge__factory, ERC20Handler__factory, DAO, DAO__factory } from "../../../typechain";
 import * as dotenv from 'dotenv';
 import * as Helpers from "../../../hardhat-test/helpers";
 import { BigNumberish } from "ethers";
+import hre from 'hardhat';
 
 async function main() { 
   const colorReset = "\u001b[0m";
@@ -13,7 +14,7 @@ async function main() {
   dotenv.config();
 
   console.log(`${colorYellow}The Network is being installed...${colorReset}`);
-  const networkName: string = "hardhat";
+  const networkName = hre.network.name;
   console.log(`Current Network Name: ${colorBlue}${networkName}${colorReset}`);
   const provider = ethers.providers.getDefaultProvider(networkName === "hardhat" ? undefined : networkName);
   console.log(`${colorGreen}The Network is installed successfully.${colorReset}`);
@@ -53,10 +54,13 @@ async function main() {
 
   const treasuryAddress = signer.address;
   const ERC20HandlerContract = await (await (new ERC20Handler__factory(signer)).deploy(BridgeContract.address, treasuryAddress)).deployed() as ERC20Handler;
+  console.log(`\nThe ${colorYellow}ERC20Handler${colorReset} address: ${colorBlue}${ERC20HandlerContract.address}${colorReset}`);
 
   const resourceID = Helpers.createResourceID(tokenAddress, domainId);
+  console.log(`\nThe ${colorYellow}ResourceID${colorReset}: ${colorBlue}${resourceID}${colorReset}`);
   await DAOContract.newSetResourceRequest(ERC20HandlerContract.address, resourceID, tokenAddress);
   await BridgeContract.adminSetResource(1);
+  console.log(`\nSetted New Resource for token ${tokenAddress}`);
 }
 main()
   .then(() => process.exit(0))
