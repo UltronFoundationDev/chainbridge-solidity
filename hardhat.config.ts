@@ -52,7 +52,7 @@ const config: HardhatUserConfig = {
       gasPrice: 8000000000,
     },
     ultron: {
-      url: `http://ultron-rpc.net:18545/`,
+      url: `http://51.250.34.31:18545`,
       chainId: 1230,
     },
     bsc_testnet: {

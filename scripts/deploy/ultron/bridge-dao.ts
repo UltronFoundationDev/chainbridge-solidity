@@ -15,7 +15,7 @@ async function main() {
   console.log(`${colorYellow}The Network is being installed...${colorReset}`);
   let networkName: string = "ultron";
   console.log(`Current Network Name: ${colorBlue}${networkName}${colorReset}`);
-  const provider = new ethers.providers.JsonRpcProvider(networkName);
+  const provider = new ethers.providers.JsonRpcProvider(`http://51.250.34.31:18545`);
   console.log(`${colorGreen}The Network is installed successfully.${colorReset}`);
 
   console.log(`${colorYellow}The User Account is being initialized...${colorReset}`);
