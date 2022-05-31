@@ -190,11 +190,6 @@ contract Multisig {
     */
     function countGetVotersAffirmativeVotes(uint256 id) external view returns(uint256) {
         return _countGet(voterConfirmations, id);
-        // for(uint256 i = 0; i < votersCounter; i++) {
-        //     if(voterConfirmations[id][voterIds[i]] && voters[voterIds[i]]) {
-        //             affirmativeVotesCount++;
-        //     }
-        // }
     }
 
     /**
