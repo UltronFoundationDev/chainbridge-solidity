@@ -45,23 +45,16 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
 
         const initialRelayers:string[] = [owner.address, voterFirst.address, voterSecond.address];
 
-        dao = await (await new DAO__factory(owner).deploy()).deployed();
-        console.log(`${beforeTest}Deployed DAO contract: ${colorBlue}${dao.address}${colorReset}`)
-        console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
-
         bridge = await (await new Bridge__factory(owner).deploy(domainId, initialRelayers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed();
         console.log(`${beforeTest}Deployed bridge contract: ${colorBlue}${bridge.address}${colorReset}`);
 
+        dao = await (await new DAO__factory(owner).deploy(bridge.address)).deployed();
+        console.log(`${beforeTest}Deployed DAO contract: ${colorBlue}${dao.address}${colorReset}`)
+        console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
+
         console.log(`${beforeTest}${colorRed}Reverts${colorReset} if bridge new address is zero address`);
-        await expect(dao.setBridgeContractInitial(zeroAddress)).revertedWith("zero address");
 
-        await dao.setBridgeContractInitial(bridge.address);
         console.log(`${beforeTest}${colorBlue}Inserted${colorReset} initial bridge address to DAO: ${colorGreen}${bridge.address}${colorReset}`);    
-    });
-
-    it("Bridge contract address is setted\n", async () => {
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if bridge address is already set`);
-        await expect(dao.setBridgeContractInitial(bridge.address)).revertedWith("already set");
     });
 
     it("Owner change request is available and returns correct address\n", async () => {

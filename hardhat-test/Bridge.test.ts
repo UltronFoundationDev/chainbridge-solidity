@@ -45,28 +45,17 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         const initialRelayers:string[] = [owner.address, voterFirst.address, voterSecond.address];
 
-        dao = await (await new DAO__factory(owner).deploy()).deployed();
-        console.log(`${beforeTest}Deployed DAO contract: ${colorBlue}${dao.address}${colorReset}`)
-        console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
-
         bridge = await (await new Bridge__factory(owner).deploy(domainId, initialRelayers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed();
         console.log(`${beforeTest}Deployed bridge contract: ${colorBlue}${bridge.address}${colorReset}`);
 
-        console.log(`${beforeTest}${colorRed}Reverts${colorReset} if bridge new address is zero address`);
-        await expect(dao.setBridgeContractInitial(zeroAddress)).revertedWith("zero address");
-
-        await dao.setBridgeContractInitial(bridge.address);
-        console.log(`${beforeTest}${colorBlue}Inserted${colorReset} initial bridge address to DAO: ${colorGreen}${bridge.address}${colorReset}`);    
+        dao = await (await new DAO__factory(owner).deploy(bridge.address)).deployed();
+        console.log(`${beforeTest}Deployed DAO contract: ${colorBlue}${dao.address}${colorReset}`)
+        console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
         
         await bridge.setDAOContractInitial(dao.address);
         console.log(`${beforeTest}${colorBlue}Inserted${colorReset} initial dao address to bridge: ${colorGreen}${dao.address}${colorReset}`);    
         
         ADMIN_ROLE = await bridge.DEFAULT_ADMIN_ROLE();
-    });
-
-    it("Bridge contract address is setted\n", async () => {
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if bridge address is already set`);
-        await expect(dao.setBridgeContractInitial(bridge.address)).revertedWith("already set");
     });
 
     it("DAO contract address is setted\n", async () => {
@@ -82,8 +71,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         await bridge.connect(owner).renounceAdmin(1);
         console.log(`${insideTest}Compares admin_role [${colorBlue}${ADMIN_ROLE}${colorReset}] with returned value: [${colorGreen}${newVoterFirst.address}${colorReset}]`);
         expect(bridge.hasRole(ADMIN_ROLE, newVoterFirst.address))
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if owner request is already approved`);
-        await expect(dao.connect(owner).isOwnerChangeAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if owner request is not active`);
+        await expect(dao.connect(owner).isOwnerChangeAvailable(1)).revertedWith("not active");
     });
 
     it("Pause status(pausing/unpausing) request execution\n", async () => {  
@@ -92,15 +81,15 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Pausing${colorReset}`);         
         await bridge.connect(owner).adminPauseStatusTransfers(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if pause status request is already approved`);
-        await expect(dao.connect(owner).isPauseStatusAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if pause status request is not active`);
+        await expect(dao.connect(owner).isPauseStatusAvailable(1)).revertedWith("not active");
     
         console.log(`${insideTest}Creates new pause status request`);    
         await dao.connect(owner).newPauseStatusRequest(false);
         console.log(`${insideTest}${colorBlue}Unpausing${colorReset}`);         
         await bridge.connect(owner).adminPauseStatusTransfers(2);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if pause status request is already approved`);
-        await expect(dao.connect(owner).isPauseStatusAvailable(2)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if pause status request is not active`);
+        await expect(dao.connect(owner).isPauseStatusAvailable(2)).revertedWith("not active");
     });
 
     it("Change relayer threshold execution\n", async () => {
@@ -110,8 +99,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         
         console.log(`${insideTest}${colorBlue}Changing relayer threshold amount${colorReset}`);         
         await bridge.connect(owner).adminChangeRelayerThreshold(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if change relayer threshold request is already approved`);
-        await expect(dao.connect(owner).isChangeRelayerThresholdAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if change relayer threshold request is not active`);
+        await expect(dao.connect(owner).isChangeRelayerThresholdAvailable(1)).revertedWith("not active");
     });
 
     it("Set resource request execution\n", async () => {
@@ -126,8 +115,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Setting resource${colorReset}`);         
         await bridge.connect(owner).adminSetResource(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set resource request is already approved`);
-        await expect(dao.connect(owner).isSetResourceAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set resource request is not active`);
+        await expect(dao.connect(owner).isSetResourceAvailable(1)).revertedWith("not active");
     });
 
     it("Change fee request execution\n", async () => {
@@ -143,8 +132,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Changing fee${colorReset}`);         
         await bridge.connect(owner).adminChangeFee(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if change fee request is already approved`);
-        await expect(dao.connect(owner).isChangeFeeAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if change fee request is not active`);
+        await expect(dao.connect(owner).isChangeFeeAvailable(1)).revertedWith("not active");
     });
 
     it("Change fee percent request execution\n", async () => {
@@ -156,8 +145,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Changing fee percent${colorReset}`);         
         await bridge.connect(owner).adminChangeFeePercent(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if change fee percent request is already approved`);
-        await expect(dao.connect(owner).isChangeFeePercentAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if change fee percent request is not active`);
+        await expect(dao.connect(owner).isChangeFeePercentAvailable(1)).revertedWith("not active");
     });
 
     it("Withdraw request execution\n", async () => {
@@ -193,8 +182,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Withdrawing${colorReset}`);         
         await bridge.connect(owner).adminWithdraw(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if withdraw request is already approved`);
-        await expect(dao.connect(owner).isWithdrawAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if withdraw request is not active`);
+        await expect(dao.connect(owner).isWithdrawAvailable(1)).revertedWith("not active");
     });
 
     it("Set burnable request execution\n", async () => {
@@ -209,16 +198,16 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Setting resource${colorReset}`);         
         await bridge.connect(owner).adminSetResource(2);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set resource request is already approved`);
-        await expect(dao.connect(owner).isSetResourceAvailable(2)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set resource request is not active`);
+        await expect(dao.connect(owner).isSetResourceAvailable(2)).revertedWith("not active");
 
         console.log(`${insideTest}Creates new set burnable request`);    
         await dao.connect(owner).newSetBurnableRequest(handlerAddress, tokenAddress);
 
         console.log(`${insideTest}${colorBlue}Setting burnable${colorReset}`);         
         await bridge.connect(owner).adminSetBurnable(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set burnable is already approved`);
-        await expect(dao.connect(owner).isSetBurnableAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set burnable is not active`);
+        await expect(dao.connect(owner).isSetBurnableAvailable(1)).revertedWith("not active");
     });
 
     it("Set nonce request execution\n", async () => {
@@ -230,8 +219,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Setting nonce${colorReset}`);         
         await bridge.connect(owner).adminSetDepositNonce(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set nonce request is already approved`);
-        await expect(dao.connect(owner).isSetNonceAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set nonce request is not active`);
+        await expect(dao.connect(owner).isSetNonceAvailable(1)).revertedWith("not active");
     });
 
     it("Set forwarder execution\n", async () => {
@@ -240,8 +229,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Setting forwarder${colorReset}`);         
         await bridge.connect(owner).adminSetForwarder(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set forwarder request is already approved`);
-        await expect(dao.connect(owner).isSetForwarderAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set forwarder request is not active`);
+        await expect(dao.connect(owner).isSetForwarderAvailable(1)).revertedWith("not active");
     });
 
     it("Set generic resource request is available and returns correct value\n", async () => {
@@ -259,8 +248,8 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Setting generic resource${colorReset}`);         
         await bridge.connect(owner).adminSetGenericResource(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set generic resource request is already approved`);
-        await expect(dao.connect(owner).isSetGenericResourceAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set generic resource request is not active`);
+        await expect(dao.connect(owner).isSetGenericResourceAvailable(1)).revertedWith("not active");
     });
 
     it("Transfer request execution\n", async () => {
@@ -293,7 +282,7 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Transferring${colorReset} funds`);         
         await bridge.connect(owner).transferFunds(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if owner request is already approved`);
-        await expect(dao.connect(owner).isTransferAvailable(1)).revertedWith("already approved");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if owner request is not active`);
+        await expect(dao.connect(owner).isTransferAvailable(1)).revertedWith("not active");
     });
 })

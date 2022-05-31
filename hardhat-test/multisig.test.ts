@@ -63,11 +63,16 @@ describe("\x1b[33mMultisig test\x1b[0m\n", () => {
         await multisig.connect(newVoterFirst).newVoteForVoterRequest(true, 2)
         console.log(`${insideTest}Inserts new voter`);
         await multisig.connect(owner).votersRequestConclusion(2);
+
+        console.log(`${insideTest}Creates new voter including request`);
+        await multisig.connect(owner).newVoterRequest(true, voterSecond.address);
+        // console.log(`${insideTest}Confirms including new voter`);
+        // await multisig.connect(newVoterFirst).newVoteForVoterRequest(false, 3)
         
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote request is already executed, while inserting vote`);
-        await expect(multisig.connect(newVoterFirst).newVoteForVoterRequest(true, 1)).revertedWith('already executed');
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote request is already executed, while executing voter request result`);
-        await expect(multisig.connect(owner).votersRequestConclusion(2)).revertedWith('already executed');
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote request is not active, while inserting vote`);
+        await expect(multisig.connect(newVoterFirst).newVoteForVoterRequest(true, 1)).revertedWith('not active');
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote request is not active, while executing voter request result`);
+        await expect(multisig.connect(owner).votersRequestConclusion(2)).revertedWith('not active');
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if not enough votes`);
         await expect(multisig.connect(owner).votersRequestConclusion(3)).revertedWith('not enough votes');
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if new voter is already a voter`);
@@ -85,19 +90,21 @@ describe("\x1b[33mMultisig test\x1b[0m\n", () => {
     it('Remove voter if enough votes', async () => {     
         console.log(`${insideTest}Creates new voter removing request`);           
         await multisig.connect(owner).newVoterRequest(false, newVoterFirst.address);
-        await multisig.connect(newVoterSecond).newVoteForVoterRequest(true, 3);
-        await multisig.connect(newVoterSecond).newVoteForVoterRequest(false, 3);
-        await multisig.connect(newVoterSecond).newVoteForVoterRequest(true, 3);
+        await multisig.connect(newVoterSecond).newVoteForVoterRequest(true, 4);
+        await multisig.connect(newVoterSecond).newVoteForVoterRequest(false, 4);
+        await multisig.connect(newVoterSecond).newVoteForVoterRequest(true, 4);
 
         console.log(`${insideTest}Removes voter`);
-        await multisig.connect(owner).votersRequestConclusion(3);
+        await multisig.connect(owner).votersRequestConclusion(4);
+
+        await multisig.connect(newVoterSecond).newVoterRequest(true, voterSecond.address);
         
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote request is already executed, while removing vote`);
-        await expect(multisig.connect(newVoterSecond).newVoteForVoterRequest(false, 1)).revertedWith('already executed');
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote request is already executed, while executing voter request result`);
-        await expect(multisig.connect(owner).votersRequestConclusion(3)).revertedWith('already executed');
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote request is not active, while removing vote`);
+        await expect(multisig.connect(newVoterSecond).newVoteForVoterRequest(false, 1)).revertedWith('not active');
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote request is not active, while executing voter request result`);
+        await expect(multisig.connect(owner).votersRequestConclusion(4)).revertedWith('not active');
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if not enough votes`);
-        await expect(multisig.connect(owner).votersRequestConclusion(4)).revertedWith('not enough votes');
+        await expect(multisig.connect(owner).votersRequestConclusion(5)).revertedWith('not enough votes');
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if new voter address is not a voter, while removing`);
         await expect(multisig.connect(owner).newVoterRequest(false, newVoterFirst.address)).revertedWith('not a voter');
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender(removed voter) is not a voter`);
