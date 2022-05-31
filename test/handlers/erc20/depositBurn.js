@@ -46,8 +46,7 @@ contract('ERC20Handler - [Deposit Burn ERC20]', async (accounts) => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance2 = instance)
         ])
 
-        DAOInstance = await DAOContract.new();
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID1 = Helpers.createResourceID(ERC20MintableInstance1.address, domainID);

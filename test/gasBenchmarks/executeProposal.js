@@ -71,8 +71,8 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
 
     before(async () => {
         await Promise.all([
-            DAOContract.new().then(instance => DAOInstance = instance),
             BridgeContract.new(domainID, initialRelayers, relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
+            DAOContract.new(BridgeInstance.address).then(instance => DAOInstance = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance),
             ERC1155MintableContract.new("TOK").then(instance => ERC1155MintableInstance = instance),
@@ -83,7 +83,6 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
             ThreeArgumentsContract.new().then(instance => ThreeArgumentsInstance = instance)
         ]);
 
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         erc20ResourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);

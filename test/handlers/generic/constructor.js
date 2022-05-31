@@ -45,8 +45,7 @@ contract('GenericHandler - [constructor]', async () => {
             CentrifugeAssetContract.new(centrifugeAssetMinCount).then(instance => CentrifugeAssetInstance3 = instance)
         ]);
 
-        DAOInstance = await DAOContract.new();
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         initialResourceIDs = [

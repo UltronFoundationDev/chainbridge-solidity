@@ -34,8 +34,7 @@ contract('ERC1155Handler - [Burn ERC1155]', async () => {
             ERC1155MintableContract.new("TOK").then(instance => ERC1155MintableInstance2 = instance)
         ]);
 
-        DAOInstance = await DAOContract.new();
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID1 = Ethers.utils.hexZeroPad((ERC1155MintableInstance1.address + Ethers.utils.hexlify(domainID).substr(2)), 32);

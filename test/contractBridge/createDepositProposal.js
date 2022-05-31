@@ -47,8 +47,7 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
             BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new();
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originDomainID);
@@ -206,8 +205,7 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
             BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new();
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originDomainID);
