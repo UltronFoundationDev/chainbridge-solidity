@@ -37,7 +37,7 @@ contract('Bridge - [admin]', async accounts => {
         BridgeInstance = await BridgeContract.new(domainID, initialRelayers, initialRelayerThreshold, 0, feeMaxValue, feePercent);
         ADMIN_ROLE = await BridgeInstance.DEFAULT_ADMIN_ROLE();
         DAOInstance = await DAOContract.new(BridgeInstance.address);
-\        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
     });
     // Testing pausable methods
 

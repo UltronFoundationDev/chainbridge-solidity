@@ -72,7 +72,6 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
     before(async () => {
         await Promise.all([
             BridgeContract.new(domainID, initialRelayers, relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance),
-            DAOContract.new(BridgeInstance.address).then(instance => DAOInstance = instance),
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance),
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance),
             ERC1155MintableContract.new("TOK").then(instance => ERC1155MintableInstance = instance),
@@ -82,8 +81,6 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
             TwoArgumentsContract.new().then(instance => TwoArgumentsInstance = instance),
             ThreeArgumentsContract.new().then(instance => ThreeArgumentsInstance = instance)
         ]);
-
-        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         erc20ResourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
         erc721ResourceID = Helpers.createResourceID(ERC721MintableInstance.address, domainID);
@@ -126,6 +123,7 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
             Helpers.blankFunctionSig];
 
         await Promise.all([
+            DAOContract.new(BridgeInstance.address).then(instance => DAOInstance = instance),
             ERC20HandlerContract.new(BridgeInstance.address, someAddress).then(instance => ERC20HandlerInstance = instance),
             ERC20MintableInstance.mint(depositerAddress, erc20TokenAmount),
             ERC721HandlerContract.new(BridgeInstance.address).then(instance => ERC721HandlerInstance = instance),
@@ -134,6 +132,8 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
             ERC1155MintableInstance.mintBatch(depositerAddress, [erc1155TokenID], [erc1155TokenAmount], "0x0"),
             GenericHandlerInstance = await GenericHandlerContract.new(BridgeInstance.address)
         ]);
+
+        await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         await ERC20MintableInstance.approve(ERC20HandlerInstance.address, erc20TokenAmount, { from: depositerAddress });
         await ERC721MintableInstance.approve(ERC721HandlerInstance.address, erc721TokenID, { from: depositerAddress });
