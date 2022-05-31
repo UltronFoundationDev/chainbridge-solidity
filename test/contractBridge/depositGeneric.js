@@ -35,8 +35,7 @@ contract('Bridge - [deposit - Generic]', async () => {
             BridgeInstance = BridgeContract.new(originDomainID, [], 0, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new();
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(CentrifugeAssetInstance.address, originDomainID)

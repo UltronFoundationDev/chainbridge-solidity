@@ -57,8 +57,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             ReturnDataContract.new().then(instance => ReturnDataInstance = instance),
         ]);
 
-        DAOInstance = await DAOContract.new();
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         initialResourceIDs = [

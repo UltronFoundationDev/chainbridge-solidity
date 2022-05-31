@@ -23,6 +23,13 @@ export const createGenericDepositData = (hexMetaData: string) => {
         hexMetaData.substr(2)
 };
 
+export const createERCDepositData = (tokenAmountOrID: number | bigint | BytesLike | Hexable, lenRecipientAddress: number | bigint | BytesLike | Hexable , recipientAddress: string) => {
+    return '0x' +
+        toHex(tokenAmountOrID, 32).substr(2) +      // Token amount or ID to deposit (32 bytes)
+        toHex(lenRecipientAddress, 32).substr(2) + // len(recipientAddress)          (32 bytes)
+        recipientAddress.substr(2);               // recipientAddress               (?? bytes)
+};
+
 export const createResourceID = (contractAddress: string, domainId: number | bigint | BytesLike | Hexable) => {
     return toHex(contractAddress + toHex(domainId, 1).substr(2), 32)
 };

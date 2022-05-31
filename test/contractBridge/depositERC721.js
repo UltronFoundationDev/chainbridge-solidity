@@ -37,8 +37,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             BridgeContract.new(originDomainID, [], 0, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new();
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         originResourceID = Helpers.createResourceID(OriginERC721MintableInstance.address, originDomainID);

@@ -3,9 +3,30 @@ pragma solidity 0.8.11;
 /// @title Multisignature contract implementation
 /// @notice Multisig contract, which provides multisig functions that could be implemented when needed
 contract Multisig {
-    event InsertingVoter(address indexed _address);
-    event RemovingVoter(address indexed _address);
-    event VoteForVoterRequest(bool indexed voteType, address indexed sender, uint256 indexed requestId);
+    enum RequestStatus {
+        Canceled,
+        Active,
+        Executed
+    }
+
+    enum RequestType {
+        VoterChange,
+        OwnerChange,
+        Transfer,
+        PauseStatus,
+        RelayerThreshold,
+        SetResource,
+        SetGenericResource,
+        SetBurnable,
+        SetNonce,
+        SetForwarder,
+        ChangeFee,
+        ChangeFeePercent,
+        Withdraw
+    }
+
+    event ChangeVoter(address indexed _address, bool indexed include);
+    event NewVoteForRequest(RequestType indexed requestType, bool voteType, address indexed sender, uint256 indexed requestId);
 
     // mapping voter id => voter address
     mapping(uint256 => address) private voterIds;
@@ -18,9 +39,9 @@ contract Multisig {
 
     // vote request for inserting/removing voters
     struct VoterRequest {
-        bool executed;
         address candidate;
         bool include;
+        RequestStatus status;
     }
 
     // mapping of voter requests in order to insert/remove voters
@@ -31,15 +52,6 @@ contract Multisig {
     uint256 private voterRequestsCounter;
 
     /**
-     * @notice Throws if address is zero address
-     * @param _address the checking address
-    */
-    modifier notNullAddress(address _address) {
-        require(_address != address(0), "zero address");
-        _;
-    }
-
-    /**
      * @notice Throws if address is not a voter
      * @param _address the checking address
     */
@@ -48,25 +60,7 @@ contract Multisig {
         _;
     }
 
-    /**
-     * @notice Throws if voter request address is zero address
-     * @param voterRequestId the checking voter request Id
-    */
-    modifier voterRequestExists(uint voterRequestId) {
-        require(voterRequests[voterRequestId].candidate != address(0), "voter address is zero");
-        _;
-    }
-
-    /**
-     * @notice Throws if request is already approved(executed)
-     * @param requestId the checking id of request
-    */
-    modifier notExecuted(uint256 requestId) {
-        require(!voterRequests[requestId].executed, "already executed");
-        _;
-    }
-
-    constructor() {
+    constructor() public {
         insertVoter(msg.sender);
     }
     
@@ -74,11 +68,7 @@ contract Multisig {
      * @notice Returns voter address by id if id != 0
      * @param id the id of voter 
     */
-    function getVoterById(uint256 id) 
-        public 
-        view 
-        returns (address) 
-    {
+    function getVoterById(uint256 id) public view returns (address) {
         return voterIds[id];
     }
 
@@ -87,34 +77,22 @@ contract Multisig {
      * if address != zero address
      * @param _address the checking address 
     */
-    function getVoterStatusByAddress(address _address) 
-        public 
-        view
-        notNullAddress(_address) 
-        returns (bool) 
-    {
+    function getVoterStatusByAddress(address _address) public view returns (bool) {
+        require(_address != address(0), "zero address");
         return voters[_address];
     }
 
     /**
      * @notice Returns overall Voters Count
     */
-    function getActiveVotersCount() 
-        public 
-        view 
-        returns(uint256) 
-    {
+    function getActiveVotersCount() public view returns(uint256) {
         return activeVotersCount;
     }
 
     /**
      * @notice Returns voters list counter
     */
-    function getVotersCounter() 
-        internal 
-        view 
-        returns(uint256) 
-    {
+    function getVotersCounter() internal view returns(uint256) {
         return votersCounter;
     }
 
@@ -124,15 +102,12 @@ contract Multisig {
      * @dev Triggers insert event(logging inserted address)
      * @param newVoterAddress the address, which should be added
     */
-    function insertVoter(address newVoterAddress) 
-        internal 
-        notNullAddress(newVoterAddress) 
-    {
+    function insertVoter(address newVoterAddress) private {
+        require(newVoterAddress != address(0), "zero address");
         require(!voters[newVoterAddress], "already a voter");
         voters[newVoterAddress] = true;
         activeVotersCount++;
         voterIds[votersCounter++] = newVoterAddress;
-        emit InsertingVoter(newVoterAddress);
     }
 
     /** 
@@ -141,35 +116,48 @@ contract Multisig {
      * @dev Triggers remove event(logging removed address)
      * @param oldVoterAddress the address, which should be removed
     */
-    function removeVoter(address oldVoterAddress) 
-        internal 
-        onlyVoter(oldVoterAddress)
-    {
+    function removeVoter(address oldVoterAddress) private onlyVoter(oldVoterAddress) {
         voters[oldVoterAddress] = false;
         activeVotersCount--;
-        emit RemovingVoter(oldVoterAddress);
+    }
+
+    function _newVoteFor(mapping(uint256 => mapping(address => bool)) storage confirmations, uint256 id, bool voteType, RequestType requestType) 
+        internal onlyVoter(msg.sender) 
+    {  
+        if(voteType) {
+            require(!confirmations[id][msg.sender], "already confirmed");
+        }
+        else {
+            require(confirmations[id][msg.sender], "not confirmed");
+        }
+        confirmations[id][msg.sender] = voteType;
+        emit NewVoteForRequest(requestType, voteType, msg.sender, id);
+    }
+
+    function _countGet(mapping(uint256 => mapping(address => bool)) storage confirmations, uint256 id) 
+        internal view returns(uint256 affirmativeVotesCount) 
+    {
+        for(uint256 i = 0; i <= getVotersCounter(); i++) {
+            if(confirmations[id][getVoterById(i)] && getVoterStatusByAddress(getVoterById(i))) {
+                affirmativeVotesCount++;
+            }
+        }
+    }
+
+    function _consensus(mapping(uint256 => mapping(address => bool)) storage confirmations, uint256 id) internal view {
+         require(_countGet(confirmations, id) * 100 > (getActiveVotersCount() * 100) / 2, "not enough votes");
     }
 
     /**
      * @notice Allows a voter to insert a confirmation for a transaction
      * if sender is a voter, voter request is confirmed, voter request is not approved 
      * @param voteType the vote type: true/false = insert/remove vote
-     * @param voterRequestId voter request id
+     * @param id voter request id
     */ 
-    function newVoteForVoterRequest(bool voteType, uint256 voterRequestId)
-        external
-        onlyVoter(msg.sender)
-        voterRequestExists(voterRequestId)
-        notExecuted(voterRequestId)
-    {
-        if(voteType) {
-            require(!voterConfirmations[voterRequestId][msg.sender], "already confirmed");
-        }
-        else {
-            require(voterConfirmations[voterRequestId][msg.sender], "not confirmed");
-        }
-        voterConfirmations[voterRequestId][msg.sender] = voteType;
-        emit VoteForVoterRequest(voteType, msg.sender, voterRequestId);
+    function newVoteForVoterRequest(bool voteType, uint256 id) external onlyVoter(msg.sender) {
+        require(voterRequests[id].candidate != address(0), "voter address is zero");
+        require(voterRequests[id].status == RequestStatus.Active, "not active");
+        _newVoteFor(voterConfirmations, id, voteType, RequestType.VoterChange);
     }
 
     /**
@@ -178,11 +166,8 @@ contract Multisig {
      * @param voterAddress new voter address
      * @param include insert/remove(true/false) voter from voter list
     */
-    function newVoterRequest(bool include, address voterAddress) 
-        external 
-        notNullAddress(voterAddress)
-        onlyVoter(msg.sender)
-    {
+    function newVoterRequest(bool include, address voterAddress) external onlyVoter(msg.sender) {
+        require(voterAddress != address(0), "zero address");
         if(include) {
             require(!voters[voterAddress], "already a voter");
         } 
@@ -191,38 +176,52 @@ contract Multisig {
         }
         voterRequestsCounter = voterRequestsCounter + 1;
         voterRequests[voterRequestsCounter] = VoterRequest({
-            executed: false,
             candidate: voterAddress,
-            include: include
+            include: include,
+            status: RequestStatus.Active
         });
         voterConfirmations[voterRequestsCounter][msg.sender] = true;
-        emit VoteForVoterRequest(true, msg.sender, voterRequestsCounter);
+        emit NewVoteForRequest(RequestType.VoterChange, true, msg.sender, voterRequestsCounter);
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for voter request
+     * @param id request id to be executed
+    */
+    function countGetVotersAffirmativeVotes(uint256 id) external view returns(uint256) {
+        return _countGet(voterConfirmations, id);
+        // for(uint256 i = 0; i < votersCounter; i++) {
+        //     if(voterConfirmations[id][voterIds[i]] && voters[voterIds[i]]) {
+        //             affirmativeVotesCount++;
+        //     }
+        // }
     }
 
     /**
      * @notice Approves voter request if there is enough votes and request is not executed 
-     * @param voterRequestId request is to executed
+     * @param id request id to be executed
     */
-    function votersRequestConclusion(uint256 voterRequestId)
-        external
-        notExecuted(voterRequestId)
-    {
-        uint256 requiredVotesAmount = (activeVotersCount * 100) / 2;
-        uint256 affirmativeVotesCount = 0;
-        for(uint256 i = 0; i < votersCounter; i++) {
-            if(voterConfirmations[voterRequestId][voterIds[i]] && voters[voterIds[i]]) {
-                    affirmativeVotesCount++;
-            }
-        }
-
-        require(affirmativeVotesCount * 100 > requiredVotesAmount, "not enough votes");
-        if(voterRequests[voterRequestId].include) {
-            insertVoter(voterRequests[voterRequestId].candidate);
+    function votersRequestConclusion(uint256 id) external {
+        require(voterRequests[id].status == RequestStatus.Active, "not active");
+        _consensus(voterConfirmations, id);
+        if(voterRequests[id].include) {
+            insertVoter(voterRequests[id].candidate);
         }
         else {
-            removeVoter(voterRequests[voterRequestId].candidate);
+            removeVoter(voterRequests[id].candidate);
         }
 
-        voterRequests[voterRequestId].executed = true;
+        emit ChangeVoter(voterRequests[id].candidate, voterRequests[id].include);
+
+        voterRequests[id].status = RequestStatus.Executed;
+    }
+
+    /**
+     * @notice Cancels voter request 
+     * @param id request id to be canceled
+    */
+    function cancelVoterRequest(uint256 id) external onlyVoter(msg.sender) {
+        require(voterRequests[id].status == RequestStatus.Active, "not active");
+        voterRequests[id].status = RequestStatus.Canceled;
     }
 }

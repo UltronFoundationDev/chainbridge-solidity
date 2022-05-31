@@ -54,12 +54,10 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
             ERC721MintableContract.new("token", "TOK", "").then(instance => DestinationERC721MintableInstance = instance)
         ]);
 
-        OriginDAOInstance = await DAOContract.new();
-        await OriginDAOInstance.setBridgeContractInitial(OriginBridgeInstance.address);
+        OriginDAOInstance = await DAOContract.new(OriginBridgeInstance.address);
         await OriginBridgeInstance.setDAOContractInitial(OriginDAOInstance.address);
 
-        DestinationDAOInstance = await DAOContract.new();
-        await DestinationDAOInstance.setBridgeContractInitial(DestinationBridgeInstance.address);
+        DestinationDAOInstance = await DAOContract.new(DestinationBridgeInstance.address);
         await DestinationBridgeInstance.setDAOContractInitial(DestinationDAOInstance.address);
         
         originResourceID = Helpers.createResourceID(OriginERC721MintableInstance.address, originDomainID);

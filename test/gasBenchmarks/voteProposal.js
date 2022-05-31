@@ -45,8 +45,7 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance),
         ]);
 
-        DAOInstance = await DAOContract.new();
-        await DAOInstance.setBridgeContractInitial(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         erc20ResourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
