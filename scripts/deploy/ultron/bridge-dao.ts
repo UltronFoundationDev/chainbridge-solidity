@@ -37,6 +37,7 @@ async function main() {
   const expiry:BigNumberish = 40;
   
   const tokenAddress = "0x853D98d7B260832A55F254bBcF51216fD3a13804";
+  const destTokenAddress = "0xb0549050f6337DFF95cDb09352e7DA7a916794F1";
   const destinationId:BigNumberish = 2;
   const basicFee = ethers.utils.parseUnits("0.1", 18);
   const minAmount = ethers.utils.parseUnits("1", 18);
@@ -56,12 +57,16 @@ async function main() {
 
   await DAOContract.newChangeFeeRequest(tokenAddress, destinationId, basicFee, minAmount, maxAmount);
   await BridgeContract.adminChangeFee(1);
-  console.log(`\nSetted New Fee for token ${tokenAddress} on chain ${destinationId}`);
+  console.log(`\nSetted New Fee for token ${tokenAddress} on destination chain ${destinationId}`);
+  await DAOContract.newChangeFeeRequest(destTokenAddress, domainId, basicFee, minAmount, maxAmount);
+  await BridgeContract.adminChangeFee(2);
+  console.log(`\nSetted New Fee for dest token ${tokenAddress} on domain chain ${destinationId}`);
 
   const treasuryAddress = signer.address;
   const ERC20HandlerContract = await (await (new ERC20Handler__factory(signer)).deploy(BridgeContract.address, treasuryAddress)).deployed() as ERC20Handler;
   console.log(`\nThe ${colorYellow}ERC20Handler${colorReset} address: ${colorBlue}${ERC20HandlerContract.address}${colorReset}`);
 
+  // Should copy it from console, when deploys to another chain
   const resourceID = Helpers.createResourceID(tokenAddress, domainId);
   console.log(`\nThe ${colorYellow}ResourceID${colorReset}: ${colorBlue}${resourceID}${colorReset}`);
   await DAOContract.newSetResourceRequest(ERC20HandlerContract.address, resourceID, tokenAddress);
