@@ -40,7 +40,7 @@ contract('ERC20Handler - [setResourceIDAndContractAddress]', async () => {
         initialContractAddresses = [ERC20MintableInstance1.address];
         burnableContractAddresses = [];
 
-        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress, someAddress);
+        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
         await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[0], initialContractAddresses[0]);
         await BridgeInstance.adminSetResource(1);
