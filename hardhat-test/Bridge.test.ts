@@ -48,7 +48,10 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         bridge = await (await new Bridge__factory(owner).deploy(domainId, initialRelayers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed();
         console.log(`${beforeTest}Deployed bridge contract: ${colorBlue}${bridge.address}${colorReset}`);
 
-        dao = await (await new DAO__factory(owner).deploy(bridge.address)).deployed();
+        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address, someAddress)).deployed();
+        const handlerAddress = ERC20HandlerInstance.address;
+
+        dao = await (await new DAO__factory(owner).deploy(bridge.address, handlerAddress)).deployed();
         console.log(`${beforeTest}Deployed DAO contract: ${colorBlue}${dao.address}${colorReset}`)
         console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
         
@@ -284,5 +287,30 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         await bridge.connect(owner).transferFunds(1);
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if owner request is not active`);
         await expect(dao.connect(owner).isTransferAvailable(1)).revertedWith("not active");
+    });
+
+    it("Set Treasury request is available and returns correct address\n", async () => {
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender is not a voter`);
+        await expect(dao.connect(newVoterSecond).newSetTreasuryRequest(newVoterFirst.address)).revertedWith("not a voter"); 
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if new owner is zero address`);
+        await expect(dao.connect(owner).newSetTreasuryRequest(zeroAddress)).revertedWith("zero address"); 
+       
+        console.log(`${insideTest}Creates new owner change request`);
+        await dao.connect(owner).newSetTreasuryRequest(newVoterFirst.address);
+
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already confirmed(true)`);
+        await expect(dao.connect(owner).newVoteForSetTreasuryRequest(true, 1)).revertedWith("already confirmed");
+        
+        await dao.connect(owner).newVoteForSetTreasuryRequest(false, 1); 
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if not enough votes`);
+        await expect(dao.connect(owner).isSetTreasuryAvailable(1)).revertedWith("not enough votes");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already removed(false)`);
+        await expect(dao.connect(owner).newVoteForSetTreasuryRequest(false, 1)).revertedWith("not confirmed");
+        
+        await dao.connect(owner).newVoteForSetTreasuryRequest(true, 1);
+
+        const address = await dao.connect(owner).isSetTreasuryAvailable(1);
+        console.log(`${insideTest}Compares treasury address [${colorBlue}${newVoterFirst.address}${colorReset}] with returned value: [${colorGreen}${address}${colorReset}]`);
+        expect(newVoterFirst.address).equals(address);
     });
 })
