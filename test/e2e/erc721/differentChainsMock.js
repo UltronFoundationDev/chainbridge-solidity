@@ -19,6 +19,8 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
     const destinationRelayer1Address = accounts[3];
     const destinationRelayer2Address = accounts[4];
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
     const tokenID = 1;
@@ -54,10 +56,10 @@ contract('E2E ERC721 - Two EVM Chains', async accounts => {
             ERC721MintableContract.new("token", "TOK", "").then(instance => DestinationERC721MintableInstance = instance)
         ]);
 
-        OriginDAOInstance = await DAOContract.new(OriginBridgeInstance.address);
+        OriginDAOInstance = await DAOContract.new(OriginBridgeInstance.address, someAddress);
         await OriginBridgeInstance.setDAOContractInitial(OriginDAOInstance.address);
 
-        DestinationDAOInstance = await DAOContract.new(DestinationBridgeInstance.address);
+        DestinationDAOInstance = await DAOContract.new(DestinationBridgeInstance.address, someAddress);
         await DestinationBridgeInstance.setDAOContractInitial(DestinationDAOInstance.address);
         
         originResourceID = Helpers.createResourceID(OriginERC721MintableInstance.address, originDomainID);

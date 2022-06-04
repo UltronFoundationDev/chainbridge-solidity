@@ -75,7 +75,7 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
             ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originDomainID);
@@ -84,6 +84,7 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
         burnableContractAddresses = [DestinationERC20MintableInstance.address];
 
         DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
+        await DestinationERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
 
         await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, initialContractAddresses[0]);
         await DAOInstance.newSetBurnableRequest(DestinationERC20HandlerInstance.address, burnableContractAddresses[0]);

@@ -15,6 +15,7 @@ const GenericHandlerContract = artifacts.require("GenericHandler");
 contract('Bridge - [deposit - Generic]', async () => {
     const originDomainID = 1;
     const destinationDomainID = 2;
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
     const expectedDepositNonce = 1;
     const feeMaxValue = 10000;
     const feePercent = 10;
@@ -35,7 +36,7 @@ contract('Bridge - [deposit - Generic]', async () => {
             BridgeInstance = BridgeContract.new(originDomainID, [], 0, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(CentrifugeAssetInstance.address, originDomainID)

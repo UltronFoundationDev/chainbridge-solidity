@@ -44,7 +44,7 @@ contract('ERC20Handler - [Deposit ERC20]', async (accounts) => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
@@ -56,6 +56,7 @@ contract('ERC20Handler - [Deposit ERC20]', async (accounts) => {
             ERC20HandlerContract.new(BridgeInstance.address, someAddress).then(instance => ERC20HandlerInstance = instance),
             ERC20MintableInstance.mint(depositerAddress, tokenAmount)
         ]);
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
 
         await ERC20MintableInstance.approve(ERC20HandlerInstance.address, tokenAmount, { from: depositerAddress });
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);

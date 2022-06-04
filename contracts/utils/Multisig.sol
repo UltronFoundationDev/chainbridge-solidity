@@ -22,7 +22,8 @@ contract Multisig {
         SetForwarder,
         ChangeFee,
         ChangeFeePercent,
-        Withdraw
+        Withdraw,
+        SetTreasury
     }
 
     event ChangeVoter(address indexed _address, bool indexed include);

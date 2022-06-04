@@ -17,6 +17,8 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
     const relayer1Address = accounts[3];
     const relayer2Address = accounts[4];
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const tokenID = 1;
     const initialTokenAmount = 100;
     const depositAmount = 10; 
@@ -43,7 +45,7 @@ contract('E2E ERC1155 - Same Chain', async accounts => {
             ERC1155MintableContract.new("TOK").then(instance => ERC1155MintableInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(ERC1155MintableInstance.address, domainID);

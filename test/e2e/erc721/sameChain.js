@@ -18,6 +18,8 @@ contract('E2E ERC721 - Same Chain', async accounts => {
     const relayer1Address = accounts[3];
     const relayer2Address = accounts[4];
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const tokenID = 1;
     const depositMetadata = "0xc0ff33";
     const expectedDepositNonce = 1;
@@ -44,7 +46,7 @@ contract('E2E ERC721 - Same Chain', async accounts => {
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(ERC721MintableInstance.address, domainID);

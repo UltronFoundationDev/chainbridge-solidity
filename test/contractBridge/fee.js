@@ -22,6 +22,8 @@ contract('Bridge - [fee]', async (accounts) => {
     const feeMaxValue = 10000;
     const feePercent = 10;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const depositAmount = Ethers.utils.parseEther("1.5");
     const depositAmountApprove = Ethers.utils.parseEther("2");
 
@@ -46,7 +48,7 @@ contract('Bridge - [fee]', async (accounts) => {
             BridgeInstance = BridgeContract.new(originDomainID, [relayer], 0, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID = Helpers.createResourceID(CentrifugeAssetInstance.address, originDomainID)

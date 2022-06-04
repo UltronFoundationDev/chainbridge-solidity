@@ -6,6 +6,7 @@ import "../interfaces/IDepositExecute.sol";
 import "./HandlerHelpers.sol";
 import "../ERC20Safe.sol";
 import "../interfaces/IBridge.sol";
+import "../interfaces/IDAO.sol";
 
 /**
     @title Handles ERC20 deposits and deposit executions.
@@ -15,15 +16,14 @@ import "../interfaces/IBridge.sol";
 contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     event DepositERC20(address indexed tokenAddress, uint8 indexed destinationDomainID, address indexed sender, uint256 amount, uint256 fee, uint256 amountWithFee);
     IBridge private contractBridge;
-    address private immutable treasuryAddress;
+    IDAO private contractDAO;
+    address private treasuryAddress;
 
     /**
         @param bridgeAddress Contract address of previously deployed Bridge.
         @param _treasuryAddress Contract address of previously deployed Treasury.
      */
-    constructor(
-        address          bridgeAddress, address _treasuryAddress
-    ) public HandlerHelpers(bridgeAddress) {
+    constructor(address bridgeAddress, address _treasuryAddress) public HandlerHelpers(bridgeAddress) {
         contractBridge = IBridge(bridgeAddress);
         treasuryAddress = _treasuryAddress;
     }
@@ -34,6 +34,34 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     */
     function getTreasuryAddress() external view returns(address) {
         return treasuryAddress;
+    }
+
+    /**
+        @notice Gets DAO address, which will change treasury address
+        @return DAO address
+    */
+    function getDAOAddress() external view returns(address) {
+        return address(contractDAO);
+    }
+
+    /**
+        @notice Sets DAO contract address only once
+        @param _address The DAO address
+     */
+    function setDAOContractInitial(address _address) external {
+        require(address(contractDAO) == address(0), "already set");
+        require(_address != address(0), "zero address");
+        contractDAO = IDAO(_address);
+    }
+
+    /**
+        @notice Gets DAO address, which will receive fee from custom bridged ERC20 tokens
+        @return DAO address
+    */
+    function setTreasuryAddress(uint256 id) external returns(address) {
+        address newTreasuryAddress = contractDAO.isSetTreasuryAvailable(id);
+        treasuryAddress = newTreasuryAddress;
+        require(contractDAO.confirmSetTreasuryRequest(id), "confirmed");
     }
 
     /**

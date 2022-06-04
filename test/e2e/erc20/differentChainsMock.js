@@ -67,10 +67,10 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
             ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance)
         ]);
 
-        OriginDAOInstance = await DAOContract.new(OriginBridgeInstance.address);
+        OriginDAOInstance = await DAOContract.new(OriginBridgeInstance.address, someAddressOrigin);
         await OriginBridgeInstance.setDAOContractInitial(OriginDAOInstance.address);
 
-        DestinationDAOInstance = await DAOContract.new(DestinationBridgeInstance.address);
+        DestinationDAOInstance = await DAOContract.new(DestinationBridgeInstance.address, someAddressDestination);
         await DestinationBridgeInstance.setDAOContractInitial(DestinationDAOInstance.address);
 
         originResourceID = Helpers.createResourceID(OriginERC20MintableInstance.address, originDomainID);
@@ -89,6 +89,9 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
             ERC20HandlerContract.new(DestinationBridgeInstance.address, someAddressDestination)
                 .then(instance => DestinationERC20HandlerInstance = instance),
         ]);
+
+        await OriginERC20HandlerInstance.setDAOContractInitial(OriginDAOInstance.address);
+        await DestinationERC20HandlerInstance.setDAOContractInitial(DestinationDAOInstance.address);
 
         await OriginERC20MintableInstance.mint(depositerAddress, initialTokenAmount);
 

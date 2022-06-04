@@ -17,6 +17,7 @@ contract('Bridge - [deposit - ERC1155]', async (accounts) => {
     const relayerThreshold = 0;
     const depositerAddress = accounts[1];
     const originChainTokenID = 42;
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
     const originChainInitialTokenAmount = 100;
     const depositAmount = 10;
     const expectedDepositNonce = 1;
@@ -35,7 +36,7 @@ contract('Bridge - [deposit - ERC1155]', async (accounts) => {
             BridgeInstance = await BridgeContract.new(originDomainID, [], relayerThreshold, 100, feeMaxValue, feePercent)
         ]);
                 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID = Helpers.createResourceID(OriginERC1155MintableInstance.address, originDomainID);

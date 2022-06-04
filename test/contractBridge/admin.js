@@ -36,7 +36,7 @@ contract('Bridge - [admin]', async accounts => {
     beforeEach(async () => {
         BridgeInstance = await BridgeContract.new(domainID, initialRelayers, initialRelayerThreshold, 0, feeMaxValue, feePercent);
         ADMIN_ROLE = await BridgeInstance.DEFAULT_ADMIN_ROLE();
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
     });
     // Testing pausable methods
@@ -131,6 +131,7 @@ contract('Bridge - [admin]', async accounts => {
         const ERC20MintableInstance = await ERC20MintableContract.new("token", "TOK");
         const resourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
         
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);
         await TruffleAssert.passes(BridgeInstance.adminSetResource(1));

@@ -26,6 +26,8 @@ contract('E2E ERC1155 - Two EVM Chains', async accounts => {
     const depositAmount = 10; 
     const expectedDepositNonce = 1;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
+
     const feeMaxValue = 10000;
     const feePercent = 10;
 
@@ -55,10 +57,10 @@ contract('E2E ERC1155 - Two EVM Chains', async accounts => {
             ERC1155MintableContract.new("TOK").then(instance => DestinationERC1155MintableInstance = instance)
         ]);
 
-        OriginDAOInstance = await DAOContract.new(OriginBridgeInstance.address);
+        OriginDAOInstance = await DAOContract.new(OriginBridgeInstance.address, someAddress);
         await OriginBridgeInstance.setDAOContractInitial(OriginDAOInstance.address);
 
-        DestinationDAOInstance = await DAOContract.new(DestinationBridgeInstance.address);
+        DestinationDAOInstance = await DAOContract.new(DestinationBridgeInstance.address, someAddress);
         await DestinationBridgeInstance.setDAOContractInitial(DestinationDAOInstance.address);
         
         originResourceID = Helpers.createResourceID(OriginERC1155MintableInstance.address, originDomainID);

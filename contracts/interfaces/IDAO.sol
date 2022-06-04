@@ -36,4 +36,7 @@ interface IDAO {
 
     function isWithdrawAvailable(uint256 id) external view returns (address, bytes memory);
     function confirmWithdrawRequest(uint256 id) external returns (bool);
+
+    function isSetTreasuryAvailable(uint256 id) external view returns (address);
+    function confirmSetTreasuryRequest(uint256 id) external returns (bool);
 }

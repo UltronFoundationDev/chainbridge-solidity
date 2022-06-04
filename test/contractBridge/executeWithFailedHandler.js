@@ -53,12 +53,14 @@ contract('Bridge - [execute - FailedHandlerExecution]', async accounts => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
     
-        ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
+        await Promise.all([
+            ERC20HandlerContract.new(BridgeInstance.address, someAddress).then(instance => ERC20HandlerInstance = instance),
+        ]);        
 
         await ERC20MintableInstance.mint(depositerAddress, initialTokenAmount);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);

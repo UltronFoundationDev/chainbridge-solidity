@@ -36,7 +36,7 @@ contract('ERC20Handler - [constructor]', async () => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance3 = instance)
         ])
         
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         initialResourceIDs = [];
@@ -55,7 +55,7 @@ contract('ERC20Handler - [constructor]', async () => {
 
     it('initialResourceIDs should be parsed correctly and corresponding resourceID mappings should have expected values', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
-
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
 
         for (i = 0; i < initialResourceIDs.length; i++) {
             await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
