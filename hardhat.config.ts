@@ -10,7 +10,7 @@
  import '@nomiclabs/hardhat-waffle';
  import '@nomiclabs/hardhat-ethers';
 
- import "./deploy/tasks";
+ //import "./deploy/tasks";
  require("dotenv").config();
 
 const config: HardhatUserConfig = {
