@@ -22,6 +22,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
     const domainID = 1;
     const expectedDepositNonce = 1;
 
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
     const depositerAddress = accounts[1];
 
     const feeMaxValue = 10000;
@@ -57,7 +58,7 @@ contract('GenericHandler - [deposit]', async (accounts) => {
             ReturnDataContract.new().then(instance => ReturnDataInstance = instance),
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         initialResourceIDs = [

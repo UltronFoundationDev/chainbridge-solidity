@@ -47,7 +47,7 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
             BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originDomainID);
@@ -205,12 +205,13 @@ contract('Bridge - [create a deposit proposal (voteProposal) with relayerThresho
             BridgeContract.new(originDomainID, [originChainRelayerAddress], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originDomainID);
 
         DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
+        await DestinationERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
 
         await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
         await BridgeInstance.adminSetResource(1);

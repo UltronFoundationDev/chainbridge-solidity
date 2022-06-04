@@ -123,7 +123,7 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
             Helpers.blankFunctionSig];
 
         await Promise.all([
-            DAOContract.new(BridgeInstance.address).then(instance => DAOInstance = instance),
+            DAOContract.new(BridgeInstance.address, someAddress).then(instance => DAOInstance = instance),
             ERC20HandlerContract.new(BridgeInstance.address, someAddress).then(instance => ERC20HandlerInstance = instance),
             ERC20MintableInstance.mint(depositerAddress, erc20TokenAmount),
             ERC721HandlerContract.new(BridgeInstance.address).then(instance => ERC721HandlerInstance = instance),
@@ -133,6 +133,7 @@ contract('Gas Benchmark - [Execute Proposal]', async (accounts) => {
             GenericHandlerInstance = await GenericHandlerContract.new(BridgeInstance.address)
         ]);
 
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         await ERC20MintableInstance.approve(ERC20HandlerInstance.address, erc20TokenAmount, { from: depositerAddress });

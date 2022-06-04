@@ -61,12 +61,14 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
             ERC20MintableContract.new("token", "TOK").then(instance => DestinationERC20MintableInstance = instance)
         ]);
         
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID = Helpers.createResourceID(DestinationERC20MintableInstance.address, originDomainID);
 
         DestinationERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
+        await DestinationERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
+
         await DAOInstance.newSetResourceRequest(DestinationERC20HandlerInstance.address, resourceID, DestinationERC20MintableInstance.address);
         await DAOInstance.newSetBurnableRequest(DestinationERC20HandlerInstance.address, DestinationERC20MintableInstance.address);
         await TruffleAssert.passes(BridgeInstance.adminSetResource(1));

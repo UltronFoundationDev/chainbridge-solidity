@@ -36,7 +36,7 @@ contract('ERC20Handler - [isWhitelisted]', async () => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance2 = instance)
         ])
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         initialResourceIDs = [];
@@ -52,6 +52,7 @@ contract('ERC20Handler - [isWhitelisted]', async () => {
 
     it('initialContractAddress should be whitelisted', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID1, ERC20MintableInstance1.address);
         await BridgeInstance.adminSetResource(1);
         const isWhitelisted = await ERC20HandlerInstance._contractWhitelist.call(ERC20MintableInstance1.address);

@@ -20,6 +20,7 @@ contract('ERC721Handler - [Deposit ERC721]', async (accounts) => {
     const tokenID = 1;
     const feeMaxValue = 10000;
     const feePercent = 10;
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
 
     let DAOInstance;
     let BridgeInstance;
@@ -37,7 +38,7 @@ contract('ERC721Handler - [Deposit ERC721]', async (accounts) => {
             ERC721MintableContract.new("token", "TOK", "").then(instance => ERC721MintableInstance = instance)
         ])
         
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID = Helpers.createResourceID(ERC721MintableInstance.address, domainID);

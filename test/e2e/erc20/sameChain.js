@@ -49,7 +49,7 @@ contract('E2E ERC20 - Same Chain', async accounts => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         resourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
@@ -59,6 +59,7 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         burnableContractAddresses = [];
 
         ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
 
         await ERC20MintableInstance.mint(depositerAddress, initialTokenAmount);
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, resourceID, ERC20MintableInstance.address);

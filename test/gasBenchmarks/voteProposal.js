@@ -45,12 +45,13 @@ contract('Gas Benchmark - [Vote Proposal]', async (accounts) => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance = instance),
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         erc20ResourceID = Helpers.createResourceID(ERC20MintableInstance.address, domainID);
 
         await ERC20HandlerContract.new(BridgeInstance.address, someAddress).then(instance => ERC20HandlerInstance = instance);
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
 
         await ERC20MintableInstance.approve(ERC20HandlerInstance.address, erc20TokenAmount, { from: depositerAddress });
         await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, erc20ResourceID, ERC20MintableInstance.address);

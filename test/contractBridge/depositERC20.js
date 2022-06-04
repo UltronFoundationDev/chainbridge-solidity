@@ -46,12 +46,13 @@ contract('Bridge - [deposit - ERC20]', async (accounts) => {
             BridgeInstance = await BridgeContract.new(originDomainID, [], relayerThreshold, 100, feeMaxValue, feePercent)
         ]);
         
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID = Helpers.createResourceID(OriginERC20MintableInstance.address, originDomainID);
 
         OriginERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
+        await OriginERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
 
         await DAOInstance.newSetResourceRequest(OriginERC20HandlerInstance.address, resourceID, OriginERC20MintableInstance.address);
         await BridgeInstance.adminSetResource(1);

@@ -20,6 +20,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
     const originChainTokenID = 42;
     const expectedDepositNonce = 1;
     const genericBytes = '0x736f796c656e745f677265656e5f69735f70656f706c65';
+    const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
     const feeMaxValue = 10000;
     const feePercent = 10;
 
@@ -37,7 +38,7 @@ contract('Bridge - [deposit - ERC721]', async (accounts) => {
             BridgeContract.new(originDomainID, [], 0, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
         
         originResourceID = Helpers.createResourceID(OriginERC721MintableInstance.address, originDomainID);

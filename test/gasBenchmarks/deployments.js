@@ -29,7 +29,7 @@ contract('Gas Benchmark - [contract deployments]', async () => {
 
     it('Should deploy all contracts and print benchmarks', async () => {
         let contractInstances = [await BridgeContract.new(domainID, [], relayerThreshold, 100, feeMaxValue, feePercent).then(instance => BridgeInstance = instance)];
-        contractInstances.concat(await DAOContract.new(BridgeInstance.address).then(instance => DAOInstance = instance));
+        contractInstances.concat(await DAOContract.new(BridgeInstance.address, someAddress).then(instance => DAOInstance = instance));
         contractInstances = contractInstances.concat(
             await Promise.all([
                 ERC20HandlerContract.new(BridgeInstance.address, someAddress),

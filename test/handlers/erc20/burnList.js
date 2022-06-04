@@ -37,7 +37,7 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
             ERC20MintableContract.new("token", "TOK").then(instance => ERC20MintableInstance2 = instance)
         ]);
 
-        DAOInstance = await DAOContract.new(BridgeInstance.address);
+        DAOInstance = await DAOContract.new(BridgeInstance.address, someAddress);
         await BridgeInstance.setDAOContractInitial(DAOInstance.address);
 
         resourceID1 = Ethers.utils.hexZeroPad((ERC20MintableInstance1.address + Ethers.utils.hexlify(domainID).substr(2)), 32);
@@ -53,7 +53,8 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
 
     it('burnableContractAddresses should be marked true in _burnList', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
-        
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
+
         for (i = 0; i < initialResourceIDs.length; i++) {
             await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
             await TruffleAssert.passes(BridgeInstance.adminSetResource(i+1));
@@ -72,6 +73,7 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
 
     it('ERC20MintableInstance2.address should not be marked true in _burnList', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
 
         for (i = 0; i < initialResourceIDs.length; i++) {
             await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
@@ -89,7 +91,8 @@ contract('ERC20Handler - [Burn ERC20]', async () => {
 
     it('ERC20MintableInstance2.address should be marked true in _burnList after setBurnable is called', async () => {
         const ERC20HandlerInstance = await ERC20HandlerContract.new(BridgeInstance.address, someAddress);
-
+        await ERC20HandlerInstance.setDAOContractInitial(DAOInstance.address);
+        
         for (i = 0; i < initialResourceIDs.length; i++) {
             await DAOInstance.newSetResourceRequest(ERC20HandlerInstance.address, initialResourceIDs[i], initialContractAddresses[i])
             await TruffleAssert.passes(BridgeInstance.adminSetResource(i+1));
