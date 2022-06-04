@@ -11,6 +11,7 @@
  import '@nomiclabs/hardhat-ethers';
 
  import "./deploy/tasks";
+ require("dotenv").config();
 
 const config: HardhatUserConfig = {
   solidity: {
