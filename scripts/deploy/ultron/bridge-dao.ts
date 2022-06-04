@@ -48,30 +48,33 @@ async function main() {
   
   console.log(`The ${colorYellow}Bridge${colorReset} address: ${colorBlue}${BridgeContract.address}${colorReset}`);
 
-  const DAOContract = await (await (new DAO__factory(signer)).deploy(BridgeContract.address)).deployed() as DAO;
-  
-  console.log(`\nThe ${colorYellow}DAO${colorReset} address: ${colorBlue}${DAOContract.address}${colorReset}`);
-
-  await BridgeContract.setDAOContractInitial(DAOContract.address);
-  console.log(`\nSetted ${colorYellow}DAO${colorReset} contract ${colorGreen}in Bridge${colorReset}: ${colorBlue}${DAOContract.address}${colorReset}`);
-
-  await DAOContract.newChangeFeeRequest(tokenAddress, destinationId, basicFee, minAmount, maxAmount);
-  await BridgeContract.adminChangeFee(1);
-  console.log(`\nSetted New Fee for token ${tokenAddress} on destination chain ${destinationId}`);
-  await DAOContract.newChangeFeeRequest(tokenAddress, domainId, basicFee, minAmount, maxAmount);
-  await BridgeContract.adminChangeFee(2);
-  console.log(`\nSetted New Fee for dest token ${tokenAddress} on domain chain ${domainId}`);
-
   const treasuryAddress = signer.address;
   const ERC20HandlerContract = await (await (new ERC20Handler__factory(signer)).deploy(BridgeContract.address, treasuryAddress)).deployed() as ERC20Handler;
   console.log(`\nThe ${colorYellow}ERC20Handler${colorReset} address: ${colorBlue}${ERC20HandlerContract.address}${colorReset}`);
 
+  const DAOContract = await (await (new DAO__factory(signer)).deploy(BridgeContract.address, ERC20HandlerContract.address)).deployed() as DAO;
+  
+  console.log(`\nThe ${colorYellow}DAO${colorReset} address: ${colorBlue}${DAOContract.address}${colorReset}`);
+
+  await BridgeContract.setDAOContractInitial(DAOContract.address);
+  console.log(`\nSet ${colorYellow}DAO${colorReset} contract ${colorGreen}in Bridge${colorReset}: ${colorBlue}${DAOContract.address}${colorReset}`);
+  await ERC20HandlerContract.setDAOContractInitial(DAOContract.address);
+  console.log(`\nSet ${colorYellow}DAO${colorReset} contract ${colorGreen}in ERC20Handler${colorReset}: ${colorBlue}${DAOContract.address}${colorReset}`);
+
+
+  await DAOContract.newChangeFeeRequest(tokenAddress, destinationId, basicFee, minAmount, maxAmount);
+  await BridgeContract.adminChangeFee(1);
+  console.log(`\nSet New Fee for token ${tokenAddress} on destination chain ${destinationId}`);
+  await DAOContract.newChangeFeeRequest(tokenAddress, domainId, basicFee, minAmount, maxAmount);
+  await BridgeContract.adminChangeFee(2);
+  console.log(`\nSet New Fee for dest token ${tokenAddress} on domain chain ${domainId}`);
+  
   // Should copy it from console, when deploys to another chain
   const resourceID = Helpers.createResourceID('0x853D98d7B260832A55F254bBcF51216fD3a13804', 1);
   console.log(`\nThe ${colorYellow}ResourceID${colorReset}: ${colorBlue}${resourceID}${colorReset}`);
   await DAOContract.newSetResourceRequest(ERC20HandlerContract.address, resourceID, tokenAddress);
   await BridgeContract.adminSetResource(1);
-  console.log(`\nSetted New Resource for token ${tokenAddress}`);
+  console.log(`\nSet New Resource for token ${tokenAddress}`);
 }
 main()
   .then(() => process.exit(0))
