@@ -85,6 +85,11 @@ contract DAO is Multisig, IDAO {
         RequestStatus status;
     }
 
+    struct SetTreasuryRequest {
+        address newTreasuryAddress;
+        RequestStatus status;
+    }
+
     // mapping of owner change requests
     mapping(uint256 => OwnerChangeRequest) private ownerChangeRequests;
     // mapping of owner change request confirmations
@@ -169,7 +174,15 @@ contract DAO is Multisig, IDAO {
     // id for new withdraw request
     uint256 private withdrawRequestCounter;
 
+    // mapping of set treasury requests
+    mapping(uint256 => SetTreasuryRequest) private setTreasuryRequests;
+    // mapping of set treasury confirmations
+    mapping(uint256 => mapping(address => bool)) private setTreasuryRequestConfirmations;
+    // id for new set treasury request
+    uint256 private setTreasuryRequestCounter;
+
     address private immutable bridgeAddress;
+    address private immutable erc20HandlerAddress;
 
     /**
      * @notice Throws error if any contract except bridge trys to call the function
@@ -181,9 +194,11 @@ contract DAO is Multisig, IDAO {
 
     /**
      * @param _bridgeAddress the address of bridge
+     * @param _erc20HandlerAddress the address of ERC20Handler
     */
-    constructor(address _bridgeAddress) public {
+    constructor(address _bridgeAddress, address _erc20HandlerAddress) public {
         bridgeAddress = _bridgeAddress;
+        erc20HandlerAddress = _erc20HandlerAddress;
     }
 
     /**
@@ -280,6 +295,14 @@ contract DAO is Multisig, IDAO {
     */
     function getWithdrawRequestCount() external view returns(uint256) {
         return withdrawRequestCounter;
+    }
+    
+    /**
+     * @notice Gets set treasury request count
+     * @return Returns set treasury request count 
+    */
+    function getSetTreasuryRequestCount() external view returns(uint256) {
+        return setTreasuryRequestCounter;
     }
 
     /**
@@ -1282,5 +1305,85 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.SetGenericResource, true, msg.sender, setGenericResourceRequestCounter);
 
         return setGenericResourceRequestCounter;
+    }
+
+    /**
+     * @notice Allows setting treasury request if it is not approved and there are enough votes
+     * @param id the id of set treasury request
+    */
+    function isSetTreasuryAvailable(uint256 id) 
+        external 
+        view 
+        override
+        returns (address)
+    {
+        require(setTreasuryRequests[id].status == RequestStatus.Active, "not active");
+        _consensus(setTreasuryRequestConfirmations, id);
+        return setTreasuryRequests[id].newTreasuryAddress;
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for set treasury request
+     * @param id request id to be executed
+    */
+    function countGetSetTreasuryAffirmativeVotes(uint256 id) external view returns(uint256) {
+        return _countGet(setTreasuryRequestConfirmations, id);
+    }
+
+    /**
+     * @notice Cancels set treasury request if it is active
+     * @param id the id of set treasury request
+    */
+    function cancelSetTreasuryRequest(uint256 id) external onlyVoter(msg.sender) {
+        require(setTreasuryRequests[id].status == RequestStatus.Active, "not active");
+        setTreasuryRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
+     * @notice Approves setting treasury request if it is not approved
+     * @param id the id of set treasury request
+    */
+    function confirmSetTreasuryRequest(uint256 id) 
+        external 
+        override
+        returns (bool)
+    {
+        require(msg.sender == erc20HandlerAddress, "not ERC20handler address");
+        require(setTreasuryRequests[id].status == RequestStatus.Active, "not active");
+        setTreasuryRequests[id].status = RequestStatus.Executed;
+        return true;
+    }
+
+    /**
+     * @notice Allows a voter to insert a confirmation for set treasury request 
+     * if it is not approved and not confirmed
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of set treasury request
+    */
+    function newVoteForSetTreasuryRequest(bool voteType, uint256 id) external {
+        require(setTreasuryRequests[id].status == RequestStatus.Active, "not active");
+        _newVoteFor(setTreasuryRequestConfirmations, id, voteType, RequestType.SetTreasury);
+    }
+
+    /**
+     * @notice Creation of set treasury request by any voter
+     * @param _address new treasury address
+    */
+    function newSetTreasuryRequest(address _address)
+        external
+        onlyVoter(msg.sender)
+        returns (uint256)
+    {
+        require(_address!= address(0), "zero address");
+        setTreasuryRequestCounter = setTreasuryRequestCounter + 1;
+        
+        setTreasuryRequests[setTreasuryRequestCounter] = SetTreasuryRequest({
+            newTreasuryAddress: _address,
+            status: RequestStatus.Active
+        });
+        
+        setTreasuryRequestConfirmations[setTreasuryRequestCounter][msg.sender] = true;
+        emit NewVoteForRequest(RequestType.SetTreasury, true, msg.sender, setTreasuryRequestCounter);
+        return setTreasuryRequestCounter;
     }
 }

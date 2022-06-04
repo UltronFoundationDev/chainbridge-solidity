@@ -28,7 +28,6 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
     uint128 private feeMaxValue; /// @notice e.g. 10000 = 100% => 1(feePercent) = 0.01% 
     uint64 private feePercent;
 
-    address private addressDAO;
     IDAO private contractDAO;
 
     enum ProposalStatus {Inactive, Active, Passed, Executed, Cancelled}
@@ -118,10 +117,9 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         @param _address The DAO address
      */
     function setDAOContractInitial(address _address) external {
-        require(addressDAO == address(0), "already set");
+        require(address(contractDAO) == address(0), "already set");
         require(_address != address(0), "zero address");
-        addressDAO = _address;
-        contractDAO = IDAO(addressDAO);
+        contractDAO = IDAO(_address);
     }
 
     function _onlyRelayers() private view {
