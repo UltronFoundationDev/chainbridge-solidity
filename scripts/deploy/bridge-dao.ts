@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { Bridge, Bridge__factory, ERC20Handler__factory, DAO, DAO__factory, ERC20Handler } from "../../../typechain";
 import * as dotenv from 'dotenv';
-import * as Helpers from "../../../hardhat-test/helpers";
+import * as Helpers from "../../hardhat-test/helpers";
 import { BigNumberish } from "ethers";
 import hre from 'hardhat';
 
