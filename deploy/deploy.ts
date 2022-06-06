@@ -49,7 +49,7 @@ subtask("bridge", "The contract Bridge is deployed")
 subtask("ERC20Handler", "The contract ERC20Handler is deployed")
     .addParam("signer", "signer address")    
     .addParam("bridge", "bridge address")
-    .setAction(async (taskArgs, { ethers }) => {];
+    .setAction(async (taskArgs, { ethers }) => {
         const treasuryAddress = taskArgs.signer.address;
         
         const ERC20HandlerFactory = await ethers.getContractFactory("ERC20Handler", taskArgs.signer);
