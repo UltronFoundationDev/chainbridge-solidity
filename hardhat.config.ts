@@ -10,7 +10,7 @@
  import '@nomiclabs/hardhat-waffle';
  import '@nomiclabs/hardhat-ethers';
 
- import "./deploy/tasks";
+ import "./deploy/deploy";
  require("dotenv").config();
 
 const config: HardhatUserConfig = {
@@ -49,54 +49,66 @@ const config: HardhatUserConfig = {
       gasPrice: 8000000000,
     },
     ultron: {
-      url: `http://ultron-rpc.net`,
+      url: `https://ultron-rpc.net`,
       chainId: 1231,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     ethereum: {
       url: "https://mainnet.infura.io/v3/",
-      chainId: 1
+      chainId: 1,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     fantom: {
       url: "https://rpc.ftm.tools/",
-      chainId: 250
+      chainId: 250,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     bsc: {
       url: "https://bsc-dataseed.binance.org/",
-      chainId: 56
+      chainId: 56,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     polygon: {
       url: "https://rpc-mainnet.matic.network",
-      chainId: 137
+      chainId: 137,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     avalanche: {
       url: "https://api.avax.network/ext/bc/C/rpc",
-      chainId: 43114
+      chainId: 43114,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     ultron_testnet: {
       url: `http://51.250.34.31:18545`,
       chainId: 1230,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
       chainId: 5,
       gas: 2100000,
       gasPrice: 8000000000,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     bsc_testnet: {
       url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
       chainId: 97,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     fantom_testnet: {
       url: `https://rpc.testnet.fantom.network/`,
       chainId: 4002,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     mumbai: {
       url: "https://rpc-mumbai.matic.today",
-      chainId: 80001
+      chainId: 80001,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     }, 
     avalanche_fuji: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
-      chainId: 43113
+      chainId: 43113,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     }, 
   },
   etherscan: {
