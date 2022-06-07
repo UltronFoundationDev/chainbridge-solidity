@@ -10,6 +10,16 @@ export class Token {
     }  
 }
 
+export class TokenResourceId {
+    tokenName: string;
+    resourceId: string;;
+
+    constructor(tokenName: string, resourceId: string) {
+      this.tokenName = tokenName;
+      this.resourceId = resourceId;
+    }  
+}
+
 export class TokenFee extends Token {
     destinationDomainId: BigNumberish;
     basicFee: BigNumber;
