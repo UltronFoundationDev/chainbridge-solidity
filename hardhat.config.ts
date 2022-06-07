@@ -54,8 +54,9 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     ethereum: {
-      url: "https://mainnet.infura.io/v3/",
+      url: "https://eth-mainnet.alchemyapi.io/v2/yTaJRZrkn9LUEI6S7_GQhU4_9fhMgMsv",
       chainId: 1,
+      gasPrice: 70000000000,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     fantom: {
@@ -69,9 +70,8 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     polygon: {
-      url: "https://polygon-rpc.com",
+      url: "https://polygon-mainnet.g.alchemy.com/v2/1NyLrZDbQlwOlSdSWBYYcRpioLBnvBeX",
       chainId: 137,
-      gas: 2100000,
       gasPrice: 40000000000,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },

@@ -31,7 +31,7 @@ subtask("bridge", "The contract Bridge is deployed")
 
         // eth domainId: 2
         // polygon domainId: 5
-        const domainId:BigNumberish = 5;
+        const domainId:BigNumberish = 2;
         const initialRealyers:string[] = [`${signer.address}`];
         const initialRelayerThreshold:BigNumberish = initialRealyers.length;
         const expiry:BigNumberish = 40;
