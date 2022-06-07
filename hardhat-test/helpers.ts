@@ -1,6 +1,5 @@
-import { BytesLike } from "ethers";
+import { ethers, BytesLike, BigNumber } from "ethers";
 import { Hexable, ParamType } from "ethers/lib/utils";
-import { ethers } from "hardhat";
 
 const AbiCoder = new ethers.utils.AbiCoder;
 
@@ -46,4 +45,8 @@ export const logDeploy = (contractName: string, contractType: string | undefined
 
 export function delay(ms: number): any {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export const parseDecimals = (amount: number, decimals: number) => {
+    return ethers.utils.parseUnits(`${amount}`, decimals);
 }
