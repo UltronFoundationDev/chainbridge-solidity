@@ -27,23 +27,51 @@ task("deploy", "deploy everything")
 
 /*========== Bridge ==========*/
 subtask("bridge", "The contract Bridge is deployed")
-    .setAction(async (_, { ethers }) => {
+    .setAction(async (_, { ethers, network }) => {
         const signer = (await ethers.getSigners())[0];
 
-        // eth domainId: 2
-        // polygon domainId: 5
-        const domainId:BigNumberish = 2;
-        const initialRealyers:string[] = [`${signer.address}`];
-        const initialRelayerThreshold:BigNumberish = initialRealyers.length;
+        let domainId:BigNumberish = 0;
+        if(network.name === "ultron") {
+            domainId = 1;
+        }
+        if(network.name === "ethereum") {
+            domainId = 2;
+        }
+        if(network.name === "bsc") {
+            domainId = 3;
+        }
+        if(network.name === "avalanche") {
+            domainId = 4;
+        }
+        if(network.name === "polygon") {
+            domainId = 5;
+        }
+        if(network.name === "fantom") {
+            domainId = 6;
+        }
+
+        const initialRealyers:string[] = [
+            `${signer.address}`, 
+            "0x8599FdA43D7CE910352ffe9a3E5F34E0b6d3867E",
+            "0xd0C34eaC64B8053Bd5Aef1a16deEdbBf83E638a7",
+            "0xe5640686419D526c1d0813ace59fd7751F584232",
+        ];
+
+        const initialRelayerThreshold:BigNumberish = 2;
+
         const expiry:BigNumberish = 40;
         const feeMaxValue:BigNumberish = 10000;
         const feePercent:BigNumberish = 10;
 
-        const bridgeFactory = await ethers.getContractFactory("Bridge", signer);
-        const bridge = await (await bridgeFactory.deploy(domainId, initialRealyers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed();
-        console.log(`The Bridge: \u001b[1;34m${bridge.address}\u001b[0m`);
-        
-        return bridge.address;
+        if(domainId !== 0) {
+            const bridgeFactory = await ethers.getContractFactory("Bridge", signer);
+            const bridge = await (await bridgeFactory.deploy(domainId, initialRealyers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed();
+            console.log(`The Bridge: \u001b[1;34m${bridge.address}\u001b[0m`);    
+            return bridge.address;
+        }
+        else {
+            console.info(`Should add ${network.name}!`)
+        }
     });
 
 /*========== ERC20Handler ==========*/
@@ -103,7 +131,7 @@ subtask("deploy-tokens", "Deploying default tokens for our chain")
         const erc20StableFactory = await ethers.getContractFactory("ERC20Stable", signer);
 
         const wBTC = await (await erc20CustomFactory.deploy("Wrapped Bitcoin", "wBTC")).deployed();
-        await wBTC.grantMinterRole("0x598E5dBC2f6513E6cb1bA253b255A5b73A2a720b");
+        await wBTC.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The WBTC: \u001b[1;34m${wBTC.address}\u001b[0m`);
 
         const wETH = await (await erc20CustomFactory.deploy("Wrapped Ethereum", "wETH")).deployed();
@@ -131,7 +159,7 @@ subtask("deploy-tokens", "Deploying default tokens for our chain")
         console.log(`The MATIC: \u001b[1;34m${matic.address}\u001b[0m`);
 
         const ftm = await (await erc20CustomFactory.deploy("Fantom", "FTM")).deployed();
-        await ftm.grantMinterRole("0x598E5dBC2f6513E6cb1bA253b255A5b73A2a720b");
+        await ftm.grantMinterRole(taskArgs.erc20Handle);
         console.log(`The FTM: \u001b[1;34m${ftm.address}\u001b[0m`);
 
         const dai = await (await erc20CustomFactory.deploy("Dai", "DAI")).deployed();

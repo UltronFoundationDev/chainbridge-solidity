@@ -61,15 +61,14 @@ const config: HardhatUserConfig = {
       chainId: 1,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-    fantom: {
-      url: "https://rpc.ftm.tools/",
-      chainId: 250,
-      gasPrice: 50000000000,
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
     bsc: {
       url: "https://bsc-dataseed1.binance.org/",
       chainId: 56,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    avalanche: {
+      url: "https://api.avax.network/ext/bc/C/rpc",
+      chainId: 43114,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     polygon: {
@@ -78,9 +77,10 @@ const config: HardhatUserConfig = {
       gasPrice: 40000000000,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-    avalanche: {
-      url: "https://api.avax.network/ext/bc/C/rpc",
-      chainId: 43114,
+    fantom: {
+      url: "https://rpc.ftm.tools/",
+      chainId: 250,
+      gasPrice: 50000000000,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     ultron_testnet: {
@@ -100,21 +100,21 @@ const config: HardhatUserConfig = {
       chainId: 97,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-    fantom_testnet: {
-      url: `https://rpc.testnet.fantom.network/`,
-      chainId: 4002,
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    mumbai: {
-      url: "https://rpc-mumbai.matic.today",
-      chainId: 80001,
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    }, 
     avalanche_fuji: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       chainId: 43113,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     }, 
+    mumbai: {
+      url: "https://rpc-mumbai.matic.today",
+      chainId: 80001,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    }, 
+    fantom_testnet: {
+      url: `https://rpc.testnet.fantom.network/`,
+      chainId: 4002,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY
