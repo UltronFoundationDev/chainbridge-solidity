@@ -1,5 +1,6 @@
 import { ethers, BytesLike, BigNumber } from "ethers";
 import { Hexable, ParamType } from "ethers/lib/utils";
+import { Token } from "../deploy/tokenFee";
 
 const AbiCoder = new ethers.utils.AbiCoder;
 
@@ -49,4 +50,8 @@ export function delay(ms: number): any {
 
 export const parseDecimals = (amount: number, decimals: number) => {
     return ethers.utils.parseUnits(`${amount}`, decimals);
+}
+
+export const findToken = (tokens: Token[], name: string): any => {
+    return tokens.find(x => x.tokenName === name)?.tokenAddress;
 }
