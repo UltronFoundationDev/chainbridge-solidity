@@ -11,6 +11,8 @@
  import '@nomiclabs/hardhat-ethers';
 
  import "./deploy/deploy";
+ import "./deploy/changeFee";
+ import "./deploy/setResourceIds";
  require("dotenv").config();
 
 const config: HardhatUserConfig = {
@@ -61,6 +63,7 @@ const config: HardhatUserConfig = {
     fantom: {
       url: "https://rpc.ftm.tools/",
       chainId: 250,
+      gasPrice: 50000000000,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     bsc: {
