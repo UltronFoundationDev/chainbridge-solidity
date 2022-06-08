@@ -17,43 +17,86 @@ task("set-resource-ids-burnable", "Setting burnable and resource Ids for tokens"
 
         const bridge = await ethers.getContractAt("Bridge", bridgeAddress, signer);
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
-        const domainId:BigNumberish = await bridge._domainID(); 
-        
-        const ourChainTokenAddresses = [
-            new Token("WBTC",   "0x8E96f8FCD6815B4e1528D63E5f72e6DCc04Bf9bE"), 
-            new Token("WETH",   "0xb15b478246201DAc8D92353c34615A7b20beA938"), 
-            new Token("BNB",    "0x93b400831FB4689E41457F43b3f697042Fe59F01"), 
-            new Token("AVAX",   "0xB5bE0484FB6118401F5377C32ec3F1E530CC1815"), 
-            new Token("BUSD",   "0x422b105bb127A883F9Dc0EE022304FcB5fDE5B9C"), 
-            new Token("SHIB",   "0x49F1b81ECa2b0d1E3aA82E64934292a6B59Ad61b"), 
-            new Token("MATIC",  "0xCEcc5727D1E5e4Af94304EF98b559B00183cbEAC"),
-            new Token("FTM",    "0xDF1C1C2f3305bB6E082D382a15eb9c048Dc4C58A"), 
-            new Token("DAI",    "0x312Cf2901C89637f34a83f594028Fba1517f8Cd5"),
-            new Token("LINK",   "0x4Df449d10BD2BF419f2Fe578dFD15bB361a2d148"), 
-            new Token("uUSDT",  "0xb7FE74c0C957534400D2FF0612D3f59aF79eba49"),
-            new Token("uUSDC",  "0x026d9a638B8981Ed47aA1580f79533cEA7C1fC48"),
+        const ERC20Handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
+
+        const domainId:BigNumberish = await bridge._domainID();
+
+        const chainTokenAddresses = [
+            new Token("WBTC",   "0xd2b86a80A8f30b83843e247A50eCDc8D843D87dD"), 
+            new Token("WETH",   "0x2318Bf5809a72AaBAdd15a3453A18e50Bbd651Cd"), 
+            new Token("BNB",    "0x169ac560852ed79af3D97A8977DCf2EBA54A0488"), 
+            new Token("AVAX",   "0x6FE94412953D373Ef464b85637218EFA9EAB8e97"), 
+            new Token("BUSD",   "0xc7cAc85C1779d2B8ADA94EFfff49A4754865e2E4"), 
+            new Token("SHIB",   "0xb5Bb1911cf6C83C1a6E439951C40C2949B0d907f"), 
+            new Token("MATIC",  "0x6094a1e3919b302E236B447f45c4eb2DeCE9D9F4"),
+            new Token("FTM",    "0xE8Ef8A6FE387C2D10951a63ca8f37dB6B8fA02C1"), 
+            new Token("DAI",    "0x045F0f2DE758743c84b756B1Fca735a0dDf0b8f4"),
+            new Token("LINK",   "0xc8Fb7999d62072E12fE8f3EDcd7821204FCa0344"), 
+            new Token("uUSDT",  "0x97FDd294024f50c388e39e73F1705a35cfE87656"),
+            new Token("uUSDC",  "0x3c4E0FdeD74876295Ca36F62da289F69E3929cc4"),
         ];
 
-        console.info(await DAO.getSetResourceRequestCount());
-        console.info(await DAO.getSetBurnableRequestCount());
+        // for(let i:number = 1; i <= chainTokenAddresses.length - 2; i++) {
+        //     let token = await ethers.getContractAt("ERC20Custom", chainTokenAddresses[i - 1].tokenAddress, signer);
+        //     let role = await token.MINTER_ROLE(); 
+        //     await token.grantMinterRole(erc20HandlerAddress);
+        //     await Helpers.delay(4000);
+        //     console.info(`${chainTokenAddresses[i - 1].tokenName} ${await token.hasRole(role, erc20HandlerAddress)}`);
+        // }
 
-        let resourceIds: string[] = [];
-        for(let i:number = 1; i <= ourChainTokenAddresses.length; i++) {
-            resourceIds.push(Helpers.createResourceID(ourChainTokenAddresses[i - 1].tokenAddress, domainId));
-            await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - 1], ourChainTokenAddresses[i - 1].tokenAddress);
+        // for(let i:number = chainTokenAddresses.length - 1; i <= chainTokenAddresses.length; i++) {
+        //     let token = await ethers.getContractAt("ERC20Stable", chainTokenAddresses[i - 1].tokenAddress, signer);
+        //     let role = await token.MINTER_ROLE(); 
+        //     await token.grantMinterRole(erc20HandlerAddress);
+        //     await Helpers.delay(4000);
+        //     console.info(`${chainTokenAddresses[i - 1].tokenName} ${await token.hasRole(role, erc20HandlerAddress)}`);
+        // }
+
+        const resourceIds = [
+            //new TokenResourceId("wULX",   ""),
+            new TokenResourceId("WBTC",     "0x00000000000000000000008e96f8fcd6815b4e1528d63e5f72e6dcc04bf9be01"),
+            new TokenResourceId("WETH",     "0x0000000000000000000000b15b478246201dac8d92353c34615a7b20bea93801"),
+            new TokenResourceId("BNB",      "0x000000000000000000000093b400831fb4689e41457f43b3f697042fe59f0101"),
+            new TokenResourceId("AVAX",     "0x0000000000000000000000b5be0484fb6118401f5377c32ec3f1e530cc181501"),
+            new TokenResourceId("BUSD",     "0x0000000000000000000000422b105bb127a883f9dc0ee022304fcb5fde5b9c01"),
+            new TokenResourceId("SHIB",     "0x000000000000000000000049f1b81eca2b0d1e3aa82e64934292a6b59ad61b01"),
+            new TokenResourceId("MATIC",    "0x0000000000000000000000cecc5727d1e5e4af94304ef98b559b00183cbeac01"),
+            new TokenResourceId("FTM",      "0x0000000000000000000000df1c1c2f3305bb6e082d382a15eb9c048dc4c58a01"),
+            new TokenResourceId("DAI",      "0x0000000000000000000000312cf2901c89637f34a83f594028fba1517f8cd501"),
+            new TokenResourceId("LINK",     "0x00000000000000000000004df449d10bd2bf419f2fe578dfd15bb361a2d14801"),
+            new TokenResourceId("uUSDT",     "0x0000000000000000000000b7fe74c0c957534400d2ff0612d3f59af79eba4901"),
+            new TokenResourceId("uUSDC",     "0x0000000000000000000000026d9a638b8981ed47aa1580f79533cea7c1fc4801"),
+        ];
+
+        const iteratorResource = +(await DAO.getSetResourceRequestCount()) + 1;
+        console.info(iteratorResource);   
+        const iteratorBurnable = +(await DAO.getSetBurnableRequestCount()) + 1;     
+        console.info(iteratorBurnable);
+
+        //let resourceIds: string[] = [];
+        for(let i:number = 1; i <= chainTokenAddresses.length; i++) {
+            //resourceIds.push(Helpers.createResourceID(ourChainTokenAddresses[i - 1].tokenAddress, domainId));
+            await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - 1].resourceId, chainTokenAddresses[i - 1].tokenAddress);
+            console.info(`newSetResourceRequest ${await DAO.getSetResourceRequestCount()}`)
+            await Helpers.delay(4000);
         }
 
-        for(let i:number = 1; i <= ourChainTokenAddresses.length; i++) {
+        for(let i:number = iteratorResource; i <= (await DAO.getSetResourceRequestCount()); i++) {
             await bridge.adminSetResource(i);    
-            console.info(`[${ourChainTokenAddresses[i - 1].tokenName}] [${ourChainTokenAddresses[i - 1].tokenAddress}] - resource id [${resourceIds[i - 1]}]`);
+            console.info(`adminSetResource ${i}`)
+            await Helpers.delay(4000);
         }
 
-        for(let i:number = 1; i <= ourChainTokenAddresses.length; i++) {
-            await DAO.newSetBurnableRequest(erc20HandlerAddress, ourChainTokenAddresses[i - 1].tokenAddress);
+        for(let i:number = 1; i <= chainTokenAddresses.length; i++) {
+            await DAO.newSetBurnableRequest(erc20HandlerAddress, chainTokenAddresses[i - 1].tokenAddress);
+            console.info(`newSetBurnableRequest ${await DAO.getSetBurnableRequestCount()}`)
+            await Helpers.delay(4000);
         }
 
-        for(let i:number = 1; i <= ourChainTokenAddresses.length; i++) {
+        for(let i:number = iteratorBurnable; i <= (await DAO.getSetBurnableRequestCount()); i++) {
             await bridge.adminSetBurnable(i);
+            console.info(`adminSetBurnable ${i}`)
+            await Helpers.delay(4000);
         }
 
         return true;
@@ -104,14 +147,16 @@ task("set-resource-ids-eth", "Setting resource Ids for tokens")
             new TokenResourceId("USDC",     "0x0000000000000000000000026d9a638b8981ed47aa1580f79533cea7c1fc4801"),
         ];
 
+        const iterator = +(await DAO.getSetResourceRequestCount()) + 1;
+        console.info(iterator);
+
         for(let i:number = 1; i <= tokenAddresses.length; i++) {
             await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - 1].resourceId, tokenAddresses[i - 1].tokenAddress);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(5000);
         }
 
-        console.info(await DAO.getSetResourceRequestCount())
-        for(let i:number = 1; i <= (await DAO.getSetResourceRequestCount()); i++) {
+        for(let i:number = iterator; i <= (await DAO.getSetResourceRequestCount()); i++) {
             await bridge.adminSetResource(i);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(5000);
@@ -167,14 +212,16 @@ task("set-resource-ids-bsc", "Setting resource Ids for tokens")
             new TokenResourceId("USDC",     "0x0000000000000000000000026d9a638b8981ed47aa1580f79533cea7c1fc4801"),
         ];
 
+        const iterator = +(await DAO.getSetResourceRequestCount()) + 1;
+        console.info(iterator);
+
         for(let i:number = 1; i <= tokenAddresses.length; i++) {
             await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - 1].resourceId, tokenAddresses[i - 1].tokenAddress);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(8000);
         }
 
-        console.info(await DAO.getSetResourceRequestCount())
-        for(let i:number = 1; i <= (await DAO.getSetResourceRequestCount()); i++) {
+        for(let i:number = iterator; i <= (await DAO.getSetResourceRequestCount()); i++) {
             await bridge.adminSetResource(i);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(8000);
@@ -226,14 +273,16 @@ task("set-resource-ids-avalanche", "Setting resource Ids for tokens")
             new TokenResourceId("USDC",     "0x0000000000000000000000026d9a638b8981ed47aa1580f79533cea7c1fc4801"),
         ];
 
+        const iterator = +(await DAO.getSetResourceRequestCount()) + 1;
+        console.info(iterator);
+
         for(let i:number = 1; i <= tokenAddresses.length; i++) {
             await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - 1].resourceId, tokenAddresses[i - 1].tokenAddress);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(4000);
         }
 
-        console.info(await DAO.getSetResourceRequestCount())
-        for(let i:number = 1; i <= (await DAO.getSetResourceRequestCount()); i++) {
+        for(let i:number = iterator; i <= (await DAO.getSetResourceRequestCount()); i++) {
             await bridge.adminSetResource(i);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(4000);
@@ -287,14 +336,16 @@ task("set-resource-ids-polygon", "Setting resource Ids for tokens")
             new TokenResourceId("USDC",     "0x0000000000000000000000026d9a638b8981ed47aa1580f79533cea7c1fc4801"),
         ];
 
+        const iterator = +(await DAO.getSetResourceRequestCount()) + 1;
+        console.info(iterator);
+        
         for(let i:number = 1; i <= tokenAddresses.length; i++) {
             await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - 1].resourceId, tokenAddresses[i - 1].tokenAddress);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(4000);
         }
 
-        console.info(await DAO.getSetResourceRequestCount())
-        for(let i:number = 1; i <= (await DAO.getSetResourceRequestCount()); i++) {
+        for(let i:number = iterator; i <= (await DAO.getSetResourceRequestCount()); i++) {
             await bridge.adminSetResource(i);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(4000);
@@ -345,15 +396,17 @@ task("set-resource-ids-ftm", "Setting resource Ids for tokens")
             new TokenResourceId("USDT",     "0x0000000000000000000000b7fe74c0c957534400d2ff0612d3f59af79eba4901"),
             new TokenResourceId("USDC",     "0x0000000000000000000000026d9a638b8981ed47aa1580f79533cea7c1fc4801"),
         ];
-    
+        
+        const iterator = +(await DAO.getSetResourceRequestCount()) + 1;
+        console.info(iterator);
+        
         for(let i:number = 1; i <= tokenAddresses.length; i++) {
             await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - 1].resourceId, tokenAddresses[i - 1].tokenAddress);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(4000);
         }
 
-        console.info(await DAO.getSetResourceRequestCount())
-        for(let i:number = 1; i <= (await DAO.getSetResourceRequestCount()); i++) {
+        for(let i:number = iterator; i <= (await DAO.getSetResourceRequestCount()); i++) {
             await bridge.adminSetResource(i);
             console.info(`SetResourceRequest ${i}`)    
             await Helpers.delay(4000);
