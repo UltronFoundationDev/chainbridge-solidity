@@ -82,6 +82,7 @@ subtask("setInitialContracts", "Set Initial Contracts successfully")
     .setAction(async (taskArgs, { ethers }) => {
         const signer = (await ethers.getSigners())[0];
 
+        
         const bridge = await ethers.getContractAt("Bridge", taskArgs.bridge, signer);
         const ERC20Handler = await ethers.getContractAt("ERC20Handler", taskArgs.erc20Handler, signer);
         
