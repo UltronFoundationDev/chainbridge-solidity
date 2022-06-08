@@ -13,14 +13,15 @@ task("deploy", "deploy everything")
             bridge: bridge, erc20Handler: erc20Handler, dao: daoContract
         });
 
-        //const deployTokens = await run("deploy-tokens", { erc20Handler: erc20Handler });
-
         console.log("=".repeat(50));
         Helpers.logDeploy("bridge", "Impl", bridge);
         Helpers.logDeploy("DAOContract", "Impl", daoContract);
         Helpers.logDeploy("ERC20Handler", "Impl", erc20Handler);
         console.log("Set initial contracts: " + setInitialContracts);
-        //console.log("Deployed tokens: " + deployTokens);
+        if(network.name == "ultron") {
+            const deployTokens = await run("deploy-tokens", { erc20Handler: erc20Handler });
+            console.log("Deployed tokens: " + deployTokens);
+        }
     });
 
 
@@ -82,12 +83,13 @@ subtask("setInitialContracts", "Set Initial Contracts successfully")
     .setAction(async (taskArgs, { ethers }) => {
         const signer = (await ethers.getSigners())[0];
 
-        
         const bridge = await ethers.getContractAt("Bridge", taskArgs.bridge, signer);
         const ERC20Handler = await ethers.getContractAt("ERC20Handler", taskArgs.erc20Handler, signer);
         
         await bridge.setDAOContractInitial(taskArgs.dao);
+        console.info(await bridge.getContractDAO());
         await ERC20Handler.setDAOContractInitial(taskArgs.dao);
+        console.info(await ERC20Handler.getDAOAddress());
 
         return true;
     });

@@ -68,7 +68,7 @@ task("set-resource-ids-eth", "Setting resource Ids for tokens")
         const signer = (await ethers.getSigners())[0];
 
         const bridgeAddress = "0x6Ab2A602d1018987Cdcb29aE6fB6E3Ebe44b1412";
-        const daoAddress = "";
+        const daoAddress = "0x9DcD76b4A7357249d6160D456670bAcC53292e27";
         const erc20HandlerAddress = "0xFe21Dd0eC80e744A473770827E1aD6393A5A94F0";
 
         const bridge = await ethers.getContractAt("Bridge", bridgeAddress, signer);
