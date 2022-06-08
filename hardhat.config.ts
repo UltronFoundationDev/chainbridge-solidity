@@ -13,6 +13,7 @@
  import "./deploy/deploy";
  import "./deploy/changeFee";
  import "./deploy/setResourceIds";
+ import "./deploy/changeRelayers";
  require("dotenv").config();
 
 const config: HardhatUserConfig = {
@@ -67,7 +68,7 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     bsc: {
-      url: "https://bsc-dataseed.binance.org/",
+      url: "https://bsc-dataseed1.binance.org/",
       chainId: 56,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
