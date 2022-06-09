@@ -36,12 +36,16 @@ task("fee-ultron", "Changing fee for ultron tokens")
             new Token("LINK",   "0xc8Fb7999d62072E12fE8f3EDcd7821204FCa0344"), 
             new Token("uUSDT",  "0x97FDd294024f50c388e39e73F1705a35cfE87656"),
             new Token("uUSDC",  "0x3c4E0FdeD74876295Ca36F62da289F69E3929cc4"),
+
+            new Token("bep_uUSDT",  "0xB8160f15D44604E892Ac52eC4CCBfDA3cafbFDbd"),
+            new Token("bep_uUSDC",  "0x06d522b2118d535978382d9533a68B0b110f9BC2"),
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
         console.info(iterator);
 
         // // Already set
+
         // // WBTC
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.00002, 18), Helpers.parseDecimals(0.0002, 18), Helpers.parseDecimals(430, 18));
         // await Helpers.delay(4000);
@@ -121,10 +125,10 @@ task("fee-ultron", "Changing fee for ultron tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), ethereumDomainId, Helpers.parseDecimals(53.5, 18), Helpers.parseDecimals(60, 18), Helpers.parseDecimals(2500000, 18));
         // await Helpers.delay(4000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), bscDomainId, Helpers.parseDecimals(1.7, 18), Helpers.parseDecimals(3.4, 18), Helpers.parseDecimals(1700000, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), bscDomainId, Helpers.parseDecimals(2.4, 18), Helpers.parseDecimals(4.8, 18), Helpers.parseDecimals(2500000, 18));
         // await Helpers.delay(4000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), fantomDomainId, Helpers.parseDecimals(2.4, 18), Helpers.parseDecimals(4.8, 18), Helpers.parseDecimals(2500000, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), fantomDomainId, Helpers.parseDecimals(1.7, 18), Helpers.parseDecimals(3.4, 18), Helpers.parseDecimals(1700000, 18));
         // await Helpers.delay(4000);
         
         // // LINK
@@ -170,14 +174,14 @@ task("fee-ultron", "Changing fee for ultron tokens")
         // await Helpers.delay(4000);
 
         // // uUSDT
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(2000000, 6));
-        // await Helpers.delay(4000);
+        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(2000000, 6));
+        await Helpers.delay(4000);
         
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), ethereumDomainId, Helpers.parseDecimals(40, 6), Helpers.parseDecimals(200, 6),  Helpers.parseDecimals(50000000, 6));
         // await Helpers.delay(4000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), bscDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
-        // await Helpers.delay(4000);
+        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), bscDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
+        await Helpers.delay(4000);
 
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), avalancheDomainId, Helpers.parseDecimals(1.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
         // await Helpers.delay(4000);
@@ -189,14 +193,14 @@ task("fee-ultron", "Changing fee for ultron tokens")
         // await Helpers.delay(4000);
 
         // // uUSDC
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(2000000, 6));
-        // await Helpers.delay(4000);
+        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(2000000, 6));
+        await Helpers.delay(4000);
         
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), ethereumDomainId, Helpers.parseDecimals(40, 6), Helpers.parseDecimals(200, 6),  Helpers.parseDecimals(50000000, 6));
         // await Helpers.delay(4000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), bscDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
-        // await Helpers.delay(4000);
+        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), bscDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
+        await Helpers.delay(4000);
 
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), avalancheDomainId, Helpers.parseDecimals(1.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
         // await Helpers.delay(4000);
@@ -251,63 +255,89 @@ task("fee-eth", "Changing fee for ethereum tokens")
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
         console.info((iterator));
 
-        // WBTC
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.0013, 18), Helpers.parseDecimals(0.003, 18), Helpers.parseDecimals(1000, 18));
-        await Helpers.delay(8000);
+        //console.info(`WBTC ETH ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "WBTC"), domainId)}`)
+        //console.info(`WBTC UlX ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "WBTC"), ultronDomainId)}`)
 
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WBTC"), ultronDomainId, Helpers.parseDecimals(0.00002, 18), Helpers.parseDecimals(0.0002, 18), Helpers.parseDecimals(430, 18));
-        await Helpers.delay(8000);
+        // console.info(`WETH ETH ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "WETH"), domainId)}`)
+        // console.info(`WETH UlX ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "WETH"), ultronDomainId)}`)
+
+        // console.info(`FTM ETH ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "FTM"), domainId)}`)
+        // console.info(`FTM UlX ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "FTM"), ultronDomainId)}`)
+
+        // console.info(`SHIB ETH ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "SHIB"), domainId)}`)
+        // console.info(`SHIB UlX ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "SHIB"), ultronDomainId)}`)
+
+        // console.info(`LINK ETH ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "LINK"), domainId)}`)
+        // console.info(`LINK UlX ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "LINK"), ultronDomainId)}`)
+
+        // console.info(`DAI ETH ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "DAI"), domainId)}`)
+        // console.info(`DAI UlX ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "DAI"), ultronDomainId)}`)
+
+        // console.info(`USDT ETH ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "USDT"), domainId)}`)
+        // console.info(`USDT UlX ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "USDT"), ultronDomainId)}`)
+
+        // console.info(`USDC ETH ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "USDC"), domainId)}`)
+        // console.info(`USDC UlX ${await bridge.getFee(Helpers.findToken(chainTokenAddresses, "USDC"), ultronDomainId)}`)
+
+        // WBTC
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.0013, 18), Helpers.parseDecimals(0.003, 18), Helpers.parseDecimals(1000, 18));
+        // await Helpers.delay(8000);
+
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WBTC"), ultronDomainId, Helpers.parseDecimals(0.00002, 18), Helpers.parseDecimals(0.0002, 18), Helpers.parseDecimals(430, 18));
+        // await Helpers.delay(8000);
 
         // WETH
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WETH"), domainId, Helpers.parseDecimals(0.02, 18), Helpers.parseDecimals(0.05, 18), Helpers.parseDecimals(13000, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WETH"), domainId, Helpers.parseDecimals(0.02, 18), Helpers.parseDecimals(0.05, 18), Helpers.parseDecimals(13000, 18));
+        // console.info(3);
+        // await Helpers.delay(8000);
 
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WETH"), ultronDomainId, Helpers.parseDecimals(0.0003, 18), Helpers.parseDecimals(0.006, 18), Helpers.parseDecimals(9640, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WETH"), ultronDomainId, Helpers.parseDecimals(0.0003, 18), Helpers.parseDecimals(0.006, 18), Helpers.parseDecimals(9640, 18));
+        // await Helpers.delay(8000);
 
         // FTM
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), domainId, Helpers.parseDecimals(53.5, 18), Helpers.parseDecimals(60, 18), Helpers.parseDecimals(2500000, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), domainId, Helpers.parseDecimals(53.5, 18), Helpers.parseDecimals(60, 18), Helpers.parseDecimals(2500000, 18));
+        // await Helpers.delay(8000);
 
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), ultronDomainId, Helpers.parseDecimals(1.7, 18), Helpers.parseDecimals(3.4, 18), Helpers.parseDecimals(1700000, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), ultronDomainId, Helpers.parseDecimals(1.7, 18), Helpers.parseDecimals(3.4, 18), Helpers.parseDecimals(1700000, 18));
+        // await Helpers.delay(8000);
+
 
         // SHIB
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "SHIB"), domainId, Helpers.parseDecimals(1112500, 18), Helpers.parseDecimals(28000000, 18), Helpers.parseDecimals(620000000000, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "SHIB"), domainId, Helpers.parseDecimals(1112500, 18), Helpers.parseDecimals(28000000, 18), Helpers.parseDecimals(620000000000, 18));
+        // await Helpers.delay(8000);
 
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "SHIB"), ultronDomainId, Helpers.parseDecimals(1112.5, 18), Helpers.parseDecimals(1112500, 18), Helpers.parseDecimals(620000000000, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "SHIB"), ultronDomainId, Helpers.parseDecimals(1112.5, 18), Helpers.parseDecimals(1112500, 18), Helpers.parseDecimals(620000000000, 18));
+        // await Helpers.delay(8000);
 
         // LINK
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "LINK"), domainId, Helpers.parseDecimals(2.73, 18), Helpers.parseDecimals(7, 18), Helpers.parseDecimals(230000, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "LINK"), domainId, Helpers.parseDecimals(2.73, 18), Helpers.parseDecimals(7, 18), Helpers.parseDecimals(230000, 18));
+        // await Helpers.delay(8000);
 
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "LINK"), ultronDomainId, Helpers.parseDecimals(0.00273, 18), Helpers.parseDecimals(2.73, 18), Helpers.parseDecimals(230000, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "LINK"), ultronDomainId, Helpers.parseDecimals(0.00273, 18), Helpers.parseDecimals(2.73, 18), Helpers.parseDecimals(230000, 18));
+        // await Helpers.delay(8000);
         
         // DAI
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "DAI"), domainId, Helpers.parseDecimals(40, 18), Helpers.parseDecimals(200, 18), Helpers.parseDecimals(50000000, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "DAI"), domainId, Helpers.parseDecimals(40, 18), Helpers.parseDecimals(200, 18), Helpers.parseDecimals(50000000, 18));
+        // await Helpers.delay(8000);
 
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "DAI"), ultronDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18), Helpers.parseDecimals(50000000, 18));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "DAI"), ultronDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18), Helpers.parseDecimals(50000000, 18));
+        // await Helpers.delay(8000);
 
-        // USDT
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), domainId, Helpers.parseDecimals(40, 6), Helpers.parseDecimals(200, 6),  Helpers.parseDecimals(50000000, 6));
-        await Helpers.delay(8000);
+        // // USDT
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), domainId, Helpers.parseDecimals(40, 6), Helpers.parseDecimals(200, 6),  Helpers.parseDecimals(50000000, 6));
+        // await Helpers.delay(8000);
         
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), ultronDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(50000000, 6));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), ultronDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(50000000, 6));
+        // await Helpers.delay(8000);
 
-        // USDC
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), domainId, Helpers.parseDecimals(40, 6), Helpers.parseDecimals(200, 6),  Helpers.parseDecimals(50000000, 6));
-        await Helpers.delay(8000);
+        // // USDC
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), domainId, Helpers.parseDecimals(40, 6), Helpers.parseDecimals(200, 6),  Helpers.parseDecimals(50000000, 6));
+        // await Helpers.delay(8000);
 
-        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(50000000, 6));
-        await Helpers.delay(8000);
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(50000000, 6));
+        // await Helpers.delay(8000);
 
-        for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
+        for(let i:number = 10; i <= (await DAO.getChangeFeeRequestCount()); i++) {
             await bridge.adminChangeFee(i);
             console.info(`adminChangeFeeRequest ${i}`)    
             await Helpers.delay(8000);
@@ -381,8 +411,8 @@ task("fee-bsc", "Changing fee for bsc tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "AVAX"), ultronDomainId, Helpers.parseDecimals(0.08, 18), Helpers.parseDecimals(0.16, 18), Helpers.parseDecimals(80000, 18));
         // await Helpers.delay(8000);
         
-        // // FTM
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), domainId, Helpers.parseDecimals(1.7, 18), Helpers.parseDecimals(3.4, 18), Helpers.parseDecimals(1700000, 18));
+        // FTM
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), domainId, Helpers.parseDecimals(2.4, 18), Helpers.parseDecimals(4.8, 18), Helpers.parseDecimals(2500000, 18));
         // await Helpers.delay(8000);
 
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "FTM"), ultronDomainId, Helpers.parseDecimals(1.7, 18), Helpers.parseDecimals(3.4, 18), Helpers.parseDecimals(1700000, 18));
@@ -403,18 +433,18 @@ task("fee-bsc", "Changing fee for bsc tokens")
         // await Helpers.delay(8000);
 
         // USDT
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
-        // await Helpers.delay(8000);
+        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), domainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(20000000, 18));
+        await Helpers.delay(8000);
         
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), ultronDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(2000000, 18));
-        // await Helpers.delay(8000);
+        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), ultronDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(2000000, 18));
+        await Helpers.delay(8000);
 
-        // USDC
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
-        // await Helpers.delay(8000);
+        // // USDC
+        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
+        await Helpers.delay(8000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(2000000, 18));
-        // await Helpers.delay(8000);
+        await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(2000000, 18));
+        await Helpers.delay(8000);
 
         for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
             await bridge.adminChangeFee(i);
@@ -526,9 +556,9 @@ task("fee-polygon", "Changing fee for polygon tokens")
         }
         const signer = (await ethers.getSigners())[0];
 
-        const bridgeAddress = "0x2806bB5E34A135f17d521899dfB3c8dC3Fd51Ee3";
-        const daoAddress = "0xA8731cbF4a402Aed371C6930921896706B8E8Bd8";
-        const erc20HandlerAddress = "0xE8Ef8A6FE387C2D10951a63ca8f37dB6B8fA02C1";
+        const bridgeAddress = "0x6Ab2A602d1018987Cdcb29aE6fB6E3Ebe44b1412";
+        const daoAddress = "0x9DcD76b4A7357249d6160D456670bAcC53292e27";
+        const erc20HandlerAddress = "0xFe21Dd0eC80e744A473770827E1aD6393A5A94F0";
 
         const bridge = await ethers.getContractAt("Bridge", bridgeAddress, signer);
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
@@ -552,9 +582,9 @@ task("fee-polygon", "Changing fee for polygon tokens")
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
         console.info((iterator));
 
-        // // Already set
+        // Already set
 
-        // // WBTC
+        // WBTC
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.00002, 18), Helpers.parseDecimals(0.0002, 18), Helpers.parseDecimals(430, 18));
         // await Helpers.delay(4000);
 
@@ -667,8 +697,8 @@ task("fee-fantom", "Changing fee for fantom tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(сhainTokenAddresses, "AVAX"), ultronDomainId, Helpers.parseDecimals(0.08, 18), Helpers.parseDecimals(0.16, 18), Helpers.parseDecimals(80000, 18));
         // await Helpers.delay(4000);
 
-        // // FTM
-        // await DAO.newChangeFeeRequest(Helpers.findToken(сhainTokenAddresses, "FTM"), domainId, Helpers.parseDecimals(2.4, 18), Helpers.parseDecimals(4.8, 18), Helpers.parseDecimals(2500000, 18));
+        // FTM
+        // await DAO.newChangeFeeRequest(Helpers.findToken(сhainTokenAddresses, "FTM"), domainId, Helpers.parseDecimals(1.7, 18), Helpers.parseDecimals(3.4, 18), Helpers.parseDecimals(1700000, 18));
         // await Helpers.delay(4000);
 
         // await DAO.newChangeFeeRequest(Helpers.findToken(сhainTokenAddresses, "FTM"), ultronDomainId, Helpers.parseDecimals(1.7, 18), Helpers.parseDecimals(3.4, 18), Helpers.parseDecimals(1700000, 18));

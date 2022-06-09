@@ -178,6 +178,14 @@ subtask("deploy-tokens", "Deploying default tokens for our chain")
         await uUSDC.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The uUSDC: \u001b[1;34m${uUSDC.address}\u001b[0m`);
 
-        return [wBTC.address, wETH.address, bnb.address, avax.address, bUSD.address, shib.address, 
-            matic.address, ftm.address, dai.address, link.address, uUSDT.address, uUSDC.address];
+        const bep_uUSDT = await (await erc20CustomFactory.deploy("Ultron BEP-Tether", "Bep-uUSDT")).deployed();
+        await bep_uUSDT.grantMinterRole(taskArgs.erc20Handler);
+        console.log(`The bep_uUSDT: \u001b[1;34m${bep_uUSDT.address}\u001b[0m`);
+
+        const bep_uUSDC = await (await erc20CustomFactory.deploy("Ultron BEP-USD Coin", "Bep-uUSDC")).deployed();
+        await bep_uUSDC.grantMinterRole(taskArgs.erc20Handler);
+        console.log(`The bep_uUSDC: \u001b[1;34m${bep_uUSDC.address}\u001b[0m`);
+
+        return [wBTC.address, wETH.address, bnb.address, avax.address, bUSD.address, shib.address, matic.address, 
+            ftm.address, dai.address, link.address, uUSDT.address, uUSDC.address, bep_uUSDT.address, bep_uUSDC.address];
     });
