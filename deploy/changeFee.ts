@@ -176,7 +176,7 @@ task("fee-ultron", "Changing fee for ultron tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), ethereumDomainId, Helpers.parseDecimals(40, 6), Helpers.parseDecimals(200, 6),  Helpers.parseDecimals(50000000, 6));
         // await Helpers.delay(4000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), bscDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(20000000, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), bscDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
         // await Helpers.delay(4000);
 
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDT"), avalancheDomainId, Helpers.parseDecimals(1.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
@@ -195,7 +195,7 @@ task("fee-ultron", "Changing fee for ultron tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), ethereumDomainId, Helpers.parseDecimals(40, 6), Helpers.parseDecimals(200, 6),  Helpers.parseDecimals(50000000, 6));
         // await Helpers.delay(4000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), bscDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(20000000, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), bscDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
         // await Helpers.delay(4000);
 
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "uUSDC"), avalancheDomainId, Helpers.parseDecimals(1.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
@@ -403,17 +403,17 @@ task("fee-bsc", "Changing fee for bsc tokens")
         // await Helpers.delay(8000);
 
         // USDT
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), domainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(20000000, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
         // await Helpers.delay(8000);
         
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), ultronDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(2000000, 6));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDT"), ultronDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(2000000, 18));
         // await Helpers.delay(8000);
 
         // USDC
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), domainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(20000000, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
         // await Helpers.delay(8000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(2000000, 6));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(2000000, 18));
         // await Helpers.delay(8000);
 
         for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
@@ -442,7 +442,7 @@ task("fee-avalanche", "Changing fee for avalanche tokens")
         const domainId:BigNumberish = await bridge._domainID(); 
         
         const chainTokenAddresses = [
-            //new Token("wULX",   ""), 
+            // new Token("wULX",   ""), 
             new Token("WBTC",   "0x50b7545627a5162F82A992c33b87aDc75187B218"), // DONE
             new Token("WETH",   "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB"), // DONE
             new Token("BNB",    "0x264c1383EA520f73dd837F915ef3a732e204a493"), 
