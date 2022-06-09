@@ -255,7 +255,7 @@ task("set-resource-ids-avalanche", "Setting resource Ids for tokens")
             new Token("SHIB",   "0x02D980A0D7AF3fb7Cf7Df8cB35d9eDBCF355f665"), 
             new Token("DAI",    "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70"),
             new Token("LINK",   "0xB3fe5374F67D7a22886A0eE082b2E2f9d2651651"), 
-            new Token("USDT",   "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB"),
+            new Token("USDT",   "0xc7198437980c041c805A1EDcbA50c1Ce5db95118"),
             new Token("USDC",   "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"),
         ];
 
