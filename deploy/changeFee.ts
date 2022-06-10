@@ -337,7 +337,7 @@ task("fee-eth", "Changing fee for ethereum tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(chainTokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(50000000, 6));
         // await Helpers.delay(8000);
 
-        for(let i:number = 10; i <= (await DAO.getChangeFeeRequestCount()); i++) {
+        for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
             await bridge.adminChangeFee(i);
             console.info(`adminChangeFeeRequest ${i}`)    
             await Helpers.delay(8000);
