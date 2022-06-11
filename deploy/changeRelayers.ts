@@ -25,18 +25,24 @@ task("change-relayers-ultron", "Setting new relayer addresses and threshold")
             "0xe5640686419D526c1d0813ace59fd7751F584232", 
         ];
 
-        for(let i:number = 1; i <= relayerAddresses.length; i++) {            
-            await bridge.adminAddRelayer(relayerAddresses[i - 1]);
-            await Helpers.delay(4000);
-            console.info(`Adding relayer ${i}`)    
+        for(let i:number = 1; i <= relayerAddresses.length; i++) {
+            let isRelayer = await bridge.isRelayer(relayerAddresses[i - 1]); 
+            console.info(`${relayerAddresses[i - 1]} - ${isRelayer}`);
         }
+        console.info(`_relayerThreshold ${await bridge._relayerThreshold()} = ${relayerThreshold}`);
 
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
-        await Helpers.delay(4000);
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
-        console.info(`Changed relayers threshold to ${relayerThreshold}`);
+        // for(let i:number = 1; i <= relayerAddresses.length; i++) {            
+        //     await bridge.adminAddRelayer(relayerAddresses[i - 1]);
+        //     await Helpers.delay(4000);
+        //     console.info(`Adding relayer ${i}`)    
+        // }
+
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
+        // await Helpers.delay(4000);
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
+        // console.info(`Changed relayers threshold to ${relayerThreshold}`);
 
         return true;
     });
@@ -63,18 +69,24 @@ task("change-relayers-eth", "Setting new relayer addresses and threshold")
             "0xe5640686419D526c1d0813ace59fd7751F584232", 
         ];
 
-        for(let i:number = 1; i <= relayerAddresses.length; i++) {            
-            await bridge.adminAddRelayer(relayerAddresses[i - 1]);
-            await Helpers.delay(8000);
-            console.info(`Adding relayer ${i}`)    
+        for(let i:number = 1; i <= relayerAddresses.length; i++) {
+            let isRelayer = await bridge.isRelayer(relayerAddresses[i - 1]); 
+            console.info(`${relayerAddresses[i - 1]} - ${isRelayer}`);
         }
+        console.info(`_relayerThreshold ${await bridge._relayerThreshold()} = ${relayerThreshold}`);
 
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
-        await Helpers.delay(8000);
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
-        console.info(`Changed relayers threshold to ${relayerThreshold}`);
+        // for(let i:number = 1; i <= relayerAddresses.length; i++) {            
+        //     await bridge.adminAddRelayer(relayerAddresses[i - 1]);
+        //     await Helpers.delay(8000);
+        //     console.info(`Adding relayer ${i}`)    
+        // }
+
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
+        // await Helpers.delay(8000);
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
+        // console.info(`Changed relayers threshold to ${relayerThreshold}`);
 
         return true;
     });
@@ -101,18 +113,24 @@ task("change-relayers-bsc", "Setting new relayer addresses and threshold")
             "0xe5640686419D526c1d0813ace59fd7751F584232", 
         ];
 
-        for(let i:number = 2; i <= relayerAddresses.length; i++) {            
-            await bridge.adminAddRelayer(relayerAddresses[i - 1]);
-            await Helpers.delay(8000);
-            console.info(`Adding relayer ${i}`)    
+        for(let i:number = 1; i <= relayerAddresses.length; i++) {
+            let isRelayer = await bridge.isRelayer(relayerAddresses[i - 1]); 
+            console.info(`${relayerAddresses[i - 1]} - ${isRelayer}`);
         }
+        console.info(`_relayerThreshold ${await bridge._relayerThreshold()} = ${relayerThreshold}`);
 
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
-        await Helpers.delay(8000);
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
-        console.info(`Changed relayers threshold to ${relayerThreshold}`);
+        // for(let i:number = 1; i <= relayerAddresses.length; i++) {            
+        //     await bridge.adminAddRelayer(relayerAddresses[i - 1]);
+        //     await Helpers.delay(8000);
+        //     console.info(`Adding relayer ${i}`)    
+        // }
+
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
+        // await Helpers.delay(8000);
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
+        // console.info(`Changed relayers threshold to ${relayerThreshold}`);
 
         return true;
     });
@@ -139,18 +157,24 @@ task("change-relayers-avalanche", "Setting new relayer addresses and threshold")
             "0xe5640686419D526c1d0813ace59fd7751F584232", 
         ];
 
-        for(let i:number = 1; i <= relayerAddresses.length; i++) {            
-            await bridge.adminAddRelayer(relayerAddresses[i - 1]);
-            await Helpers.delay(4000);
-            console.info(`Adding relayer ${i}`)    
+        for(let i:number = 1; i <= relayerAddresses.length; i++) {
+            let isRelayer = await bridge.isRelayer(relayerAddresses[i - 1]); 
+            console.info(`${relayerAddresses[i - 1]} - ${isRelayer}`);
         }
+        console.info(`_relayerThreshold ${await bridge._relayerThreshold()} = ${relayerThreshold}`);
 
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
-        await Helpers.delay(4000);
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
-        console.info(`Changed relayers threshold to ${relayerThreshold}`);
+        // for(let i:number = 1; i <= relayerAddresses.length; i++) {            
+        //     await bridge.adminAddRelayer(relayerAddresses[i - 1]);
+        //     await Helpers.delay(4000);
+        //     console.info(`Adding relayer ${i}`)    
+        // }
+
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
+        // await Helpers.delay(4000);
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
+        // console.info(`Changed relayers threshold to ${relayerThreshold}`);
 
         return true;
     });
@@ -177,18 +201,24 @@ task("change-relayers-polygon", "Setting new relayer addresses and threshold")
             "0xe5640686419D526c1d0813ace59fd7751F584232", 
         ];
 
-        for(let i:number = 1; i <= relayerAddresses.length; i++) {            
-            await bridge.adminAddRelayer(relayerAddresses[i - 1]);
-            await Helpers.delay(4000);
-            console.info(`Adding relayer ${i}`)    
+        for(let i:number = 1; i <= relayerAddresses.length; i++) {
+            let isRelayer = await bridge.isRelayer(relayerAddresses[i - 1]); 
+            console.info(`${relayerAddresses[i - 1]} - ${isRelayer}`);
         }
+        console.info(`_relayerThreshold ${await bridge._relayerThreshold()} = ${relayerThreshold}`);
 
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
-        await Helpers.delay(4000);
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
-        console.info(`Changed relayers threshold to ${relayerThreshold}`);
+        // for(let i:number = 1; i <= relayerAddresses.length; i++) {            
+        //     await bridge.adminAddRelayer(relayerAddresses[i - 1]);
+        //     await Helpers.delay(4000);
+        //     console.info(`Adding relayer ${i}`)    
+        // }
+
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
+        // await Helpers.delay(4000);
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
+        // console.info(`Changed relayers threshold to ${relayerThreshold}`);
 
         return true;
     });
@@ -215,18 +245,24 @@ task("change-relayers-ftm", "Setting new relayer addresses and threshold")
             "0xe5640686419D526c1d0813ace59fd7751F584232", 
         ];
 
-        for(let i:number = 1; i <= relayerAddresses.length; i++) {            
-            await bridge.adminAddRelayer(relayerAddresses[i - 1]);
-            await Helpers.delay(4000);
-            console.info(`Adding relayer ${i}`)    
+        for(let i:number = 1; i <= relayerAddresses.length; i++) {
+            let isRelayer = await bridge.isRelayer(relayerAddresses[i - 1]); 
+            console.info(`${relayerAddresses[i - 1]} - ${isRelayer}`);
         }
+        console.info(`_relayerThreshold ${await bridge._relayerThreshold()} = ${relayerThreshold}`);
 
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
-        await Helpers.delay(4000);
-        console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
-        console.info(`Changed relayers threshold to ${relayerThreshold}`);
+        // for(let i:number = 1; i <= relayerAddresses.length; i++) {            
+        //     await bridge.adminAddRelayer(relayerAddresses[i - 1]);
+        //     await Helpers.delay(4000);
+        //     console.info(`Adding relayer ${i}`)    
+        // }
+
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
+        // await Helpers.delay(4000);
+        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        // await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
+        // console.info(`Changed relayers threshold to ${relayerThreshold}`);
 
         return true;
     });
