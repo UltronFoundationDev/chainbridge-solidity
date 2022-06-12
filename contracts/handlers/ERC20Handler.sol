@@ -65,6 +65,11 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     }
 
     /**
+        @notice function to receive chain native tokens
+    */
+    receive() external payable {}
+
+    /**
         @notice A deposit is initiatied by making a deposit in the Bridge contract.
         @param destinationDomainID ID of chain deposit will be bridged to.
         @param resourceID ResourceID used to find address of token to be used for deposit.

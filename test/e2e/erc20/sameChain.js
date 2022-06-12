@@ -12,6 +12,7 @@ contract('E2E ERC20 - Same Chain', async accounts => {
     const relayerThreshold = 2;
     const domainID = 1;
 
+    const owner = accounts[0];
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
     const relayer1Address = accounts[3];
@@ -75,58 +76,75 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         depositProposalDataHash = Ethers.utils.keccak256(ERC20HandlerInstance.address + depositProposalData.substr(2));
     });
 
-    it("[sanity] depositerAddress' balance should be equal to initialTokenAmount", async () => {
-        const depositerBalance = await ERC20MintableInstance.balanceOf(depositerAddress);
-        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber());
-    });
+    it("handler receive ether returns same balance", async () => {
+        const erc20HandlerBalanceBefore = await web3.eth.getBalance(ERC20HandlerInstance.address);
+        assert.strictEqual(erc20HandlerBalanceBefore, '0');
 
-    it("[sanity] ERC20HandlerInstance.address should have an allowance of depositAmount from depositerAddress", async () => {
-        const handlerAllowance = await ERC20MintableInstance.allowance(depositerAddress, ERC20HandlerInstance.address);
-        assert.strictEqual(handlerAllowance.toNumber(), depositAmount.toNumber());
-    });
-
-    it("depositAmount of Destination ERC20 should be transferred to recipientAddress", async () => {
-        // depositerAddress makes initial deposit of depositAmount
-        await TruffleAssert.passes(BridgeInstance.deposit(
-            domainID,
-            resourceID,
-            depositData,
-            { from: depositerAddress }
-        ));
-
-        // Handler should have a balance of depositAmount
-        const handlerBalance = await ERC20MintableInstance.balanceOf(ERC20HandlerInstance.address);
-        assert.strictEqual(handlerBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
+        const etherTransfer = Ethers.utils.parseUnits("1.0", 18);
+        await web3.eth.sendTransaction({
+            from: owner,
+            to: ERC20HandlerInstance.address,
+            value: etherTransfer
+        });
         
-        // relayer1 creates the deposit proposal
-        await TruffleAssert.passes(BridgeInstance.voteProposal(
-            domainID,
-            domainID,
-            expectedDepositNonce,
-            resourceID,
-            depositProposalData,
-            { from: relayer1Address }
-        ));
-
-        // relayer2 votes in favor of the deposit proposal
-        // because the relayerThreshold is 2, the deposit proposal will go
-        // into a finalized state
-        // and then automatically executes the proposal
-        await TruffleAssert.passes(BridgeInstance.voteProposal(
-            domainID,
-            domainID,
-            expectedDepositNonce,
-            resourceID,
-            depositProposalData,
-            { from: relayer2Address }
-        ));
-
-        // Assert ERC20 balance was transferred from depositerAddress
-        const depositerBalance = await ERC20MintableInstance.balanceOf(depositerAddress);
-        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber() - depositAmount.toNumber());
-
-        // // Assert ERC20 balance was transferred to recipientAddress
-        const recipientBalance = await ERC20MintableInstance.balanceOf(recipientAddress);
-        assert.strictEqual(recipientBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
+        const erc20HandlerBalanceAfter = await web3.eth.getBalance(ERC20HandlerInstance.address);
+        console.log(`erc20HandlerBalanceAfter ${erc20HandlerBalanceAfter}`);
+        console.log(`etherTransfer ${etherTransfer}`);
+        assert.strictEqual(erc20HandlerBalanceAfter.toString(), etherTransfer.toString());
     });
+
+    // it("[sanity] depositerAddress' balance should be equal to initialTokenAmount", async () => {
+    //     const depositerBalance = await ERC20MintableInstance.balanceOf(depositerAddress);
+    //     assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber());
+    // });
+
+    // it("[sanity] ERC20HandlerInstance.address should have an allowance of depositAmount from depositerAddress", async () => {
+    //     const handlerAllowance = await ERC20MintableInstance.allowance(depositerAddress, ERC20HandlerInstance.address);
+    //     assert.strictEqual(handlerAllowance.toNumber(), depositAmount.toNumber());
+    // });
+
+    // it("depositAmount of Destination ERC20 should be transferred to recipientAddress", async () => {
+    //     // depositerAddress makes initial deposit of depositAmount
+    //     await TruffleAssert.passes(BridgeInstance.deposit(
+    //         domainID,
+    //         resourceID,
+    //         depositData,
+    //         { from: depositerAddress }
+    //     ));
+
+    //     // Handler should have a balance of depositAmount
+    //     const handlerBalance = await ERC20MintableInstance.balanceOf(ERC20HandlerInstance.address);
+    //     assert.strictEqual(handlerBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
+        
+    //     // relayer1 creates the deposit proposal
+    //     await TruffleAssert.passes(BridgeInstance.voteProposal(
+    //         domainID,
+    //         domainID,
+    //         expectedDepositNonce,
+    //         resourceID,
+    //         depositProposalData,
+    //         { from: relayer1Address }
+    //     ));
+
+    //     // relayer2 votes in favor of the deposit proposal
+    //     // because the relayerThreshold is 2, the deposit proposal will go
+    //     // into a finalized state
+    //     // and then automatically executes the proposal
+    //     await TruffleAssert.passes(BridgeInstance.voteProposal(
+    //         domainID,
+    //         domainID,
+    //         expectedDepositNonce,
+    //         resourceID,
+    //         depositProposalData,
+    //         { from: relayer2Address }
+    //     ));
+
+    //     // Assert ERC20 balance was transferred from depositerAddress
+    //     const depositerBalance = await ERC20MintableInstance.balanceOf(depositerAddress);
+    //     assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber() - depositAmount.toNumber());
+
+    //     // // Assert ERC20 balance was transferred to recipientAddress
+    //     const recipientBalance = await ERC20MintableInstance.balanceOf(recipientAddress);
+    //     assert.strictEqual(recipientBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
+    // });
 });
