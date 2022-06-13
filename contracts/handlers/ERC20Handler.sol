@@ -137,6 +137,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         uint256 feeValue = evaluateFee(destinationDomainID, tokenAddress, amount);
         uint256 transferAmount = amount - feeValue;
 
+        sendNativeForGas(payable(address(recipientAddress)));
         if (_burnList[tokenAddress]) {
             mintERC20(tokenAddress, address(recipientAddress), transferAmount);
         } else {
