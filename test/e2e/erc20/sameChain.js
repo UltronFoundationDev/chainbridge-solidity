@@ -12,10 +12,12 @@ contract('E2E ERC20 - Same Chain', async accounts => {
     const relayerThreshold = 2;
     const domainID = 1;
 
+    const owner = accounts[0];
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
     const relayer1Address = accounts[3];
     const relayer2Address = accounts[4];
+    const etherRecipientAddress = '0x0111111111111111111111111111111111111151';
 
     const initialTokenAmount = Ethers.utils.parseUnits("100", 6);
     const depositAmount = Ethers.utils.parseUnits("20", 6);
@@ -73,6 +75,25 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         depositData = Helpers.createERCDepositData(depositAmount.toNumber(), 20, recipientAddress);
         depositProposalData = Helpers.createERCDepositData(depositAmount.toNumber(), 20, recipientAddress)
         depositProposalDataHash = Ethers.utils.keccak256(ERC20HandlerInstance.address + depositProposalData.substr(2));
+
+        depositDataForEther = Helpers.createERCDepositData(depositAmount.toNumber(), 20, etherRecipientAddress);
+        depositProposalDataForEther = Helpers.createERCDepositData(depositAmount.toNumber(), 20, etherRecipientAddress)
+        depositProposalDataHashForEther = Ethers.utils.keccak256(ERC20HandlerInstance.address + depositProposalData.substr(2));
+    });
+
+    it("handler receive ether returns same balance", async () => {
+        const erc20HandlerBalanceBefore = await web3.eth.getBalance(ERC20HandlerInstance.address);
+        assert.strictEqual(erc20HandlerBalanceBefore, '0');
+
+        const etherTransfer = Ethers.utils.parseUnits("1.0", 18);
+        await web3.eth.sendTransaction({
+            from: owner,
+            to: ERC20HandlerInstance.address,
+            value: etherTransfer
+        });
+        
+        const erc20HandlerBalanceAfter = await web3.eth.getBalance(ERC20HandlerInstance.address);
+        assert.strictEqual(erc20HandlerBalanceAfter.toString(), etherTransfer.toString());
     });
 
     it("[sanity] depositerAddress' balance should be equal to initialTokenAmount", async () => {
@@ -85,7 +106,23 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         assert.strictEqual(handlerAllowance.toNumber(), depositAmount.toNumber());
     });
 
-    it("depositAmount of Destination ERC20 should be transferred to recipientAddress", async () => {
+    it("depositAmount of Destination ERC20 should be transferred to recipientAddress and not sends native tokens", async () => {
+        const recipientEthBalanceBefore = await web3.eth.getBalance(recipientAddress)
+        assert.strictEqual(recipientEthBalanceBefore.toString(), Ethers.utils.parseUnits("100", 18).toString());
+
+        const erc20HandlerBalanceBefore = await web3.eth.getBalance(ERC20HandlerInstance.address);
+        assert.strictEqual(erc20HandlerBalanceBefore, '0');
+
+        const etherTransfer = Ethers.utils.parseUnits("10", 18);
+        await web3.eth.sendTransaction({
+            from: owner,
+            to: ERC20HandlerInstance.address,
+            value: etherTransfer
+        });
+        
+        const erc20HandlerBalanceAfter = await web3.eth.getBalance(ERC20HandlerInstance.address);
+        assert.strictEqual(erc20HandlerBalanceAfter.toString(), etherTransfer.toString());
+
         // depositerAddress makes initial deposit of depositAmount
         await TruffleAssert.passes(BridgeInstance.deposit(
             domainID,
@@ -128,5 +165,72 @@ contract('E2E ERC20 - Same Chain', async accounts => {
         // // Assert ERC20 balance was transferred to recipientAddress
         const recipientBalance = await ERC20MintableInstance.balanceOf(recipientAddress);
         assert.strictEqual(recipientBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
+
+        const recipientEthBalanceAfter = await web3.eth.getBalance(recipientAddress)
+        assert.strictEqual(recipientEthBalanceAfter.toString(), Ethers.utils.parseUnits("100", 18).toString());
+    });
+
+    it("depositAmount of Destination ERC20 should be transferred to recipientAddress and sends native tokens", async () => {
+        const recipientEthBalanceBefore = await web3.eth.getBalance(etherRecipientAddress);
+        assert.strictEqual(recipientEthBalanceBefore.toString(), '0');
+
+        const erc20HandlerBalanceBefore = await web3.eth.getBalance(ERC20HandlerInstance.address);
+        assert.strictEqual(erc20HandlerBalanceBefore, '0');
+
+        const etherTransfer = Ethers.utils.parseUnits("10", 18);
+        await web3.eth.sendTransaction({
+            from: owner,
+            to: ERC20HandlerInstance.address,
+            value: etherTransfer
+        });
+        
+        const erc20HandlerBalanceAfter = await web3.eth.getBalance(ERC20HandlerInstance.address);
+        assert.strictEqual(erc20HandlerBalanceAfter.toString(), etherTransfer.toString());
+
+        // depositerAddress makes initial deposit of depositAmount
+        await TruffleAssert.passes(BridgeInstance.deposit(
+            domainID,
+            resourceID,
+            depositDataForEther,
+            { from: depositerAddress }
+        ));
+
+        // Handler should have a balance of depositAmount
+        const handlerBalance = await ERC20MintableInstance.balanceOf(ERC20HandlerInstance.address);
+        assert.strictEqual(handlerBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
+        
+        // relayer1 creates the deposit proposal
+        await TruffleAssert.passes(BridgeInstance.voteProposal(
+            domainID,
+            domainID,
+            expectedDepositNonce,
+            resourceID,
+            depositProposalDataForEther,
+            { from: relayer1Address }
+        ));
+
+        // relayer2 votes in favor of the deposit proposal
+        // because the relayerThreshold is 2, the deposit proposal will go
+        // into a finalized state
+        // and then automatically executes the proposal
+        await TruffleAssert.passes(BridgeInstance.voteProposal(
+            domainID,
+            domainID,
+            expectedDepositNonce,
+            resourceID,
+            depositProposalDataForEther,
+            { from: relayer2Address }
+        ));
+
+        // Assert ERC20 balance was transferred from depositerAddress
+        const depositerBalance = await ERC20MintableInstance.balanceOf(depositerAddress);
+        assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber() - depositAmount.toNumber());
+
+        // // Assert ERC20 balance was transferred to recipientAddress
+        const recipientBalance = await ERC20MintableInstance.balanceOf(etherRecipientAddress);
+        assert.strictEqual(recipientBalance.toNumber(), depositAmount.toNumber() - basicFee.toNumber());
+
+        const recipientEthBalanceAfter = await web3.eth.getBalance(etherRecipientAddress)
+        assert.strictEqual(recipientEthBalanceAfter.toString(), Ethers.utils.parseUnits("0.001", 18).toString());
     });
 });
