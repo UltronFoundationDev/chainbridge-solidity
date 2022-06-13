@@ -20,9 +20,14 @@ task("fee-ultron", "Changing fee for ultron tokens")
 
         const signer = (await ethers.getSigners())[0];
 
-        const bridgeAddress = "0xC453C52f794661C2c0856936e13df67F0eB82f9e";
-        const daoAddress = "0xc4A47D97070Dd02F4544a12859f6A23592C8194B";
-        const erc20HandlerAddress = "0x6d5a23B55CBDB0Fc7b48794d806f0bcE7Dca99E1";
+        const bridgeAddress = "0x82d93f1f0Be7B1258F42646E5a312d6a637103c4";
+        const erc20HandlerAddress = "0xA615C027a6f4a8027d70C0d69C099283Ee28EA8b";
+        const daoAddress = "0x59A799F38eEc3d473E2EB1E9a4cf3cd15A19a989";
+
+        // // Old used for first tests:
+        // const bridgeAddress = "0xC453C52f794661C2c0856936e13df67F0eB82f9e";
+        // const daoAddress = "0xc4A47D97070Dd02F4544a12859f6A23592C8194B";
+        // const erc20HandlerAddress = "0x6d5a23B55CBDB0Fc7b48794d806f0bcE7Dca99E1";
 
         const bridge = await ethers.getContractAt("Bridge", bridgeAddress, signer);
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
@@ -49,14 +54,14 @@ task("fee-ultron", "Changing fee for ultron tokens")
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
         console.info(iterator);
 
-        for(let i = 1; i <= tokenAddresses.length; i++) {
-            console.info(`${tokenAddresses[i - 1].tokenName} ${network.name} ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), domainId)}`)
-            console.info(`${tokenAddresses[i - 1].tokenName} ETH ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ethereumDomainId)}`)    
-            console.info(`${tokenAddresses[i - 1].tokenName} BSC ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), bscDomainId)}`)    
-            console.info(`${tokenAddresses[i - 1].tokenName} AVAX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), avalancheDomainId)}`)    
-            console.info(`${tokenAddresses[i - 1].tokenName} MATIC ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), polygonDomainId)}`)    
-            console.info(`${tokenAddresses[i - 1].tokenName} FTM ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), fantomDomainId)}`)    
-        }
+        // for(let i = 1; i <= tokenAddresses.length; i++) {
+        //     console.info(`${tokenAddresses[i - 1].tokenName} ${network.name} ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), domainId)}`)
+        //     console.info(`${tokenAddresses[i - 1].tokenName} ETH ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ethereumDomainId)}`)    
+        //     console.info(`${tokenAddresses[i - 1].tokenName} BSC ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), bscDomainId)}`)    
+        //     console.info(`${tokenAddresses[i - 1].tokenName} AVAX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), avalancheDomainId)}`)    
+        //     console.info(`${tokenAddresses[i - 1].tokenName} MATIC ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), polygonDomainId)}`)    
+        //     console.info(`${tokenAddresses[i - 1].tokenName} FTM ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), fantomDomainId)}`)    
+        // }
 
         // // Already set
 

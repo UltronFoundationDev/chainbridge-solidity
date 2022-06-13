@@ -11,9 +11,14 @@ task("set-resource-ids-burnable", "Setting burnable and resource Ids for tokens"
         }
         const signer = (await ethers.getSigners())[0];
 
-        const bridgeAddress = "0xC453C52f794661C2c0856936e13df67F0eB82f9e";
-        const daoAddress = "0xc4A47D97070Dd02F4544a12859f6A23592C8194B";
-        const erc20HandlerAddress = "0x6d5a23B55CBDB0Fc7b48794d806f0bcE7Dca99E1";
+        const bridgeAddress = "0x82d93f1f0Be7B1258F42646E5a312d6a637103c4";
+        const erc20HandlerAddress = "0xA615C027a6f4a8027d70C0d69C099283Ee28EA8b";
+        const daoAddress = "0x59A799F38eEc3d473E2EB1E9a4cf3cd15A19a989";
+
+        // Old used for first tests:
+        // const bridgeAddress = "0xC453C52f794661C2c0856936e13df67F0eB82f9e";
+        // const daoAddress = "0xc4A47D97070Dd02F4544a12859f6A23592C8194B";
+        // const erc20HandlerAddress = "0x6d5a23B55CBDB0Fc7b48794d806f0bcE7Dca99E1";
 
         const bridge = await ethers.getContractAt("Bridge", bridgeAddress, signer);
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
@@ -39,21 +44,21 @@ task("set-resource-ids-burnable", "Setting burnable and resource Ids for tokens"
             new Token("bep_uUSDC",  "0x06d522b2118d535978382d9533a68B0b110f9BC2"),
         ];
 
-        // for(let i:number = 1; i <= chainTokenAddresses.length - 2; i++) {
-        //     let token = await ethers.getContractAt("ERC20Custom", chainTokenAddresses[i - 1].tokenAddress, signer);
-        //     let role = await token.MINTER_ROLE(); 
-        //     await token.grantMinterRole(erc20HandlerAddress);
-        //     await Helpers.delay(4000);
-        //     console.info(`${chainTokenAddresses[i - 1].tokenName} ${await token.hasRole(role, erc20HandlerAddress)}`);
-        // }
+        for(let i:number = 1; i <= tokenAddresses.length - 4; i++) {
+            let token = await ethers.getContractAt("ERC20Custom", tokenAddresses[i - 1].tokenAddress, signer);
+            let role = await token.MINTER_ROLE(); 
+            // await token.grantMinterRole(erc20HandlerAddress);
+            // await Helpers.delay(4000);
+            console.info(`${tokenAddresses[i - 1].tokenName} ${await token.hasRole(role, erc20HandlerAddress)}`);
+        }
 
-        // for(let i:number = chainTokenAddresses.length - 1; i <= chainTokenAddresses.length; i++) {
-        //     let token = await ethers.getContractAt("ERC20Stable", chainTokenAddresses[i - 1].tokenAddress, signer);
-        //     let role = await token.MINTER_ROLE(); 
-        //     await token.grantMinterRole(erc20HandlerAddress);
-        //     await Helpers.delay(4000);
-        //     console.info(`${chainTokenAddresses[i - 1].tokenName} ${await token.hasRole(role, erc20HandlerAddress)}`);
-        // }
+        for(let i:number = tokenAddresses.length - 3; i <= tokenAddresses.length; i++) {
+            let token = await ethers.getContractAt("ERC20Stable", tokenAddresses[i - 1].tokenAddress, signer);
+            let role = await token.MINTER_ROLE(); 
+            // await token.grantMinterRole(erc20HandlerAddress);
+            // await Helpers.delay(4000);
+            console.info(`${tokenAddresses[i - 1].tokenName} ${await token.hasRole(role, erc20HandlerAddress)}`);
+        }
 
         const resourceIds = [
             //new TokenResourceId("wULX",   ""),
@@ -85,9 +90,9 @@ task("set-resource-ids-burnable", "Setting burnable and resource Ids for tokens"
         // const iteratorBurnable = +(await DAO.getSetBurnableRequestCount()) + 1;     
         // console.info(iteratorBurnable);
 
-        //let resourceIds: string[] = [];
+        // // let resourceIds: string[] = [];
         // for(let i:number = 1; i <= tokenAddresses.length; i++) {
-        //     //resourceIds.push(Helpers.createResourceID(tokenAddresses[i - 1].tokenAddress, domainId));
+        //     // resourceIds.push(Helpers.createResourceID(tokenAddresses[i - 1].tokenAddress, domainId));
         //     await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - 1].resourceId, tokenAddresses[i - 1].tokenAddress);
         //     console.info(`newSetResourceRequest ${await DAO.getSetResourceRequestCount()}`)
         //     await Helpers.delay(4000);

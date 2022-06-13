@@ -11,9 +11,14 @@ task("change-relayers-ultron", "Setting new relayer addresses and threshold")
         }
         const signer = (await ethers.getSigners())[0];
 
-        const bridgeAddress = "0xC453C52f794661C2c0856936e13df67F0eB82f9e";
-        const daoAddress = "0xc4A47D97070Dd02F4544a12859f6A23592C8194B";
-        const erc20HandlerAddress = "0x6d5a23B55CBDB0Fc7b48794d806f0bcE7Dca99E1";
+        const bridgeAddress = "0x82d93f1f0Be7B1258F42646E5a312d6a637103c4";
+        const erc20HandlerAddress = "0xA615C027a6f4a8027d70C0d69C099283Ee28EA8b";
+        const daoAddress = "0x59A799F38eEc3d473E2EB1E9a4cf3cd15A19a989";
+
+        // Old used for first tests:
+        // const bridgeAddress = "0xC453C52f794661C2c0856936e13df67F0eB82f9e";
+        // const daoAddress = "0xc4A47D97070Dd02F4544a12859f6A23592C8194B";
+        // const erc20HandlerAddress = "0x6d5a23B55CBDB0Fc7b48794d806f0bcE7Dca99E1";
 
         const bridge = await ethers.getContractAt("Bridge", bridgeAddress, signer);
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
@@ -31,18 +36,18 @@ task("change-relayers-ultron", "Setting new relayer addresses and threshold")
         }
         console.info(`_relayerThreshold ${await bridge._relayerThreshold()} = ${relayerThreshold}`);
 
-        // for(let i:number = 1; i <= relayerAddresses.length; i++) {            
-        //     await bridge.adminAddRelayer(relayerAddresses[i - 1]);
-        //     await Helpers.delay(4000);
-        //     console.info(`Adding relayer ${i}`)    
-        // }
+        for(let i:number = 1; i <= relayerAddresses.length; i++) {            
+            await bridge.adminAddRelayer(relayerAddresses[i - 1]);
+            await Helpers.delay(4000);
+            console.info(`Adding relayer ${i}`)    
+        }
 
-        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        // await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
-        // await Helpers.delay(4000);
-        // console.info(await DAO.getChangeRelayerThresholdRequestCount())
-        // await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
-        // console.info(`Changed relayers threshold to ${relayerThreshold}`);
+        console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        await DAO.newChangeRelayerThresholdRequest(relayerThreshold);
+        await Helpers.delay(4000);
+        console.info(await DAO.getChangeRelayerThresholdRequestCount())
+        await bridge.adminChangeRelayerThreshold(await DAO.getChangeRelayerThresholdRequestCount());
+        console.info(`Changed relayers threshold to ${relayerThreshold}`);
 
         return true;
     });
