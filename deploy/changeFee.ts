@@ -378,12 +378,13 @@ task("fee-bsc", "Changing fee for bsc tokens")
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
-        console.info((iterator));
+        console.info(iterator);
 
         for(let i = 1; i <= tokenAddresses.length; i++) {
             console.info(`${tokenAddresses[i - 1].tokenName} ${network.name} ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), domainId)}`)
             console.info(`${tokenAddresses[i - 1].tokenName} ULX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ultronDomainId)}`)    
         }
+
 
         // // Already set
         
@@ -444,7 +445,7 @@ task("fee-bsc", "Changing fee for bsc tokens")
         // await Helpers.delay(8000);
 
         // // USDC
-        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "USDC"), domainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(20000000, 6));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "USDC"), domainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(20000000, 18));
         // await Helpers.delay(8000);
 
         // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 18), Helpers.parseDecimals(12, 18),  Helpers.parseDecimals(2000000, 18));
