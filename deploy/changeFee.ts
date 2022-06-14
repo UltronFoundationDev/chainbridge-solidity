@@ -5,8 +5,8 @@ import { Token, TokenFee, TokenResourceId } from "./tokenFee";
 
 const ultronDomainId:number = 1;
 const ethereumDomainId:number = 2;
-const avalancheDomainId:number = 3;
-const bscDomainId:number = 4;
+const bscDomainId:number = 3;
+const avalancheDomainId:number = 4;
 const polygonDomainId:number = 5;
 const fantomDomainId:number = 6;
 
@@ -47,8 +47,8 @@ task("fee-ultron", "Changing fee for ultron tokens")
             new Token("uUSDT",  "0x97FDd294024f50c388e39e73F1705a35cfE87656"),
             new Token("uUSDC",  "0x3c4E0FdeD74876295Ca36F62da289F69E3929cc4"),
 
-            new Token("bep_uUSDT",  "0xB8160f15D44604E892Ac52eC4CCBfDA3cafbFDbd"),
-            new Token("bep_uUSDC",  "0x06d522b2118d535978382d9533a68B0b110f9BC2"),
+            // new Token("bep_uUSDT",  "0xB8160f15D44604E892Ac52eC4CCBfDA3cafbFDbd"),
+            // new Token("bep_uUSDC",  "0x06d522b2118d535978382d9533a68B0b110f9BC2"),
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
@@ -233,7 +233,7 @@ task("fee-ultron", "Changing fee for ultron tokens")
         // for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
         //     await bridge.adminChangeFee(i);
         //     console.info(`adminChangeFeeRequest ${i}`)    
-        //     await Helpers.delay(8000);
+        //     await Helpers.delay(4000);
         // }
 
         return domainId;
