@@ -273,16 +273,18 @@ task("fee-eth", "Changing fee for ethereum tokens")
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
         console.info((iterator));
 
-        for(let i = 1; i <= tokenAddresses.length; i++) {
-            console.info(`${tokenAddresses[i - 1].tokenName} ETH ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), domainId)}`)
-            console.info(`${tokenAddresses[i - 1].tokenName} ULX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ultronDomainId)}`)    
-        }
+        // for(let i = 1; i <= tokenAddresses.length; i++) {
+        //     console.info(`${tokenAddresses[i - 1].tokenName} ETH ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), domainId)}`)
+        //     console.info(`${tokenAddresses[i - 1].tokenName} ULX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ultronDomainId)}`)    
+        // }
 
         // WBTC
-        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.0013, 18), Helpers.parseDecimals(0.003, 18), Helpers.parseDecimals(1000, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.0013, 8), Helpers.parseDecimals(0.003, 8), Helpers.parseDecimals(1000, 8));
+        // console.info(1);
         // await Helpers.delay(8000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), ultronDomainId, Helpers.parseDecimals(0.00002, 18), Helpers.parseDecimals(0.0002, 18), Helpers.parseDecimals(430, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), ultronDomainId, Helpers.parseDecimals(0.00002, 8), Helpers.parseDecimals(0.0002, 8), Helpers.parseDecimals(430, 8));
+        // console.info(2);
         // await Helpers.delay(8000);
 
         // WETH
@@ -493,18 +495,18 @@ task("fee-avalanche", "Changing fee for avalanche tokens")
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
         console.info((iterator));
 
-        for(let i = 1; i <= tokenAddresses.length; i++) {
-            console.info(`${tokenAddresses[i - 1].tokenName} ${network.name} ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), domainId)}`)
-            console.info(`${tokenAddresses[i - 1].tokenName} ULX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ultronDomainId)}`)    
-        }
+        // for(let i = 1; i <= tokenAddresses.length; i++) {
+        //     console.info(`${tokenAddresses[i - 1].tokenName} ${network.name} ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), domainId)}`)
+        //     console.info(`${tokenAddresses[i - 1].tokenName} ULX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ultronDomainId)}`)    
+        // }
 
         // // Already set
 
         // // WBTC
-        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.000045, 18), Helpers.parseDecimals(0.0002, 18),  Helpers.parseDecimals(430, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.000045, 8), Helpers.parseDecimals(0.0002, 8),  Helpers.parseDecimals(430, 8));
         // await Helpers.delay(4000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), ultronDomainId, Helpers.parseDecimals(0.00002, 18), Helpers.parseDecimals(0.0002, 18),  Helpers.parseDecimals(430, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), ultronDomainId, Helpers.parseDecimals(0.00002, 8), Helpers.parseDecimals(0.0002, 8),  Helpers.parseDecimals(430, 8));
         // await Helpers.delay(4000);
 
         // // WETH
@@ -597,9 +599,9 @@ task("fee-polygon", "Changing fee for polygon tokens")
         //     console.info(`${tokenAddresses[i - 1].tokenName} ULX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ultronDomainId)}`)    
         // }
 
-        // Already set
+        // // Already set
 
-        // WBTC
+        // // WBTC
         // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.00002, 8), Helpers.parseDecimals(0.0002, 8), Helpers.parseDecimals(430, 8));
         // await Helpers.delay(4000);
 
@@ -690,17 +692,17 @@ task("fee-fantom", "Changing fee for fantom tokens")
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
         console.info((iterator));
 
-        for(let i = 1; i <= tokenAddresses.length; i++) {
-            console.info(`${tokenAddresses[i - 1].tokenName} ${network.name} ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), domainId)}`)
-            console.info(`${tokenAddresses[i - 1].tokenName} ULX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ultronDomainId)}`)    
-        }
+        // for(let i = 1; i <= tokenAddresses.length; i++) {
+        //     console.info(`${tokenAddresses[i - 1].tokenName} ${network.name} ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), domainId)}`)
+        //     console.info(`${tokenAddresses[i - 1].tokenName} ULX ${await bridge.getFee(Helpers.findToken(tokenAddresses, tokenAddresses[i - 1].tokenName), ultronDomainId)}`)    
+        // }
 
         // // Already set
         // // WBTC
-        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.000045, 18), Helpers.parseDecimals(0.0002, 18), Helpers.parseDecimals(430, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), domainId, Helpers.parseDecimals(0.000045, 8), Helpers.parseDecimals(0.0002, 8), Helpers.parseDecimals(430, 8));
         // await Helpers.delay(4000);
 
-        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), ultronDomainId, Helpers.parseDecimals(0.00002, 18), Helpers.parseDecimals(0.0002, 18), Helpers.parseDecimals(430, 18));
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "WBTC"), ultronDomainId, Helpers.parseDecimals(0.00002, 8), Helpers.parseDecimals(0.0002, 8), Helpers.parseDecimals(430, 8));
         // await Helpers.delay(4000);
 
         // // WETH
@@ -752,11 +754,11 @@ task("fee-fantom", "Changing fee for fantom tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(2000000, 6));
         // await Helpers.delay(4000);
 
-        // for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
-        //     await bridge.adminChangeFee(i);
-        //     console.info(`adminChangeFeeRequest ${i}`)    
-        //     await Helpers.delay(8000);
-        // }
+        for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
+            await bridge.adminChangeFee(i);
+            console.info(`adminChangeFeeRequest ${i}`)    
+            await Helpers.delay(8000);
+        }
 
         return domainId;
     });
