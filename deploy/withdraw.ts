@@ -80,17 +80,17 @@ task("withdraw-eth", "Withdraw tokens from ethereum")
         
         const tokenAddresses = [
             //new Token("wULX",   ""), 
-            new Token("WBTC",   "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"), // DONE
-            new Token("WETH",   "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"), // DONE
+            new Token("WBTC",   "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"), 
+            new Token("WETH",   "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"), 
             new Token("BNB",    "0xB8c77482e45F1F44dE1745F52C74426C631bDD52"), 
             new Token("BUSD",   "0x4Fabb145d64652a948d72533023f6E7A623C7C53"), 
-            new Token("SHIB",   "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"), // DONE
+            new Token("SHIB",   "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE"), 
             new Token("MATIC",  "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0"),
-            new Token("FTM",    "0x4E15361FD6b4BB609Fa63C81A2be19d873717870"), // DONE
-            new Token("DAI",    "0x6B175474E89094C44Da98b954EedeAC495271d0F"), // DONE
-            new Token("LINK",   "0x514910771AF9Ca656af840dff83E8264EcF986CA"), // DONE
-            new Token("USDT",   "0xdAC17F958D2ee523a2206206994597C13D831ec7"), // DONE
-            new Token("USDC",   "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"), // DONE
+            new Token("FTM",    "0x4E15361FD6b4BB609Fa63C81A2be19d873717870"), 
+            new Token("DAI",    "0x6B175474E89094C44Da98b954EedeAC495271d0F"), 
+            new Token("LINK",   "0x514910771AF9Ca656af840dff83E8264EcF986CA"), 
+            new Token("USDT",   "0xdAC17F958D2ee523a2206206994597C13D831ec7"), 
+            new Token("USDC",   "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"), 
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
@@ -131,18 +131,18 @@ task("withdraw-bsc", "Withdraw tokens from bsc")
         
         const tokenAddresses = [
             //new Token("wULX",   ""), 
-            new Token("WBTC",   "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c"), // DONE
-            new Token("WETH",   "0x2170Ed0880ac9A755fd29B2688956BD959F933F8"), // DONE
-            new Token("BNB",    "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"), // DONE
-            new Token("AVAX",   "0x1CE0c2827e2eF14D5C4f29a091d735A204794041"), // DONE
-            new Token("BUSD",   "0xe9e7cea3dedca5984780bafc599bd69add087d56"), // DONE
+            new Token("WBTC",   "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c"), 
+            new Token("WETH",   "0x2170Ed0880ac9A755fd29B2688956BD959F933F8"), 
+            new Token("BNB",    "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"), 
+            new Token("AVAX",   "0x1CE0c2827e2eF14D5C4f29a091d735A204794041"), 
+            new Token("BUSD",   "0xe9e7cea3dedca5984780bafc599bd69add087d56"), 
             //new Token("SHIB",   "0x2859e4544C4bB03966803b044A93563Bd2D0DD4D"), 
             //new Token("MATIC",  "0xcc42724c6683b7e57334c4e856f4c9965ed682bd"),
-            new Token("FTM",    "0xad29abb318791d579433d831ed122afeaf29dcfe"), // DONE
-            new Token("DAI",    "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3"), // DONE
+            new Token("FTM",    "0xad29abb318791d579433d831ed122afeaf29dcfe"), 
+            new Token("DAI",    "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3"), 
             //new Token("LINK",   "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD"), 
-            new Token("USDT",   "0x55d398326f99059ff775485246999027b3197955"), // DONE
-            new Token("USDC",   "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"), // DONE
+            new Token("USDT",   "0x55d398326f99059ff775485246999027b3197955"), 
+            new Token("USDC",   "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"), 
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
@@ -183,16 +183,16 @@ task("withdraw-avalanche", "Withdraw tokens from avalanche")
         
         const tokenAddresses = [
             // new Token("wULX",   ""), 
-            new Token("WBTC",   "0x50b7545627a5162F82A992c33b87aDc75187B218"), // DONE
-            new Token("WETH",   "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB"), // DONE
+            new Token("WBTC",   "0x50b7545627a5162F82A992c33b87aDc75187B218"), 
+            new Token("WETH",   "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB"), 
             new Token("BNB",    "0x264c1383EA520f73dd837F915ef3a732e204a493"), 
-            new Token("AVAX",   "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7"), // DONE
-            new Token("BUSD",   "0xaEb044650278731Ef3DC244692AB9F64C78FfaEA"), // DONE
+            new Token("AVAX",   "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7"), 
+            new Token("BUSD",   "0xaEb044650278731Ef3DC244692AB9F64C78FfaEA"), 
             new Token("SHIB",   "0x02D980A0D7AF3fb7Cf7Df8cB35d9eDBCF355f665"), 
-            new Token("DAI",    "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70"), // DONE
+            new Token("DAI",    "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70"), 
             new Token("LINK",   "0xB3fe5374F67D7a22886A0eE082b2E2f9d2651651"), 
-            new Token("USDT",   "0xc7198437980c041c805A1EDcbA50c1Ce5db95118"), // DONE
-            new Token("USDC",   "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"), // DONE
+            new Token("USDT",   "0xc7198437980c041c805A1EDcbA50c1Ce5db95118"), 
+            new Token("USDC",   "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"), 
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
@@ -233,17 +233,17 @@ task("withdraw-polygon", "Withdraw tokens from polygon")
         
         const tokenAddresses = [
             //new Token("wULX",   ""), 
-            new Token("WBTC",   "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6"), // DONE
-            new Token("WETH",   "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"), // DONE
-            new Token("BNB",    "0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3"), // DONE
+            new Token("WBTC",   "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6"), 
+            new Token("WETH",   "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"), 
+            new Token("BNB",    "0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3"), 
             new Token("AVAX",   "0x2c89bbc92bd86f8075d1decc58c7f4e0107f286b"), 
-            new Token("BUSD",   "0xdAb529f40E671A1D4bF91361c21bf9f0C9712ab7"), // DONE
-            new Token("MATIC",  "0x0000000000000000000000000000000000001010"), // DONE
+            new Token("BUSD",   "0xdAb529f40E671A1D4bF91361c21bf9f0C9712ab7"), 
+            new Token("MATIC",  "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270"), 
             new Token("FTM",    "0xC9c1c1c20B3658F8787CC2FD702267791f224Ce1"), 
-            new Token("DAI",    "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063"), // DONE
+            new Token("DAI",    "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063"),
             new Token("LINK",   "0xb0897686c545045aFc77CF20eC7A532E3120E0F1"), 
-            new Token("USDT",   "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"), // DONE
-            new Token("USDC",   "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"), // DONE
+            new Token("USDT",   "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"), 
+            new Token("USDC",   "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"), 
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
@@ -284,16 +284,16 @@ task("withdraw-fantom", "Withdraw tokens from fantom")
         
         const tokenAddresses = [
             //new Token("wULX",   ""), 
-            new Token("WBTC",   "0x321162Cd933E2Be498Cd2267a90534A804051b11"), // DONE
-            new Token("WETH",   "0x74b23882a30290451A17c44f4F05243b6b58C76d"), // DONE
-            new Token("BNB",    "0x27f26F00e1605903645BbaBC0a73E35027Dccd45"), // DONE
+            new Token("WBTC",   "0x321162Cd933E2Be498Cd2267a90534A804051b11"), 
+            new Token("WETH",   "0x74b23882a30290451A17c44f4F05243b6b58C76d"), 
+            new Token("BNB",    "0x27f26F00e1605903645BbaBC0a73E35027Dccd45"), 
             new Token("AVAX",   "0x511D35c52a3C244E7b8bd92c0C297755FbD89212"), 
-            new Token("BUSD",   "0xC931f61B1534EB21D8c11B24f3f5Ab2471d4aB50"), // DONE
-            new Token("FTM",    "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83"), // DONE
-            new Token("DAI",    "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E"), // DONE
+            new Token("BUSD",   "0xC931f61B1534EB21D8c11B24f3f5Ab2471d4aB50"), 
+            new Token("FTM",    "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83"), 
+            new Token("DAI",    "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E"), 
             new Token("LINK",   "0xb3654dc3D10Ea7645f8319668E8F54d2574FBdC8"), 
-            new Token("USDT",   "0x049d68029688eabf473097a2fc38ef61633a3c7a"), // DONE
-            new Token("USDC",   "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75"), // DONE
+            new Token("USDT",   "0x049d68029688eabf473097a2fc38ef61633a3c7a"), 
+            new Token("USDC",   "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75"), 
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;

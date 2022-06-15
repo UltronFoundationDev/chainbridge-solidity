@@ -583,7 +583,7 @@ task("fee-polygon", "Changing fee for polygon tokens")
             new Token("BNB",    "0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3"), // DONE
             new Token("AVAX",   "0x2c89bbc92bd86f8075d1decc58c7f4e0107f286b"), 
             new Token("BUSD",   "0xdAb529f40E671A1D4bF91361c21bf9f0C9712ab7"), // DONE
-            new Token("MATIC",  "0x0000000000000000000000000000000000001010"), // DONE
+            new Token("MATIC",  "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270"), // DONE
             new Token("FTM",    "0xC9c1c1c20B3658F8787CC2FD702267791f224Ce1"), 
             new Token("DAI",    "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063"), // DONE
             new Token("LINK",   "0xb0897686c545045aFc77CF20eC7A532E3120E0F1"), 
@@ -650,10 +650,10 @@ task("fee-polygon", "Changing fee for polygon tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "USDC"), ultronDomainId, Helpers.parseDecimals(0.9, 6), Helpers.parseDecimals(12, 6),  Helpers.parseDecimals(2000000, 6));
         // await Helpers.delay(4000);
 
-        // for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
+        // for(let i:number = 25; i <= (await DAO.getChangeFeeRequestCount()); i++) {
         //     await bridge.adminChangeFee(i);
         //     console.info(`adminChangeFeeRequest ${i}`)    
-        //     await Helpers.delay(8000);
+        //     await Helpers.delay(4000);
         // }
 
         return domainId;
