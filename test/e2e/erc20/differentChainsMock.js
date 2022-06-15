@@ -19,6 +19,7 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
     const destinationRelayer1Address = accounts[3];
     const destinationRelayer2Address = accounts[4];
     
+    const ownerAddress = accounts[0];
     const depositerAddress = accounts[1];
     const recipientAddress = accounts[2];
 
@@ -122,6 +123,20 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         destinationDepositData = Helpers.createERCDepositData(depositAmount.toNumber(), 20, depositerAddress);
         destinationDepositProposalData = Helpers.createERCDepositData(depositAmount.toNumber() - basicFee.toNumber(), 20, depositerAddress);
         destinationDepositProposalDataHash = Ethers.utils.keccak256(OriginERC20HandlerInstance.address + destinationDepositProposalData.substr(2));
+
+        const etherTransfer = Ethers.utils.parseUnits("1.0", 18);
+        await web3.eth.sendTransaction({
+            from: ownerAddress,
+            to: DestinationERC20HandlerInstance.address,
+            value: etherTransfer
+        });
+
+        await web3.eth.sendTransaction({
+            from: ownerAddress,
+            to: OriginERC20HandlerInstance.address,
+            value: etherTransfer
+        });
+        
     });
     
     it("[sanity] depositerAddress' balance should be equal to initialTokenAmount", async () => {
@@ -229,6 +244,8 @@ contract('E2E ERC20 - Two EVM Chains', async accounts => {
         
         // Assert ERC20 balance was transferred to recipientAddress
         depositerBalance = await OriginERC20MintableInstance.balanceOf(depositerAddress);
+        console.info(`depositerBalance = ${depositerBalance}`)
+        console.info(`initialTokenAmount.toNumber() - (basicFee.toNumber() * 2) = ${initialTokenAmount.toNumber() - (basicFee.toNumber() * 2)}`)
         assert.strictEqual(depositerBalance.toNumber(), initialTokenAmount.toNumber() - (basicFee.toNumber() * 2));
     });
 });

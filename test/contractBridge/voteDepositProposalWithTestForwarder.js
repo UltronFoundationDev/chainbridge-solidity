@@ -107,6 +107,13 @@ contract('Bridge - [voteProposal through forwarder]', async (accounts) => {
         executeCallData = Helpers.createCallData(BridgeInstance, 'executeProposal', ["uint8", "uint8", "uint64", "bytes", "bytes32", "bool"], [destinationDomainID, originDomainID, expectedDepositNonce, depositData, resourceID, true]);
         await DAOInstance.newSetForwarderRequest(ForwarderInstance.address, true);
         await BridgeInstance.adminSetForwarder(1);
+
+        const etherTransfer = Ethers.utils.parseUnits("1.0", 18);
+        await web3.eth.sendTransaction({
+            from: relayer1Address,
+            to: DestinationERC20HandlerInstance.address,
+            value: etherTransfer
+        });
     });
 
     it ('[sanity] bridge configured with threshold and relayers', async () => {

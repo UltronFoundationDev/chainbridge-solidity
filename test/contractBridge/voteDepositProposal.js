@@ -102,6 +102,13 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
         await DAOInstance.newChangeFeeRequest(DestinationERC20MintableInstance.address, destinationDomainID, basicFee, minAmount, maxAmount);
         await BridgeInstance.adminChangeFee(1);
 
+        const etherTransfer = Ethers.utils.parseUnits("1.0", 18);
+        await web3.eth.sendTransaction({
+            from: relayer1Address,
+            to: DestinationERC20HandlerInstance.address,
+            value: etherTransfer
+        });
+
         vote = (relayer) => BridgeInstance.voteProposal(destinationDomainID, originDomainID, expectedDepositNonce, resourceID, depositData, { from: relayer });
         executeProposal = (relayer) => BridgeInstance.executeProposal(destinationDomainID, originDomainID, expectedDepositNonce, depositData, resourceID, { from: relayer });
     });
