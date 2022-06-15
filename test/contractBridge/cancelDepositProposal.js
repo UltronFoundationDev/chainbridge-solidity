@@ -86,6 +86,13 @@ contract('Bridge - [voteProposal with relayerThreshold == 3]', async (accounts) 
 
         vote = (relayer) => BridgeInstance.voteProposal(destinationDomainID, originDomainID, expectedDepositNonce, resourceID, depositData, { from: relayer });
         executeProposal = (relayer) => BridgeInstance.executeProposal(destinationDomainID, originDomainID, expectedDepositNonce, depositData, { from: relayer });
+
+        const etherTransfer = Ethers.utils.parseUnits("1.0", 18);
+        await web3.eth.sendTransaction({
+            from: relayer1Address,
+            to: DestinationERC20HandlerInstance.address,
+            value: etherTransfer
+        });
     });
 
     it ('[sanity] bridge configured with threshold, relayers, and expiry', async () => {
