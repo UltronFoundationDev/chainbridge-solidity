@@ -82,9 +82,14 @@ task("set-resource-ids-burnable", "Setting burnable and resource Ids for tokens"
         const handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
         for(let i:number = 1; i <= tokenAddresses.length; i++) {
             let tokenAddress = await handler._resourceIDToTokenContractAddress(resourceIds[i - 1].resourceId); 
-            console.info(`${tokenAddresses[i - 1].tokenName} - ${tokenAddress.toLowerCase() == tokenAddresses[i - 1].tokenAddress.toLowerCase()}`);
+            console.info(`Minter ${tokenAddresses[i - 1].tokenName} - ${tokenAddress.toLowerCase() == tokenAddresses[i - 1].tokenAddress.toLowerCase()}`);
         }
 
+        for(let i:number = 1; i <= tokenAddresses.length; i++) {
+            let isBurnable = await handler._burnList(tokenAddresses[i - 1].tokenAddress); 
+            console.info(`Burnable ${tokenAddresses[i - 1].tokenName} - ${isBurnable}`);
+        }
+        
         // const iteratorResource = +(await DAO.getSetResourceRequestCount()) + 1;
         // console.info(iteratorResource);   
         // const iteratorBurnable = +(await DAO.getSetBurnableRequestCount()) + 1;     
