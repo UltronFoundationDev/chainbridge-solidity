@@ -16,6 +16,8 @@
  import "./deploy/changeRelayers";
  import "./deploy/withdraw";
  import "./deploy/changeNonce";
+ import "./deploy/multisig";
+ import "./deploy/changeTreasury";
  require("dotenv").config();
 
 const config: HardhatUserConfig = {
