@@ -14,6 +14,8 @@
  import "./deploy/changeFee";
  import "./deploy/setResourceIds";
  import "./deploy/changeRelayers";
+ import "./deploy/withdraw";
+ import "./deploy/changeNonce";
  require("dotenv").config();
 
 const config: HardhatUserConfig = {
