@@ -11,9 +11,9 @@ task("set-resource-ids-burnable", "Setting burnable and resource Ids for tokens"
         }
         const signer = (await ethers.getSigners())[0];
 
-        const bridgeAddress = "0x82d93f1f0Be7B1258F42646E5a312d6a637103c4";
-        const erc20HandlerAddress = "0xA615C027a6f4a8027d70C0d69C099283Ee28EA8b";
-        const daoAddress = "0x59A799F38eEc3d473E2EB1E9a4cf3cd15A19a989";
+        const bridgeAddress = "0x61488630B3337b9b897eF3A0AB47CB180399CEa3";
+        const erc20HandlerAddress = "0xc078626DA5C09DC63A7c5C0c030f431EFfF098b8";
+        const daoAddress = "0x6025adaD5b1EAC55f24e3e4783E0e881428017e8";
 
         // Old used for first tests:
         // const bridgeAddress = "0xC453C52f794661C2c0856936e13df67F0eB82f9e";

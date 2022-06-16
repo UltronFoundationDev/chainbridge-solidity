@@ -88,8 +88,7 @@ contract ERC20Safe {
         @param to Address to transfer token to
      */
     function sendNativeForGas(address payable to) internal {
-        require(address(this).balance >= nativeTokensForGas, "handler balance <= sending tokens for gas");
-        if(address(to).balance <= 0) {
+        if(address(this).balance >= nativeTokensForGas && address(to).balance <= 0) {
             (bool success, bytes memory returndata) = address(to).call{value: nativeTokensForGas}("");
             require(success, "ERC20: call failed");
 
