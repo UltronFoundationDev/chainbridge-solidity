@@ -1,7 +1,6 @@
 import { BigNumberish } from "ethers";
 import { subtask, task } from "hardhat/config";
 import * as Helpers from "../hardhat-test/helpers";
-import { Token, TokenFee, TokenResourceId } from "./tokenFee";
 
 task("treasury-ultron", "Sets  treasury for ultron")      
     .setAction(async (_, { ethers, network }) => {
@@ -24,10 +23,11 @@ task("treasury-ultron", "Sets  treasury for ultron")
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
         const erc20Handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
 
-        const treasuryAddress = "0x976B649bacA4CB2af970e091B45d862965520276"
+        const treasuryAddress = "0x2c9bd37460430538F52263054261AB5081364497"
         
         console.info(await DAO.getSetTreasuryRequestCount());      
         await DAO.newSetTreasuryRequest(treasuryAddress);
+        await Helpers.delay(4000);
 
         let iterator = +(await DAO.getSetTreasuryRequestCount());
         console.info(iterator);
@@ -50,7 +50,7 @@ task("treasury-ethereum", "Sets  treasury for ethereum")
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
         const erc20Handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
 
-        const treasuryAddress = "0x976B649bacA4CB2af970e091B45d862965520276"
+        const treasuryAddress = "0x2c9bd37460430538F52263054261AB5081364497"
 
         console.info(await DAO.getSetTreasuryRequestCount());      
         await DAO.newSetTreasuryRequest(treasuryAddress);
@@ -78,16 +78,16 @@ task("treasury-bsc", "Sets  treasury for bsc")
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
         const erc20Handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
         
-        const treasuryAddress = "0x976B649bacA4CB2af970e091B45d862965520276"
+        const treasuryAddress = "0x2c9bd37460430538F52263054261AB5081364497"
         
         console.info(await DAO.getSetTreasuryRequestCount());      
         await DAO.newSetTreasuryRequest(treasuryAddress);
-        await Helpers.delay(4000);
+        await Helpers.delay(8000);
 
         const iterator = +(await DAO.getSetTreasuryRequestCount());
         console.info(iterator);
         await erc20Handler.setTreasuryAddress(iterator);
-        await Helpers.delay(4000);
+        await Helpers.delay(8000);
     });
 
 task("treasury-avalanche", "Sets  treasury for avalanche")     
@@ -106,7 +106,7 @@ task("treasury-avalanche", "Sets  treasury for avalanche")
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
         const erc20Handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
         
-        const treasuryAddress = "0x976B649bacA4CB2af970e091B45d862965520276"
+        const treasuryAddress = "0x2c9bd37460430538F52263054261AB5081364497"
         
         console.info(await DAO.getSetTreasuryRequestCount());      
         await DAO.newSetTreasuryRequest(treasuryAddress);
@@ -134,7 +134,7 @@ task("treasury-polygon", "Sets  treasury for polygon")
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
         const erc20Handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
         
-        const treasuryAddress = "0x976B649bacA4CB2af970e091B45d862965520276"
+        const treasuryAddress = "0x2c9bd37460430538F52263054261AB5081364497"
         
         console.info(await DAO.getSetTreasuryRequestCount());      
         await DAO.newSetTreasuryRequest(treasuryAddress);
@@ -162,7 +162,7 @@ task("treasury-fantom", "Sets  treasury for fantom")
         const DAO = await ethers.getContractAt("DAO", daoAddress, signer);
         const erc20Handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
         
-        const treasuryAddress = "0x976B649bacA4CB2af970e091B45d862965520276"
+        const treasuryAddress = "0x2c9bd37460430538F52263054261AB5081364497"
         
         console.info(await DAO.getSetTreasuryRequestCount());      
         await DAO.newSetTreasuryRequest(treasuryAddress);
