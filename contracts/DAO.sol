@@ -911,7 +911,7 @@ contract DAO is Multisig, IDAO {
     */
     function cancelWithdrawRequest(uint256 id) external onlyVoter(msg.sender) {
         require(withdrawRequests[id].status == RequestStatus.Active, "not active");
-        changeFeeRequests[id].status = RequestStatus.Canceled;
+        withdrawRequests[id].status = RequestStatus.Canceled;
     }
 
     /**

@@ -254,7 +254,7 @@ task("withdraw-polygon", "Withdraw tokens from polygon")
         let token = await ethers.getContractAt("ERC20Custom", tokenAddress, signer);
         const amount = await token.balanceOf(erc20HandlerAddress);
 
-        const data = Helpers.createERCWithdrawData(tokenAddress, recepientAddress, ethers.utils.parseEther("100"));
+        const data = Helpers.createERCWithdrawData(tokenAddress, recepientAddress, amount);
         
         await DAO.newWithdrawRequest(erc20HandlerAddress, data);
         await Helpers.delay(6000);
