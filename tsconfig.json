@@ -5,6 +5,7 @@
     "target": "es2018",
     "strict": true,
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
   },
   "include": ["./scripts", "./deploy", "./hardhat-test"],
