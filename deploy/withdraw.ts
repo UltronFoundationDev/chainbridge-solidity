@@ -42,11 +42,11 @@ task("withdraw-ultron", "Withdraw tokens from ultron")
             // new Token("bep_uUSDC",  "0x06d522b2118d535978382d9533a68B0b110f9BC2"),
         ];
 
-        const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
+        const iterator = +(await DAO.getWithdrawRequestCount()) + 1;
         console.info(iterator);
 
         const tokenAddress = Helpers.findToken(tokenAddresses, "BNB");
-        const recepientAddress = "0xEDF51b1778DBc485F3F3788fe2C36eC9D0B65004";
+        const recepientAddress = "0x4CE535D6E2D47690e33CA646972807BeB264dFBf";
         let token = await ethers.getContractAt("ERC20Custom", tokenAddress, signer);
         const amount = await token.balanceOf(erc20HandlerAddress);
 
@@ -93,11 +93,11 @@ task("withdraw-eth", "Withdraw tokens from ethereum")
             new Token("USDC",   "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"), 
         ];
 
-        const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
+        const iterator = +(await DAO.getWithdrawRequestCount()) + 1;
         console.info(iterator);
 
         const tokenAddress = Helpers.findToken(tokenAddresses, "BNB");
-        const recepientAddress = "0xEDF51b1778DBc485F3F3788fe2C36eC9D0B65004";
+        const recepientAddress = "0x4CE535D6E2D47690e33CA646972807BeB264dFBf";
         let token = await ethers.getContractAt("ERC20Custom", tokenAddress, signer);
         const amount = await token.balanceOf(erc20HandlerAddress);
 
@@ -145,11 +145,11 @@ task("withdraw-bsc", "Withdraw tokens from bsc")
             new Token("USDC",   "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"), 
         ];
 
-        const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
+        const iterator = +(await DAO.getWithdrawRequestCount()) + 1;
         console.info(iterator);
 
         const tokenAddress = Helpers.findToken(tokenAddresses, "BNB");
-        const recepientAddress = "0xEDF51b1778DBc485F3F3788fe2C36eC9D0B65004";
+        const recepientAddress = "0x4CE535D6E2D47690e33CA646972807BeB264dFBf";
         let token = await ethers.getContractAt("ERC20Custom", tokenAddress, signer);
         const amount = await token.balanceOf(erc20HandlerAddress);
 
@@ -195,11 +195,11 @@ task("withdraw-avalanche", "Withdraw tokens from avalanche")
             new Token("USDC",   "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"), 
         ];
 
-        const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
+        const iterator = +(await DAO.getWithdrawRequestCount()) + 1;
         console.info(iterator);
 
         const tokenAddress = Helpers.findToken(tokenAddresses, "BNB");
-        const recepientAddress = "0xEDF51b1778DBc485F3F3788fe2C36eC9D0B65004";
+        const recepientAddress = "0x4CE535D6E2D47690e33CA646972807BeB264dFBf";
         let token = await ethers.getContractAt("ERC20Custom", tokenAddress, signer);
         const amount = await token.balanceOf(erc20HandlerAddress);
 
@@ -246,15 +246,15 @@ task("withdraw-polygon", "Withdraw tokens from polygon")
             new Token("USDC",   "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"), 
         ];
 
-        const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
+        const iterator = +(await DAO.getWithdrawRequestCount()) + 1;
         console.info(iterator);
 
-        const tokenAddress = Helpers.findToken(tokenAddresses, "BNB");
-        const recepientAddress = "0xEDF51b1778DBc485F3F3788fe2C36eC9D0B65004";
+        const tokenAddress = Helpers.findToken(tokenAddresses, "USDT");
+        const recepientAddress = "0x4CE535D6E2D47690e33CA646972807BeB264dFBf";
         let token = await ethers.getContractAt("ERC20Custom", tokenAddress, signer);
         const amount = await token.balanceOf(erc20HandlerAddress);
 
-        const data = Helpers.createERCWithdrawData(tokenAddress, recepientAddress, amount);
+        const data = Helpers.createERCWithdrawData(tokenAddress, recepientAddress, ethers.utils.parseEther("100"));
         
         await DAO.newWithdrawRequest(erc20HandlerAddress, data);
         await Helpers.delay(6000);
@@ -296,11 +296,11 @@ task("withdraw-fantom", "Withdraw tokens from fantom")
             new Token("USDC",   "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75"), 
         ];
 
-        const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
+        const iterator = +(await DAO.getWithdrawRequestCount()) + 1;
         console.info(iterator);
 
         const tokenAddress = Helpers.findToken(tokenAddresses, "BNB");
-        const recepientAddress = "0xEDF51b1778DBc485F3F3788fe2C36eC9D0B65004";
+        const recepientAddress = "0x4CE535D6E2D47690e33CA646972807BeB264dFBf";
         let token = await ethers.getContractAt("ERC20Custom", tokenAddress, signer);
         const amount = await token.balanceOf(erc20HandlerAddress);
 
