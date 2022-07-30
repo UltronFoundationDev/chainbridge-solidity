@@ -192,3 +192,37 @@ subtask("deploy-tokens", "Deploying default tokens for our chain")
         return [wBTC.address, wETH.address, bnb.address, avax.address, bUSD.address, shib.address, matic.address, 
             ftm.address, dai.address, link.address, uUSDT.address, uUSDC.address, bep_uUSDT.address, bep_uUSDC.address];
     });
+
+/*========== Deploy ULX ==========*/
+task("deploy-ulx", "Deploying ULX for different chains")     
+    .setAction(async (taskArgs, { ethers, network }) => {
+        let erc20HandlerAddress;
+        if(network.name === "ultron") {
+            return;
+        }     
+        else if(network.name === "ethereum") {
+            erc20HandlerAddress = '0xFe21Dd0eC80e744A473770827E1aD6393A5A94F0';
+        }
+        else if(network.name === "bsc") {
+            erc20HandlerAddress = '0xFe21Dd0eC80e744A473770827E1aD6393A5A94F0';
+        }
+        else if(network.name === "avalanche") {
+            erc20HandlerAddress = '0xFe21Dd0eC80e744A473770827E1aD6393A5A94F0';
+        }
+        else if(network.name === "polygon") {
+            erc20HandlerAddress = '0xFe21Dd0eC80e744A473770827E1aD6393A5A94F0';
+        }
+        else if(network.name === "fantom") {
+            erc20HandlerAddress = '0x598E5dBC2f6513E6cb1bA253b255A5b73A2a720b';
+        }       
+        
+        const signer = (await ethers.getSigners())[0];
+
+        const erc20CustomFactory = await ethers.getContractFactory("ERC20Custom", signer);
+
+        const ulx = await (await erc20CustomFactory.deploy("Ultron", "ULX")).deployed();
+        await ulx.grantMinterRole(erc20HandlerAddress);
+        console.log(`The ULX: \u001b[1;34m${ulx.address}\u001b[0m`);
+
+        return [ulx.address];
+    });
