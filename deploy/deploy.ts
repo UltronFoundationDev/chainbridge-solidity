@@ -126,7 +126,8 @@ subtask("setInitialContracts", "Set Initial Contracts successfully")
     });
 
 /*========== Deploy Tokens ==========*/
-subtask("deploy-tokens", "Deploying default tokens for our chain")     
+subtask("deploy-tokens", "Deploying default tokens for our chain")
+    .addParam("erc20Handler", "erc20Handler address")     
     .setAction(async (taskArgs, { ethers }) => {
         const signer = (await ethers.getSigners())[0];
 
