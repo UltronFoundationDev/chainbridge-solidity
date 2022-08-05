@@ -42,4 +42,7 @@ interface IDAO {
 
     function isSetNativeTokensForGasAvailable(uint256 id) external view returns (uint256);
     function confirmSetNativeTokensForGasRequest(uint256 id) external returns (bool);
+
+    function isTransferNativeAvailable(uint256 id) external view returns (address, uint256);
+    function confirmTransferNativeRequest(uint256 id) external returns (bool);
 }

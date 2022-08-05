@@ -174,6 +174,12 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         releaseERC20(tokenAddress, recipient, amount);
     }
 
+    function withdrawNative(uint256 id) external {
+        (address recepient, uint256 amount) = contractDAO.isTransferNativeAvailable(id);
+        require(contractDAO.confirmTransferNativeRequest(id), "confirmed");
+        payable(recepient).transfer(amount);
+    }
+
     function evaluateFee(uint8 destinationDomainID, address tokenAddress, uint256 amount) private view returns (uint256 fee) {
         (uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractBridge.getFee(tokenAddress, destinationDomainID);
         require(minAmount <= amount, "amount < min amount");

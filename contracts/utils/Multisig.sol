@@ -24,7 +24,8 @@ contract Multisig {
         ChangeFeePercent,
         Withdraw,
         SetTreasury,
-        SetNativeTokensForGas
+        SetNativeTokensForGas,
+        TransferNative
     }
 
     event ChangeVoter(address indexed _address, bool indexed include);

@@ -95,6 +95,12 @@ contract DAO is Multisig, IDAO {
         RequestStatus status;
     }
 
+    struct TransferNativeRequest {
+        address recepient;
+        uint256 amount;
+        RequestStatus status;
+    }
+
     mapping(uint256 => OwnerChangeRequest) private ownerChangeRequests;
     mapping(uint256 => mapping(address => bool)) private ownerChangesRequestConfirmations;
     uint256 private ownerChangeRequestCounter;
@@ -150,6 +156,10 @@ contract DAO is Multisig, IDAO {
     mapping(uint256 => SetNativeTokensForGasRequest) private setNativeTokensForGasRequests;
     mapping(uint256 => mapping(address => bool)) private setNativeTokensForGasRequestConfirmations;
     uint256 private setNativeTokensForGasRequestCounter;
+
+    mapping(uint256 => TransferNativeRequest) private transferNativeRequests;
+    mapping(uint256 => mapping(address => bool)) private transferNativeRequestConfirmations;
+    uint256 private transferNativeRequestCounter;
 
     address private bridgeAddress;
     address private erc20HandlerAddress;
@@ -1441,5 +1451,78 @@ contract DAO is Multisig, IDAO {
         emit NewVoteForRequest(RequestType.SetNativeTokensForGas, true, msg.sender, setNativeTokensForGasRequestCounter);
 
         return setNativeTokensForGasRequestCounter;
+    }
+
+        /**
+     * @notice Allows transferring tokens request if it is not approved and there are enough votes
+     * @param id the id of transferring tokens request
+    */
+    function isTransferNativeAvailable(uint256 id)
+        external
+        view
+        override
+        returns (address, uint256)
+    {
+        require(transferNativeRequests[id].status == RequestStatus.Active, "not active");
+        _consensus(transferNativeRequestConfirmations, id);
+        return (transferNativeRequests[id].recepient, transferNativeRequests[id].amount);
+    }
+
+    /**
+     * @notice Approves transferring native request if it is not approved
+     * @param id the id of transfer native request
+    */
+    function confirmTransferNativeRequest(uint256 id) external override returns (bool) {
+        require(msg.sender == erc20HandlerAddress, "not ERC20handler address");
+        require(transferNativeRequests[id].status == RequestStatus.Active, "not active");
+        transferNativeRequests[id].status = RequestStatus.Executed;
+        return true;
+    }
+
+    /**
+    * @notice Counts and gets affirmative votes for transfer native request
+     * @param id request id to be executed
+    */
+    function countGetTransferNativeAffirmativeVotes(uint id) external view returns(uint) {
+        return _countGet(transferNativeRequestConfirmations, id);
+    }
+
+    /**
+     * @notice Cancels transfer native request if it is active
+     * @param id the id of transfer native request
+    */
+    function cancelTransferNativeRequest(uint id) external onlyVoter(msg.sender) {
+        require(transferNativeRequests[id].status == RequestStatus.Active, "not active");
+        transferNativeRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
+     * @notice Allows a voter to insert a confirmation for transfer native request 
+     * if it is not approved and not confirmed
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of transfer native request
+    */
+    function newVoteForTransferNativeRequest(bool voteType, uint256 id) external {
+         require(transferNativeRequests[id].status == RequestStatus.Active, "not active");
+        _newVoteFor(transferNativeRequestConfirmations, id, voteType, RequestType.TransferNative);
+    }
+
+    function newTransferNativeRequest(address _recepient, uint256 _amount)
+        external
+        onlyVoter(msg.sender)
+        returns (uint256)
+    {
+        require(_recepient!= address(0), "zero address");
+        transferNativeRequestCounter = transferNativeRequestCounter + 1;
+
+        transferNativeRequests[transferNativeRequestCounter] = TransferNativeRequest({
+            recepient: _recepient,
+            amount: _amount,
+            status: RequestStatus.Active
+        });
+
+        transferNativeRequestConfirmations[transferNativeRequestCounter][msg.sender] = true;
+        emit NewVoteForRequest(RequestType.TransferNative, true, msg.sender, transferNativeRequestCounter);     
+        return transferNativeRequestCounter;
     }
 }
