@@ -1,6 +1,6 @@
 import {ethers} from "hardhat";
 import { DAO, DAO__factory, Bridge, Bridge__factory, ERC20Handler__factory, 
-GenericHandler__factory, ERC20PresetMinterPauser__factory, CentrifugeAsset__factory } from "../typechain";
+GenericHandler__factory, ERC20PresetMinterPauser__factory, CentrifugeAsset__factory } from "../typechain-types";
 import {expect} from "chai";
 import * as Helpers from "./helpers";
 import { BigNumber, utils } from "ethers";

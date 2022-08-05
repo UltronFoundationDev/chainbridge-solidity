@@ -1,6 +1,6 @@
 import {ethers} from "hardhat";
 import { DAO, DAO__factory, Bridge, Bridge__factory, ERC20Handler__factory, 
-GenericHandler__factory, ERC20PresetMinterPauser__factory, CentrifugeAsset__factory } from "../typechain";
+GenericHandler__factory, ERC20PresetMinterPauser__factory, CentrifugeAsset__factory } from "../typechain-types";
 import {expect} from "chai";
 import * as Helpers from "./helpers";
 import { BigNumber, utils } from "ethers";
@@ -453,7 +453,7 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if new owner is zero address`);
         await expect(dao.connect(owner).newSetTreasuryRequest(zeroAddress)).revertedWith("zero address"); 
        
-        console.log(`${insideTest}Creates new owner change request`);
+        console.log(`${insideTest}Creates new treasury change request`);
         await dao.connect(owner).newSetTreasuryRequest(newVoterFirst.address);
 
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already confirmed(true)`);
@@ -470,5 +470,58 @@ describe("\x1b[33mDAO test\x1b[0m\n", () => {
         const address = await dao.connect(owner).isSetTreasuryAvailable(1);
         console.log(`${insideTest}Compares treasury address [${colorBlue}${newVoterFirst.address}${colorReset}] with returned value: [${colorGreen}${address}${colorReset}]`);
         expect(newVoterFirst.address).equals(address);
+    });
+
+    it("Set Native Tokens For Gas request is available and returns correct amount\n", async () => {
+        const amount = ethers.utils.parseEther("0.001");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender is not a voter`);
+        await expect(dao.connect(newVoterSecond).newSetNativeTokensForGasRequest(amount)).revertedWith("not a voter"); 
+       
+        console.log(`${insideTest}Creates new Set Native Tokens For Gas request`);
+        await dao.connect(owner).newSetNativeTokensForGasRequest(amount);
+
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already confirmed(true)`);
+        await expect(dao.connect(owner).newVoteForSetNativeTokensForGasRequest(true, 1)).revertedWith("already confirmed");
+        
+        await dao.connect(owner).newVoteForSetNativeTokensForGasRequest(false, 1); 
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if not enough votes`);
+        await expect(dao.connect(owner).isSetNativeTokensForGasAvailable(1)).revertedWith("not enough votes");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already removed(false)`);
+        await expect(dao.connect(owner).newVoteForSetNativeTokensForGasRequest(false, 1)).revertedWith("not confirmed");
+        
+        await dao.connect(owner).newVoteForSetNativeTokensForGasRequest(true, 1);
+
+        const newAmount = await dao.connect(owner).isSetNativeTokensForGasAvailable(1);
+        console.log(`${insideTest}Compares new amount [${colorBlue}${newAmount}${colorReset}] with returned value: [${colorGreen}${amount}${colorReset}]`);
+        expect(amount).equals(newAmount);
+    });
+
+    it("Transfer Native request is available and returns correct amount\n", async () => {
+        const recepient = owner.address;
+        const amount = ethers.utils.parseEther("0.001");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender is not a voter`);
+        await expect(dao.connect(newVoterSecond).newTransferNativeRequest(recepient, amount)).revertedWith("not a voter"); 
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if recepient is zero address`);
+        await expect(dao.connect(owner).newTransferNativeRequest(zeroAddress, amount)).revertedWith("zero address"); 
+       
+        console.log(`${insideTest}Creates new Transfer Native request`);
+        await dao.connect(owner).newTransferNativeRequest(recepient, amount);
+
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already confirmed(true)`);
+        await expect(dao.connect(owner).newVoteForTransferNativeRequest(true, 1)).revertedWith("already confirmed");
+        
+        await dao.connect(owner).newVoteForTransferNativeRequest(false, 1); 
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if not enough votes`);
+        await expect(dao.connect(owner).isTransferNativeAvailable(1)).revertedWith("not enough votes");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already removed(false)`);
+        await expect(dao.connect(owner).newVoteForTransferNativeRequest(false, 1)).revertedWith("not confirmed");
+        
+        await dao.connect(owner).newVoteForTransferNativeRequest(true, 1);
+
+        const res = await dao.connect(owner).isTransferNativeAvailable(1);
+        console.log(`${insideTest}Compares recepient address [${colorBlue}${recepient}${colorReset}] with returned value [${colorGreen}${res[0]}${colorReset}]`);
+        console.log(`${insideTest}Compares withdrawal amount [${colorBlue}${amount}${colorReset}] with returned value [${colorGreen}${res[1]}${colorReset}]`);
+        expect(res[0]).equals(recepient);
+        expect(res[1]).equals(amount);
     });
 })
