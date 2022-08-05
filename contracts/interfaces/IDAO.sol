@@ -39,4 +39,7 @@ interface IDAO {
 
     function isSetTreasuryAvailable(uint256 id) external view returns (address);
     function confirmSetTreasuryRequest(uint256 id) external returns (bool);
+
+    function isSetNativeTokensForGasAvailable(uint256 id) external view returns (uint256);
+    function confirmSetNativeTokensForGasRequest(uint256 id) external returns (bool);
 }

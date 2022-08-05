@@ -90,99 +90,69 @@ contract DAO is Multisig, IDAO {
         RequestStatus status;
     }
 
-    // mapping of owner change requests
+    struct SetNativeTokensForGasRequest {
+        uint256 nativeTokensForGas;
+        RequestStatus status;
+    }
+
     mapping(uint256 => OwnerChangeRequest) private ownerChangeRequests;
-    // mapping of owner change request confirmations
     mapping(uint256 => mapping(address => bool)) private ownerChangesRequestConfirmations;
-    // id for new owner change request
     uint256 private ownerChangeRequestCounter;
 
-    // mapping of transfer requests
     mapping(uint256 => TransferRequest) private transferRequests;
-    // mapping of signs of transfer requests
     mapping(uint256 => mapping(address => bool)) private transferRequestConfirmations;
-    // id for new transfer request
     uint256 private transferRequestCounter;
 
-    // mapping of pause requests
     mapping(uint256 => PauseStatusRequest) private pauseStatusRequests;
-    // mapping of pause request confirmations
     mapping(uint256 => mapping(address => bool)) private pauseStatusRequestConfirmations;
-    // id for new pause request
     uint256 private pauseStatusRequestCounter;
 
-    // mapping of change relayer threshold requests
     mapping(uint256 => ChangeRelayerThresholdRequest) private changeRelayerThresholdRequests;
-    // mapping of change relayer threshold request confirmations
     mapping(uint256 => mapping(address => bool)) private changeRelayerThresholdRequestConfirmations;
-    // id for new change relayer threshold request
     uint256 private changeRelayerThresholdRequestCounter;
 
-    // mapping of set resource requests
     mapping(uint256 => SetResourceRequest) private setResourceRequests;
-    // mapping of set resource request confirmations
     mapping(uint256 => mapping(address => bool)) private setResourceRequestConfirmations;
-    // id for new set resource request
     uint256 private setResourceRequestCounter;
 
-    // mapping of set generic resource requests
     mapping(uint256 => SetGenericResourceRequest) private setGenericResourceRequests;
-    // mapping of set generic resource request confirmations
     mapping(uint256 => mapping(address => bool)) private setGenericResourceRequestConfirmations;
-    // id for new set generic resource request
     uint256 private setGenericResourceRequestCounter;
 
-    // mapping of set burnable requests
     mapping(uint256 => SetBurnableRequest) private setBurnableRequests;
-    // mapping of set burnable request confirmations
     mapping(uint256 => mapping(address => bool)) private setBurnableRequestConfirmations;
-    // id for new set burnable request
     uint256 private setBurnableRequestCounter;
 
-    // mapping of set nonce requests
     mapping(uint256 => SetNonceRequest) private setNonceRequests;
-    // mapping of set nonce request confirmations
     mapping(uint256 => mapping(address => bool)) private setNonceRequestConfirmations;
-    // id for new set nonce request
     uint256 private setNonceRequestCounter;
 
-    // mapping of set forwarder requests
     mapping(uint256 => SetForwarderRequest) private setForwarderRequests;
-    // mapping of set forwarder request confirmations
     mapping(uint256 => mapping(address => bool)) private setForwarderRequestConfirmations;
-    // id for new set forwarder request
     uint256 private setForwarderRequestCounter;
 
-    // mapping of change fee requests
     mapping(uint256 => ChangeFeeRequest) private changeFeeRequests;
-    // mapping of change fee confirmations
     mapping(uint256 => mapping(address => bool)) private changeFeeRequestConfirmations;
-    // id for new change fee request
     uint256 private changeFeeRequestCounter;
 
-     // mapping of change fee percent requests
     mapping(uint256 => ChangeFeePercentRequest) private changeFeePercentRequests;
-    // mapping of change fee percent confirmations
     mapping(uint256 => mapping(address => bool)) private changeFeePercentRequestConfirmations;
-    // id for new change fee percent request
     uint256 private changeFeePercentRequestCounter;
 
-    // mapping of withdraw requests
     mapping(uint256 => WithdrawRequest) private withdrawRequests;
-    // mapping of withdraw confirmations
     mapping(uint256 => mapping(address => bool)) private withdrawRequestConfirmations;
-    // id for new withdraw request
     uint256 private withdrawRequestCounter;
 
-    // mapping of set treasury requests
     mapping(uint256 => SetTreasuryRequest) private setTreasuryRequests;
-    // mapping of set treasury confirmations
     mapping(uint256 => mapping(address => bool)) private setTreasuryRequestConfirmations;
-    // id for new set treasury request
     uint256 private setTreasuryRequestCounter;
 
-    address private immutable bridgeAddress;
-    address private immutable erc20HandlerAddress;
+    mapping(uint256 => SetNativeTokensForGasRequest) private setNativeTokensForGasRequests;
+    mapping(uint256 => mapping(address => bool)) private setNativeTokensForGasRequestConfirmations;
+    uint256 private setNativeTokensForGasRequestCounter;
+
+    address private bridgeAddress;
+    address private erc20HandlerAddress;
 
     /**
      * @notice Throws error if any contract except bridge trys to call the function
@@ -303,6 +273,14 @@ contract DAO is Multisig, IDAO {
     */
     function getSetTreasuryRequestCount() external view returns(uint256) {
         return setTreasuryRequestCounter;
+    }
+
+    /**
+     * @notice Gets set native tokens for gas request count
+     * @return Returns set native tokens for gas request count 
+    */
+    function getSetNativeTokensForGasRequestCount() external view returns(uint256) {
+        return setNativeTokensForGasRequestCounter;
     }
 
     /**
@@ -1385,5 +1363,83 @@ contract DAO is Multisig, IDAO {
         setTreasuryRequestConfirmations[setTreasuryRequestCounter][msg.sender] = true;
         emit NewVoteForRequest(RequestType.SetTreasury, true, msg.sender, setTreasuryRequestCounter);
         return setTreasuryRequestCounter;
+    }
+
+    /**
+     * @notice Allows setting native token for gas request if it is not approved and there are enough votes
+     * @param id the id of set native token for gas request
+    */
+    function isSetNativeTokensForGasAvailable(uint256 id) 
+        external 
+        view 
+        override
+        returns (uint256) 
+    {
+        require(setNativeTokensForGasRequests[id].status == RequestStatus.Active, "not active");
+        _consensus(setNativeTokensForGasRequestConfirmations, id);        
+        return setNativeTokensForGasRequests[id].nativeTokensForGas;
+    }
+
+    /**
+     * @notice Counts and gets affirmative votes for set native token for gas request
+     * @param id request id to be executed
+    */
+    function countGetSetNativeTokensForGasAffirmativeVotes(uint256 id) external view returns(uint256) {
+        return _countGet(setNativeTokensForGasRequestConfirmations, id);
+    }
+
+    /**
+     * @notice Cancels set native token for gas request if it is active
+     * @param id the id of set native token for gas request
+    */
+    function cancelSetNativeTokensForGasRequest(uint256 id) external onlyVoter(msg.sender) {
+        require(setNativeTokensForGasRequests[id].status == RequestStatus.Active, "not active");
+        setNativeTokensForGasRequests[id].status = RequestStatus.Canceled;
+    }
+
+    /**
+     * @notice Approves set native token for gas request if it is not approved
+     * @param id the id of set native token for gas request
+    */
+    function confirmSetNativeTokensForGasRequest(uint256 id) 
+        external
+        override
+        onlyBridge
+        returns (bool)
+    {
+        require(setNativeTokensForGasRequests[id].status == RequestStatus.Active, "not active");
+        setNativeTokensForGasRequests[id].status = RequestStatus.Executed;
+        return true;
+    }
+
+    /**
+     * @notice Allows a voter to insert a confirmation for set native token for gas request if it is not approved
+     * @param voteType the vote type: true/false = insert/remove vote
+     * @param id the id of set native token for gas request
+    */
+    function newVoteForSetNativeTokensForGasRequest(bool voteType, uint256 id) external {
+        require(setNativeTokensForGasRequests[id].status == RequestStatus.Active, "not active");
+        _newVoteFor(setNativeTokensForGasRequestConfirmations, id, voteType, RequestType.SetNativeTokensForGas);
+    }
+
+    /**
+     * @notice Creation of set native token for gas request by any voter
+     * @param nativeTokensForGas new native token for gas value
+    */
+    function newSetNativeTokensForGasRequest(uint256 nativeTokensForGas)
+        external
+        onlyVoter(msg.sender)
+        returns (uint256)
+    {
+        setNativeTokensForGasRequestCounter = setNativeTokensForGasRequestCounter + 1;     
+        setNativeTokensForGasRequests[setNativeTokensForGasRequestCounter] = SetNativeTokensForGasRequest ({
+            nativeTokensForGas: nativeTokensForGas,
+            status: RequestStatus.Active
+        });
+
+        setNativeTokensForGasRequestConfirmations[setNativeTokensForGasRequestCounter][msg.sender] = true;
+        emit NewVoteForRequest(RequestType.SetNativeTokensForGas, true, msg.sender, setNativeTokensForGasRequestCounter);
+
+        return setNativeTokensForGasRequestCounter;
     }
 }

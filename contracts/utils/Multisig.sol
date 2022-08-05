@@ -23,7 +23,8 @@ contract Multisig {
         ChangeFee,
         ChangeFeePercent,
         Withdraw,
-        SetTreasury
+        SetTreasury,
+        SetNativeTokensForGas
     }
 
     event ChangeVoter(address indexed _address, bool indexed include);
@@ -45,11 +46,8 @@ contract Multisig {
         RequestStatus status;
     }
 
-    // mapping of voter requests in order to insert/remove voters
     mapping(uint256 => VoterRequest) private voterRequests;
-    // mapping of required confirmations in order to approve voter request
     mapping(uint256 => mapping(address => bool)) private voterConfirmations;
-    // count of vote requests
     uint256 private voterRequestsCounter;
 
     /**

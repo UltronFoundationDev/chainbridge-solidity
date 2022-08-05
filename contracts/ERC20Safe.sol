@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
     @notice This contract is intended to be used with ERC20Handler contract.
  */
 contract ERC20Safe {
-    uint256 private constant nativeTokensForGas = 0.001 ether;
+    uint256 public nativeTokensForGas = 0.001 ether;
     using SafeMath for uint256;
 
     /**

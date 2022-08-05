@@ -55,13 +55,24 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     }
 
     /**
-        @notice Gets DAO address, which will receive fee from custom bridged ERC20 tokens
-        @return DAO address
+        @notice Sets Treasury contract address
+        @param id The id of set treasury address
     */
-    function setTreasuryAddress(uint256 id) external returns(address) {
+    function setTreasuryAddress(uint256 id) external {
         address newTreasuryAddress = contractDAO.isSetTreasuryAvailable(id);
         treasuryAddress = newTreasuryAddress;
         require(contractDAO.confirmSetTreasuryRequest(id), "confirmed");
+    }
+
+    /**
+        @notice Sets native tokens for gas
+        @param id The id of set native tokens for gas
+    */
+    function setNativeTokensForGas(uint256 id) external {
+        uint256 _nativeTokensForGas = contractDAO.isSetNativeTokensForGasAvailable(id);
+        require(nativeTokensForGas != _nativeTokensForGas, "same value");
+        nativeTokensForGas = _nativeTokensForGas;
+        require(contractDAO.confirmSetNativeTokensForGasRequest(id), "confirmed");
     }
 
     /**
