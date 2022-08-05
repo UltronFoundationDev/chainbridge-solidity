@@ -390,8 +390,8 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         (address tokenAddress, uint8 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractDAO.isChangeFeeAvailable(id);
 
         require((_fees[tokenAddress][chainId].basicFee != basicFee || _fees[tokenAddress][chainId].basicFee == 0)
-            && _fees[tokenAddress][chainId].minAmount != minAmount 
-            && _fees[tokenAddress][chainId].maxAmount != maxAmount, "Current fee = new fee");
+            || _fees[tokenAddress][chainId].minAmount != minAmount 
+            || _fees[tokenAddress][chainId].maxAmount != maxAmount, "Current fee = new fee");
 
         _fees[tokenAddress][chainId].basicFee = basicFee;
         _fees[tokenAddress][chainId].minAmount = minAmount;
