@@ -60,6 +60,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     */
     function setTreasuryAddress(uint256 id) external {
         address newTreasuryAddress = contractDAO.isSetTreasuryAvailable(id);
+        require(newTreasuryAddress != treasuryAddress, "same value");
         treasuryAddress = newTreasuryAddress;
         require(contractDAO.confirmSetTreasuryRequest(id), "confirmed");
     }
