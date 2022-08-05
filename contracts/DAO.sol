@@ -1404,9 +1404,9 @@ contract DAO is Multisig, IDAO {
     function confirmSetNativeTokensForGasRequest(uint256 id) 
         external
         override
-        onlyBridge
         returns (bool)
     {
+        require(msg.sender == erc20HandlerAddress, "not ERC20handler address");
         require(setNativeTokensForGasRequests[id].status == RequestStatus.Active, "not active");
         setNativeTokensForGasRequests[id].status = RequestStatus.Executed;
         return true;
