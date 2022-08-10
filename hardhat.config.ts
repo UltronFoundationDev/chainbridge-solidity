@@ -18,6 +18,7 @@
  import "./deploy/changeNonce";
  import "./deploy/multisig";
  import "./deploy/changeTreasury";
+ import "./deploy/otherRequests";
  require("dotenv").config();
 
 const config: HardhatUserConfig = {
