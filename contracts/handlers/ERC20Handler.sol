@@ -18,6 +18,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     IBridge private contractBridge;
     IDAO private contractDAO;
     address private treasuryAddress;
+    address private initialSetter;
 
     /**
         @param bridgeAddress Contract address of previously deployed Bridge.
@@ -26,6 +27,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     constructor(address bridgeAddress, address _treasuryAddress) public HandlerHelpers(bridgeAddress) {
         contractBridge = IBridge(bridgeAddress);
         treasuryAddress = _treasuryAddress;
+        initialSetter = msg.sender;
     }
 
     /**
@@ -51,6 +53,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     function setDAOContractInitial(address _address) external {
         require(address(contractDAO) == address(0), "already set");
         require(_address != address(0), "zero address");
+        require(initialSetter == msg.sender, "not initialSetter");
         contractDAO = IDAO(_address);
     }
 
