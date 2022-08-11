@@ -294,6 +294,14 @@ contract DAO is Multisig, IDAO {
     }
 
     /**
+     * @notice Gets transfer native request count
+     * @return Returns set transfer native request count 
+    */
+    function getTransferNativeRequestCount() external view returns(uint256) {
+        return transferNativeRequestCounter;
+    }
+
+    /**
      * @notice Allows changing owner request if it is not approved and there are enough votes
      * @param id the id of change owner request
     */

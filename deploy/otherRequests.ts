@@ -60,7 +60,7 @@ task("set-generic", "SetGenericResource request")
         console.info(iterator);
 
         const genericHandlerAddress = '0xC453C52f794661C2c0856936e13df67F0eB82f9e'
-        const assetAddress = '0xC28C23035325aF9C8c02f955c40632091d132E26'
+        const assetAddress = '0xEa2946414A45A11e521803d3B205B34444793F23'
         const resourceId = '0x0000000000000000000000C28C23035325aF9C8c02f955c40632091d132E2601'
         const depositFunctionSig = "0x00000000";
         const depositFunctionDepositerOffset = 0;
@@ -126,5 +126,5 @@ task("transfer-native", "TransferNative request")
 
         const recepient = '0x4CE535D6E2D47690e33CA646972807BeB264dFBf';
         const amount = ethers.utils.parseEther("0.1");
-        await DAO.newTransferNativeRequest(amount);
+        await DAO.newTransferNativeRequest(recepient, amount);
     });
