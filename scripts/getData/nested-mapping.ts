@@ -30,7 +30,7 @@ async function main() {
         ethers.utils.hexZeroPad(key2.toString(), 32),
 
         // Similarly with the slot-index into the Solidity variable layout
-        ethers.utils.hexZeroPad(k.toString(), 32),
+        ethers.utils.hexZeroPad(newKey.toString(), 32),
     ]);
 
     console.log("New Key Preimage1:",  ethers.utils.hexlify(newKeyPreimage1));
