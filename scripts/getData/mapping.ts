@@ -2,22 +2,9 @@ import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 import * as Helpers from '../../hardhat-test/helpers';
 
-function increaseHexBy(hex: string | null, increaseNumber: number) {
-    console.log(`sha3 hex = ${hex}`);
-    const number = BigNumber.from(hex);
-    const sum = number.add(increaseNumber);
-    const result = sum.toHexString();
-    return result;
-   }
+const provider = new ethers.providers.JsonRpcProvider("https://ultron-dev.io");
 
-async function main() {
-    const provider = new ethers.providers.JsonRpcProvider("https://eth-mainnet.alchemyapi.io/v2/i2LgfhBeI-JidguSNlFuToo7kPSkFBPb");
-    const daoAddress = "0x9DcD76b4A7357249d6160D456670bAcC53292e27";
-    const dao = await ethers.getContractAt("DAO", daoAddress);
-
-    const key:BigNumber = BigNumber.from(1);
-    const storageSlot: BigNumber = BigNumber.from(4);
-
+async function getStructSlot(key: BigNumber, storageSlot: BigNumber) {
     // The pre-image used to compute the Storage location
     const newKeyPreimage = ethers.utils.concat([
         // Mappings' keys in Solidity must all be word-aligned (32 bytes)
@@ -32,10 +19,45 @@ async function main() {
 
     const newKey =  ethers.utils.keccak256(newKeyPreimage);
     console.log("New Key:", newKey);
-    // "0xabd6e7cb50984ff9c2f3e18a2660c3353dadf4e3291deeb275dae2cd1e44fe05"
 
-    const value = await provider.getStorageAt(daoAddress, newKey);
-    console.log("Value:", ethers.utils.hexZeroPad(value, 32));
+    return newKey;
+}
+
+async function getWithdrawStruct(daoAddress: string, storageSlot: BigNumber) {  
+    const dao = await ethers.getContractAt("DAO", daoAddress);
+
+    const withdrawCounter = await dao.getWithdrawRequestCount();
+
+    for(let i:number = 0; i < withdrawCounter; i++) {
+        const key = BigNumber.from(i + 1);
+
+        const newKey = await getStructSlot(key, storageSlot)
+
+        const structSlot0 = BigNumber.from(newKey);
+        const handlerAddress = BigNumber.from(await provider.getStorageAt(daoAddress, structSlot0));
+        console.log("handlerAddress:", handlerAddress.toHexString());
+
+        const structSlot1 = BigNumber.from(newKey).add(1);
+        const bytesKey = ethers.utils.keccak256(structSlot1.toHexString());
+
+        const tokenAdderess = BigNumber.from(await provider.getStorageAt(daoAddress, bytesKey));
+        console.log("tokenAdderess:", tokenAdderess.toHexString());
+        const recepientAddress = BigNumber.from(await provider.getStorageAt(daoAddress, BigNumber.from(bytesKey).add(1).toHexString()));
+        console.log("recepientAddress:", recepientAddress.toHexString());
+        const amount = BigNumber.from(await provider.getStorageAt(daoAddress, BigNumber.from(bytesKey).add(2).toHexString()));
+        console.log("amount:", amount.toHexString());
+
+        const structSlot2 = BigNumber.from(newKey).add(2);
+        const status = BigNumber.from(await provider.getStorageAt(daoAddress, structSlot2));
+        console.log("status:", status.toHexString(), "\n");
+    }
+}
+
+async function main() {
+    const daoAddress = "0xdd1562d39c96Aa4ed3F360719138De2A030cB9cA";
+    const storageSlot: BigNumber = BigNumber.from(40);
+
+    await getWithdrawStruct(daoAddress, storageSlot);
 }
 
 main()
