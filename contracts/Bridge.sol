@@ -28,6 +28,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
     uint128 private feeMaxValue; /// @notice e.g. 10000 = 100% => 1(feePercent) = 0.01% 
     uint64 private feePercent;
 
+    address private initialSetter;
     IDAO private contractDAO;
 
     enum ProposalStatus {Inactive, Active, Passed, Executed, Cancelled}
@@ -119,6 +120,7 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
     function setDAOContractInitial(address _address) external {
         require(address(contractDAO) == address(0), "already set");
         require(_address != address(0), "zero address");
+        require(initialSetter == _msgSender(), "not initialSetter");
         contractDAO = IDAO(_address);
     }
 
@@ -159,6 +161,8 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         _expiry = expiry.toUint40();
         feeMaxValue= _feeMaxValue.toUint128();
         feePercent = _feePercent.toUint64();
+
+        initialSetter = _msgSender();
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
@@ -390,8 +394,8 @@ contract Bridge is IBridge, Pausable, AccessControl, SafeMath {
         (address tokenAddress, uint8 chainId, uint256 basicFee, uint256 minAmount, uint256 maxAmount) = contractDAO.isChangeFeeAvailable(id);
 
         require((_fees[tokenAddress][chainId].basicFee != basicFee || _fees[tokenAddress][chainId].basicFee == 0)
-            && _fees[tokenAddress][chainId].minAmount != minAmount 
-            && _fees[tokenAddress][chainId].maxAmount != maxAmount, "Current fee = new fee");
+            || _fees[tokenAddress][chainId].minAmount != minAmount 
+            || _fees[tokenAddress][chainId].maxAmount != maxAmount, "Current fee = new fee");
 
         _fees[tokenAddress][chainId].basicFee = basicFee;
         _fees[tokenAddress][chainId].minAmount = minAmount;

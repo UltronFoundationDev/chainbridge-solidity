@@ -1,6 +1,6 @@
 import {ethers} from "hardhat";
 import { DAO, DAO__factory, Bridge, Bridge__factory, ERC20Handler__factory, 
-GenericHandler__factory, ERC20PresetMinterPauser__factory, CentrifugeAsset__factory } from "../typechain";
+GenericHandler__factory, ERC20PresetMinterPauser__factory, CentrifugeAsset__factory, ERC20Handler } from "../typechain-types";
 import {expect} from "chai";
 import * as Helpers from "./helpers";
 import { BigNumber, utils } from "ethers";
@@ -18,7 +18,6 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
     const zeroAddress = "0x0000000000000000000000000000000000000000";
     const someAddress = "0xcafecafecafecafecafecafecafecafecafecafe";
     let provider: any;
-    let accounts: SignerWithAddress[];
 
     let owner: SignerWithAddress;
     let voterFirst: SignerWithAddress;
@@ -35,12 +34,11 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
     let dao: DAO;
     let bridge: Bridge;
+    let handler: ERC20Handler;
 
     before(async () => {
         provider = ethers.provider;
     
-        accounts = await ethers.getSigners();
-
         [ owner, voterFirst, voterSecond, newVoterFirst, newVoterSecond ] = await ethers.getSigners();
 
         const initialRelayers:string[] = [owner.address, voterFirst.address, voterSecond.address];
@@ -48,16 +46,18 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         bridge = await (await new Bridge__factory(owner).deploy(domainId, initialRelayers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed();
         console.log(`${beforeTest}Deployed bridge contract: ${colorBlue}${bridge.address}${colorReset}`);
 
-        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address, someAddress)).deployed();
-        const handlerAddress = ERC20HandlerInstance.address;
+        handler = await (await new ERC20Handler__factory(owner).deploy(bridge.address, someAddress)).deployed();
 
-        dao = await (await new DAO__factory(owner).deploy(bridge.address, handlerAddress)).deployed();
+        dao = await (await new DAO__factory(owner).deploy(bridge.address, handler.address)).deployed();
         console.log(`${beforeTest}Deployed DAO contract: ${colorBlue}${dao.address}${colorReset}`)
         console.log(`${beforeTest}Inserted initial voter : ${colorBlue}${owner.address}${colorReset}`);
         
         await bridge.setDAOContractInitial(dao.address);
         console.log(`${beforeTest}${colorBlue}Inserted${colorReset} initial dao address to bridge: ${colorGreen}${dao.address}${colorReset}`);    
         
+        await handler.setDAOContractInitial(dao.address);
+        console.log(`${beforeTest}${colorBlue}Inserted${colorReset} initial dao address to handler: ${colorGreen}${dao.address}${colorReset}`);    
+
         ADMIN_ROLE = await bridge.DEFAULT_ADMIN_ROLE();
     });
 
@@ -108,13 +108,11 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
     it("Set resource request execution\n", async () => {
         const ERC20MintableInstance = await (await new ERC20PresetMinterPauser__factory(owner).deploy("token", "TOK")).deployed();
-        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address, someAddress)).deployed();
-        const handlerAddress = ERC20HandlerInstance.address;
         const tokenAddress = ERC20MintableInstance.address;
         const resourceId = Helpers.createResourceID(tokenAddress, domainId);
 
         console.log(`${insideTest}Creates new set resource request`);    
-        await dao.connect(owner).newSetResourceRequest(handlerAddress, resourceId, tokenAddress);
+        await dao.connect(owner).newSetResourceRequest(handler.address, resourceId, tokenAddress);
 
         console.log(`${insideTest}${colorBlue}Setting resource${colorReset}`);         
         await bridge.connect(owner).adminSetResource(1);
@@ -154,8 +152,6 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
     it("Withdraw request execution\n", async () => {
         const ERC20MintableInstance = await (await new ERC20PresetMinterPauser__factory(owner).deploy("token", "TOK")).deployed();
-        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address, someAddress)).deployed();
-        const handlerAddress = ERC20HandlerInstance.address;
         const tokenAddress = ERC20MintableInstance.address;
         const numTokens = 10;
         const tokenOwner = owner.address;
@@ -169,19 +165,19 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         expect(ownerBalance).equals(numTokens);
         
         console.log(`${insideTest}${colorBlue}Transfers${colorReset} tokens ${numTokens} to handler`);
-        await ERC20MintableInstance.transfer(handlerAddress, numTokens);
+        await ERC20MintableInstance.transfer(handler.address, numTokens);
 
         ownerBalance = await ERC20MintableInstance.balanceOf(tokenOwner);
         console.log(`${insideTest}Compares owner balance after transfer [${colorBlue}${ownerBalance}${colorReset}] with minted tokens [${colorGreen}${0}${colorReset}]`);
         expect(ownerBalance).equals(0);
-        handlerBalance = await ERC20MintableInstance.balanceOf(handlerAddress);
+        handlerBalance = await ERC20MintableInstance.balanceOf(handler.address);
         console.log(`${insideTest}Compares handler balance after transfer [${colorBlue}${handlerBalance}${colorReset}] with minted tokens [${colorGreen}${numTokens}${colorReset}]`);
         expect(handlerBalance).equals(numTokens);
 
         const withdrawData = Helpers.createERCWithdrawData(tokenAddress, tokenOwner, numTokens);
         
         console.log(`${insideTest}Creates new withdraw request`);    
-        await dao.connect(owner).newWithdrawRequest(handlerAddress, withdrawData);
+        await dao.connect(owner).newWithdrawRequest(handler.address, withdrawData);
 
         console.log(`${insideTest}${colorBlue}Withdrawing${colorReset}`);         
         await bridge.connect(owner).adminWithdraw(1);
@@ -191,13 +187,11 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
     it("Set burnable request execution\n", async () => {
         const ERC20MintableInstance = await (await new ERC20PresetMinterPauser__factory(owner).deploy("token", "TOK")).deployed();
-        const ERC20HandlerInstance = await (await new ERC20Handler__factory(owner).deploy(bridge.address, someAddress)).deployed();
-        const handlerAddress = ERC20HandlerInstance.address;
         const tokenAddress = ERC20MintableInstance.address;
         const resourceId = Helpers.createResourceID(tokenAddress, domainId);
 
         console.log(`${insideTest}Creates new set resource request`);    
-        await dao.connect(owner).newSetResourceRequest(handlerAddress, resourceId, tokenAddress);
+        await dao.connect(owner).newSetResourceRequest(handler.address, resourceId, tokenAddress);
 
         console.log(`${insideTest}${colorBlue}Setting resource${colorReset}`);         
         await bridge.connect(owner).adminSetResource(2);
@@ -205,7 +199,7 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         await expect(dao.connect(owner).isSetResourceAvailable(2)).revertedWith("not active");
 
         console.log(`${insideTest}Creates new set burnable request`);    
-        await dao.connect(owner).newSetBurnableRequest(handlerAddress, tokenAddress);
+        await dao.connect(owner).newSetBurnableRequest(handler.address, tokenAddress);
 
         console.log(`${insideTest}${colorBlue}Setting burnable${colorReset}`);         
         await bridge.connect(owner).adminSetBurnable(1);
@@ -285,17 +279,17 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
 
         console.log(`${insideTest}${colorBlue}Transferring${colorReset} funds`);         
         await bridge.connect(owner).transferFunds(1);
-        console.log(`${insideTest}${colorRed}Reverts${colorReset} if owner request is not active`);
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if transfer funds is not active`);
         await expect(dao.connect(owner).isTransferAvailable(1)).revertedWith("not active");
     });
 
-    it("Set Treasury request is available and returns correct address\n", async () => {
+    it("Set Treasury request execution\n", async () => {
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender is not a voter`);
         await expect(dao.connect(newVoterSecond).newSetTreasuryRequest(newVoterFirst.address)).revertedWith("not a voter"); 
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if new owner is zero address`);
         await expect(dao.connect(owner).newSetTreasuryRequest(zeroAddress)).revertedWith("zero address"); 
        
-        console.log(`${insideTest}Creates new owner change request`);
+        console.log(`${insideTest}Creates new set treasury request`);
         await dao.connect(owner).newSetTreasuryRequest(newVoterFirst.address);
 
         console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already confirmed(true)`);
@@ -309,8 +303,73 @@ describe("\x1b[33mBridge test\x1b[0m\n", () => {
         
         await dao.connect(owner).newVoteForSetTreasuryRequest(true, 1);
 
-        const address = await dao.connect(owner).isSetTreasuryAvailable(1);
-        console.log(`${insideTest}Compares treasury address [${colorBlue}${newVoterFirst.address}${colorReset}] with returned value: [${colorGreen}${address}${colorReset}]`);
-        expect(newVoterFirst.address).equals(address);
+        console.log(`${insideTest}${colorBlue}Setting${colorReset} treasury address`);         
+        await handler.connect(owner).setTreasuryAddress(1);
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set treasury request is not active`);
+        await expect(dao.connect(owner).isSetTreasuryAvailable(1)).revertedWith("not active");
+    });
+
+    it("Set Native Tokens For Gas request execution\n", async () => {
+        const oldAmount = await handler.nativeTokensForGas();
+        expect(ethers.utils.parseEther("0.01")).equals(oldAmount);
+
+        const amount = ethers.utils.parseEther("0.001");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender is not a voter`);
+        await expect(dao.connect(newVoterSecond).newSetNativeTokensForGasRequest(amount)).revertedWith("not a voter"); 
+       
+        console.log(`${insideTest}Creates new Set Native Tokens For Gas request`);
+        await dao.connect(owner).newSetNativeTokensForGasRequest(amount);
+
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already confirmed(true)`);
+        await expect(dao.connect(owner).newVoteForSetNativeTokensForGasRequest(true, 1)).revertedWith("already confirmed");
+        
+        await dao.connect(owner).newVoteForSetNativeTokensForGasRequest(false, 1); 
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if not enough votes`);
+        await expect(dao.connect(owner).isSetNativeTokensForGasAvailable(1)).revertedWith("not enough votes");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already removed(false)`);
+        await expect(dao.connect(owner).newVoteForSetNativeTokensForGasRequest(false, 1)).revertedWith("not confirmed");
+        
+        await dao.connect(owner).newVoteForSetNativeTokensForGasRequest(true, 1);
+
+        console.log(`${insideTest}${colorBlue}Setting${colorReset} new native tokens for gas`);         
+        await handler.connect(owner).setNativeTokensForGas(1);
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if set native tokens for gas request is not active`);
+        await expect(dao.connect(owner).isSetNativeTokensForGasAvailable(1)).revertedWith("not active");
+
+        expect(await handler.nativeTokensForGas()).equals(amount);
+    });
+
+    it("Withdraw Native request execution\n", async () => {
+        const amount = ethers.utils.parseEther("10");
+        const recepient = owner.address;
+
+        await owner.sendTransaction({
+            to: handler.address,
+            value: amount, 
+        });
+
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if sender is not a voter`);
+        await expect(dao.connect(newVoterSecond).newTransferNativeRequest(recepient, amount)).revertedWith("not a voter"); 
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if new owner is zero address`);
+        await expect(dao.connect(owner).newTransferNativeRequest(zeroAddress, amount)).revertedWith("zero address"); 
+       
+        console.log(`${insideTest}Creates new transfer native request`);
+        await dao.connect(owner).newTransferNativeRequest(recepient, amount);
+
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already confirmed(true)`);
+        await expect(dao.connect(owner).newVoteForTransferNativeRequest(true, 1)).revertedWith("already confirmed");
+        
+        await dao.connect(owner).newVoteForTransferNativeRequest(false, 1); 
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if not enough votes`);
+        await expect(dao.connect(owner).isTransferNativeAvailable(1)).revertedWith("not enough votes");
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if vote is already removed(false)`);
+        await expect(dao.connect(owner).newVoteForTransferNativeRequest(false, 1)).revertedWith("not confirmed");
+        
+        await dao.connect(owner).newVoteForTransferNativeRequest(true, 1);
+
+        console.log(`${insideTest}${colorBlue}Withdrawing${colorReset} native`);         
+        await handler.connect(owner).withdrawNative(1);
+        console.log(`${insideTest}${colorRed}Reverts${colorReset} if transfer native is not active`);
+        await expect(dao.connect(owner).isTransferNativeAvailable(1)).revertedWith("not active");
     });
 })

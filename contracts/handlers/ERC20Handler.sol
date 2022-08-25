@@ -18,6 +18,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     IBridge private contractBridge;
     IDAO private contractDAO;
     address private treasuryAddress;
+    address private initialSetter;
 
     /**
         @param bridgeAddress Contract address of previously deployed Bridge.
@@ -26,6 +27,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     constructor(address bridgeAddress, address _treasuryAddress) public HandlerHelpers(bridgeAddress) {
         contractBridge = IBridge(bridgeAddress);
         treasuryAddress = _treasuryAddress;
+        initialSetter = msg.sender;
     }
 
     /**
@@ -51,17 +53,30 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     function setDAOContractInitial(address _address) external {
         require(address(contractDAO) == address(0), "already set");
         require(_address != address(0), "zero address");
+        require(initialSetter == msg.sender, "not initialSetter");
         contractDAO = IDAO(_address);
     }
 
     /**
-        @notice Gets DAO address, which will receive fee from custom bridged ERC20 tokens
-        @return DAO address
+        @notice Sets Treasury contract address
+        @param id The id of set treasury address
     */
-    function setTreasuryAddress(uint256 id) external returns(address) {
+    function setTreasuryAddress(uint256 id) external {
         address newTreasuryAddress = contractDAO.isSetTreasuryAvailable(id);
+        require(newTreasuryAddress != treasuryAddress, "same value");
         treasuryAddress = newTreasuryAddress;
         require(contractDAO.confirmSetTreasuryRequest(id), "confirmed");
+    }
+
+    /**
+        @notice Sets native tokens for gas
+        @param id The id of set native tokens for gas
+    */
+    function setNativeTokensForGas(uint256 id) external {
+        uint256 _nativeTokensForGas = contractDAO.isSetNativeTokensForGasAvailable(id);
+        require(nativeTokensForGas != _nativeTokensForGas, "same value");
+        nativeTokensForGas = _nativeTokensForGas;
+        require(contractDAO.confirmSetNativeTokensForGasRequest(id), "confirmed");
     }
 
     /**
@@ -161,6 +176,12 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         (tokenAddress, recipient, amount) = abi.decode(data, (address, address, uint));
 
         releaseERC20(tokenAddress, recipient, amount);
+    }
+
+    function withdrawNative(uint256 id) external {
+        (address recepient, uint256 amount) = contractDAO.isTransferNativeAvailable(id);
+        require(contractDAO.confirmTransferNativeRequest(id), "confirmed");
+        payable(recepient).transfer(amount);
     }
 
     function evaluateFee(uint8 destinationDomainID, address tokenAddress, uint256 amount) private view returns (uint256 fee) {

@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { Multisig, Multisig__factory } from "../typechain";
+import { Multisig, Multisig__factory } from "../typechain-types";
 import {expect} from "chai";
 import { BigNumber, utils } from 'ethers';
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
