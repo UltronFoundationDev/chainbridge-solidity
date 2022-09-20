@@ -131,11 +131,10 @@ subtask("setInitialContracts", "Set Initial Contracts successfully")
         const ERC20Handler = await ethers.getContractAt("ERC20Handler", taskArgs.erc20Handler, signer);
         
         await bridge.setDAOContractInitial(taskArgs.dao);
-        await Helpers.delay(4000);
         console.info(await bridge.getContractDAO());
         
         await ERC20Handler.setDAOContractInitial(taskArgs.dao);
-        await Helpers.delay(4000);
+        
         console.info(await ERC20Handler.getDAOAddress());
 
         return true;
