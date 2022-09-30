@@ -9,14 +9,4 @@ contract ERC20Custom is ERC20PresetMinterPauser {
      */
     constructor(string memory name, string memory symbol) public ERC20PresetMinterPauser(name, symbol) {
     }
-
-    function grantMinterRole(address minterAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        _grantRole(MINTER_ROLE, minterAddress);
-    }
-
-    function grantPauserRole(address minterAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        _grantRole(MINTER_ROLE, minterAddress);
-    }
 }

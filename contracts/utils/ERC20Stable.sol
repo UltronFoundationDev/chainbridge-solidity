@@ -14,14 +14,4 @@ contract ERC20Stable is ERC20PresetMinterPauser {
     function decimals() public view virtual override returns (uint8) {
         return 6;
     }
-
-    function grantMinterRole(address minterAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        _grantRole(MINTER_ROLE, minterAddress);
-    }
-
-    function grantPauserRole(address minterAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        _grantRole(MINTER_ROLE, minterAddress);
-    }
 }
