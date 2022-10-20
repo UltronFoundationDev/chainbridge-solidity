@@ -145,7 +145,7 @@ subtask("deploy-tokens", "Deploying default tokens for our chain")
     .addParam("erc20Handler", "erc20Handler address")     
     .setAction(async (taskArgs, { ethers }) => {
         const signer = (await ethers.getSigners())[0];
-
+        let tokens: any = {};
         const erc20CustomFactory = await ethers.getContractFactory("ERC20Custom", signer);
         const erc20StableFactory = await ethers.getContractFactory("ERC20Stable", signer);
 
@@ -153,86 +153,74 @@ subtask("deploy-tokens", "Deploying default tokens for our chain")
         await wBTC.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The WBTC: \u001b[1;34m${wBTC.address}\u001b[0m`);
         await wBTC.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['wBTC'] = wBTC.address;
+        tokens['wBTC'] = wBTC.address;
 
         const wETH = await (await erc20CustomFactory.deploy("Wrapped Ethereum", "wETH")).deployed();
         await wETH.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The WETH: \u001b[1;34m${wETH.address}\u001b[0m`);
         await wETH.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['wETH'] = wETH.address;
+        tokens['wETH'] = wETH.address;
 
         const bnb = await (await erc20CustomFactory.deploy("BNB", "BNB")).deployed();
         await bnb.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The BNB: \u001b[1;34m${bnb.address}\u001b[0m`);
         await bnb.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['bnb'] = bnb.address;
+        tokens['BNB'] = bnb.address;
 
         const avax = await (await erc20CustomFactory.deploy("Avalanche", "AVAX")).deployed();
         await avax.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The AVAX: \u001b[1;34m${avax.address}\u001b[0m`);
         await avax.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['avax'] = avax.address;
+        tokens['AVAX'] = avax.address;
 
         const bUSD = await (await erc20CustomFactory.deploy("Binance USD", "BUSD")).deployed();
         await bUSD.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The BUSD: \u001b[1;34m${bUSD.address}\u001b[0m`);
         await bUSD.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['bUSD'] = bUSD.address;
+        tokens['BUSD'] = bUSD.address;
 
         const shib = await (await erc20CustomFactory.deploy("Shiba Inu", "SHIB")).deployed();
         await shib.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The SHIB: \u001b[1;34m${shib.address}\u001b[0m`);
         await shib.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['shib'] = shib.address;
+        tokens['SHIB'] = shib.address;
 
         const matic = await (await erc20CustomFactory.deploy("Polygon", "MATIC")).deployed();
         await matic.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The MATIC: \u001b[1;34m${matic.address}\u001b[0m`);
         await matic.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['matic'] = matic.address;
+        tokens['MATIC'] = matic.address;
 
         const ftm = await (await erc20CustomFactory.deploy("Fantom", "FTM")).deployed();
         await ftm.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The FTM: \u001b[1;34m${ftm.address}\u001b[0m`);
         await ftm.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['ftm'] = ftm.address;
+        tokens['FTM'] = ftm.address;
 
         const dai = await (await erc20CustomFactory.deploy("Dai", "DAI")).deployed();
         await dai.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The DAI: \u001b[1;34m${dai.address}\u001b[0m`);
         await dai.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['dai'] = dai.address;
+        tokens['DAI'] = dai.address;
 
         const link = await (await erc20CustomFactory.deploy("Chainlink", "LINK")).deployed();
         await link.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The LINK: \u001b[1;34m${link.address}\u001b[0m`);
         await link.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['link'] = link.address;
+        tokens['LINK'] = link.address;
 
         const uUSDT = await (await erc20StableFactory.deploy("Ultron Tether", "uUSDT")).deployed();
         await uUSDT.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The uUSDT: \u001b[1;34m${uUSDT.address}\u001b[0m`);
         await uUSDT.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['uUSDT'] = uUSDT.address;
+        tokens['uUSDT'] = uUSDT.address;
 
         const uUSDC = await (await erc20StableFactory.deploy("Ultron USD Coin", "uUSDC")).deployed();
         await uUSDC.grantMinterRole(taskArgs.erc20Handler);
         console.log(`The uUSDC: \u001b[1;34m${uUSDC.address}\u001b[0m`);
         await uUSDC.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['uUSDC'] = uUSDC.address;
-
-        const bep_uUSDT = await (await erc20CustomFactory.deploy("Ultron BEP-Tether", "Bep-uUSDT")).deployed();
-        await bep_uUSDT.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The bep_uUSDT: \u001b[1;34m${bep_uUSDT.address}\u001b[0m`);
-        await bep_uUSDT.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['bep_uUSDT'] = bep_uUSDT.address;
-
-        const bep_uUSDC = await (await erc20CustomFactory.deploy("Ultron BEP-USD Coin", "Bep-uUSDC")).deployed();
-        await bep_uUSDC.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The bep_uUSDC: \u001b[1;34m${bep_uUSDC.address}\u001b[0m`);
-        await bep_uUSDC.mint(signer.address, "1000000000000000000000000");
-        deployed_storage['bep_uUSDC'] = bep_uUSDC.address;
-
+        tokens['uUSDC'] = uUSDC.address;
+        deployed_storage['tokens'] = tokens
         return deployed_storage;
     });
 
