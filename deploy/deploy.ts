@@ -26,7 +26,7 @@ task("deploy", "deploy everything")
 
 
 /*========== Bridge ==========*/
-subtask("bridge", "The contract Bridge is deployed")
+subtask("bridge", "contract Bridge is deployed")
     .setAction(async (_, { ethers, network }) => {
         const signer = (await ethers.getSigners())[0];
 
@@ -66,7 +66,7 @@ subtask("bridge", "The contract Bridge is deployed")
         if(domainId !== 0) {
             const bridgeFactory = await ethers.getContractFactory("Bridge", signer);
             const bridge = await (await bridgeFactory.deploy(domainId, initialRealyers, initialRelayerThreshold, expiry, feeMaxValue, feePercent)).deployed();
-            console.log(`The Bridge: \u001b[1;34m${bridge.address}\u001b[0m`);    
+            console.log(`Bridge: \u001b[1;34m${bridge.address}\u001b[0m`);    
             return bridge.address;
         }
         else {
@@ -75,7 +75,7 @@ subtask("bridge", "The contract Bridge is deployed")
     });
 
 /*========== ERC20Handler ==========*/
-subtask("ERC20Handler", "The contract ERC20Handler is deployed")
+subtask("ERC20Handler", "contract ERC20Handler is deployed")
     .addParam("bridge", "bridge address")
     .setAction(async (taskArgs, { ethers }) => {
         const signer = (await ethers.getSigners())[0];
@@ -84,13 +84,13 @@ subtask("ERC20Handler", "The contract ERC20Handler is deployed")
         
         const ERC20HandlerFactory = await ethers.getContractFactory("ERC20Handler", signer);
         const ERC20Handler = await (await ERC20HandlerFactory.deploy(taskArgs.bridge, treasuryAddress)).deployed();
-        console.log(`The ERC20Handler: \u001b[1;34m${ERC20Handler.address}\u001b[0m`);
+        console.log(`ERC20Handler: \u001b[1;34m${ERC20Handler.address}\u001b[0m`);
         
         return ERC20Handler.address;
     });
 
 /*========== DAO ==========*/
-subtask("dao", "The contract DAO is deployed")   
+subtask("dao", "contract DAO is deployed")   
     .addParam("bridge", "bridge address")
     .addParam("erc20Handler", "ERC20Handler address")
     .setAction(async (taskArgs, { ethers }) => {
@@ -98,7 +98,7 @@ subtask("dao", "The contract DAO is deployed")
 
         const DAOFactory = await ethers.getContractFactory("DAO", signer);
         const DAO = await (await DAOFactory.deploy(taskArgs.bridge, taskArgs.erc20Handler)).deployed();
-        console.log(`The DAO: \u001b[1;34m${DAO.address}\u001b[0m`);
+        console.log(`DAO: \u001b[1;34m${DAO.address}\u001b[0m`);
 
         return DAO.address;
     });
@@ -135,60 +135,61 @@ subtask("deploy-tokens", "Deploying default tokens for our chain")
         const erc20StableFactory = await ethers.getContractFactory("ERC20Stable", signer);
 
         const wBTC = await (await erc20CustomFactory.deploy("Wrapped Bitcoin", "wBTC")).deployed();
-        await wBTC.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The WBTC: \u001b[1;34m${wBTC.address}\u001b[0m`);
+        const minterRole = await wBTC.MINTER_ROLE();
+        await wBTC.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`WBTC: \u001b[1;34m${wBTC.address}\u001b[0m`);
 
         const wETH = await (await erc20CustomFactory.deploy("Wrapped Ethereum", "wETH")).deployed();
-        await wETH.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The WETH: \u001b[1;34m${wETH.address}\u001b[0m`);
+        await wETH.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`WETH: \u001b[1;34m${wETH.address}\u001b[0m`);
 
         const bnb = await (await erc20CustomFactory.deploy("BNB", "BNB")).deployed();
-        await bnb.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The BNB: \u001b[1;34m${bnb.address}\u001b[0m`);
+        await bnb.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`BNB: \u001b[1;34m${bnb.address}\u001b[0m`);
 
         const avax = await (await erc20CustomFactory.deploy("Avalanche", "AVAX")).deployed();
-        await avax.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The AVAX: \u001b[1;34m${avax.address}\u001b[0m`);
+        await avax.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`AVAX: \u001b[1;34m${avax.address}\u001b[0m`);
 
         const bUSD = await (await erc20CustomFactory.deploy("Binance USD", "BUSD")).deployed();
-        await bUSD.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The BUSD: \u001b[1;34m${bUSD.address}\u001b[0m`);
+        await bUSD.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`BUSD: \u001b[1;34m${bUSD.address}\u001b[0m`);
 
         const shib = await (await erc20CustomFactory.deploy("Shiba Inu", "SHIB")).deployed();
-        await shib.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The SHIB: \u001b[1;34m${shib.address}\u001b[0m`);
+        await shib.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`SHIB: \u001b[1;34m${shib.address}\u001b[0m`);
 
         const matic = await (await erc20CustomFactory.deploy("Polygon", "MATIC")).deployed();
-        await matic.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The MATIC: \u001b[1;34m${matic.address}\u001b[0m`);
+        await matic.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`MATIC: \u001b[1;34m${matic.address}\u001b[0m`);
 
         const ftm = await (await erc20CustomFactory.deploy("Fantom", "FTM")).deployed();
-        await ftm.grantMinterRole(taskArgs.erc20Handle);
-        console.log(`The FTM: \u001b[1;34m${ftm.address}\u001b[0m`);
+        await ftm.grantRole(minterRole, taskArgs.erc20Handle);
+        console.log(`FTM: \u001b[1;34m${ftm.address}\u001b[0m`);
 
         const dai = await (await erc20CustomFactory.deploy("Dai", "DAI")).deployed();
-        await dai.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The DAI: \u001b[1;34m${dai.address}\u001b[0m`);
+        await dai.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`DAI: \u001b[1;34m${dai.address}\u001b[0m`);
 
         const link = await (await erc20CustomFactory.deploy("Chainlink", "LINK")).deployed();
-        await link.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The LINK: \u001b[1;34m${link.address}\u001b[0m`);    
+        await link.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`LINK: \u001b[1;34m${link.address}\u001b[0m`);    
 
         const uUSDT = await (await erc20StableFactory.deploy("Ultron Tether", "uUSDT")).deployed();
-        await uUSDT.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The uUSDT: \u001b[1;34m${uUSDT.address}\u001b[0m`);
+        await uUSDT.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`uUSDT: \u001b[1;34m${uUSDT.address}\u001b[0m`);
 
         const uUSDC = await (await erc20StableFactory.deploy("Ultron USD Coin", "uUSDC")).deployed();
-        await uUSDC.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The uUSDC: \u001b[1;34m${uUSDC.address}\u001b[0m`);
+        await uUSDC.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`uUSDC: \u001b[1;34m${uUSDC.address}\u001b[0m`);
 
         const bep_uUSDT = await (await erc20CustomFactory.deploy("Ultron BEP-Tether", "Bep-uUSDT")).deployed();
-        await bep_uUSDT.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The bep_uUSDT: \u001b[1;34m${bep_uUSDT.address}\u001b[0m`);
+        await bep_uUSDT.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`bep_uUSDT: \u001b[1;34m${bep_uUSDT.address}\u001b[0m`);
 
         const bep_uUSDC = await (await erc20CustomFactory.deploy("Ultron BEP-USD Coin", "Bep-uUSDC")).deployed();
-        await bep_uUSDC.grantMinterRole(taskArgs.erc20Handler);
-        console.log(`The bep_uUSDC: \u001b[1;34m${bep_uUSDC.address}\u001b[0m`);
+        await bep_uUSDC.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`bep_uUSDC: \u001b[1;34m${bep_uUSDC.address}\u001b[0m`);
 
         return [wBTC.address, wETH.address, bnb.address, avax.address, bUSD.address, shib.address, matic.address, 
             ftm.address, dai.address, link.address, uUSDT.address, uUSDC.address, bep_uUSDT.address, bep_uUSDC.address];
@@ -222,8 +223,84 @@ task("deploy-ulx", "Deploying ULX for different chains")
         const erc20CustomFactory = await ethers.getContractFactory("ERC20Custom", signer);
 
         const ulx = await (await erc20CustomFactory.deploy("Ultron", "ULX")).deployed();
-        await ulx.grantMinterRole(erc20HandlerAddress);
-        console.log(`The ULX: \u001b[1;34m${ulx.address}\u001b[0m`);
+        const minterRole = await ulx.MINTER_ROLE();
+        await ulx.grantRole(minterRole, erc20HandlerAddress);
+        console.log(`ULX: \u001b[1;34m${ulx.address}\u001b[0m`);
 
         return [ulx.address];
+    });
+
+/*========== Deploy Sub-Tokens ==========*/
+task("deploy-sub-tokens", "Deploying sub tokens for our chain")
+    .addParam("erc20Handler", "erc20Handler address", "0xc078626DA5C09DC63A7c5C0c030f431EFfF098b8")     
+    .setAction(async (taskArgs, { ethers }) => {
+        const signer = (await ethers.getSigners())[0];
+
+        const erc20CustomFactory = await ethers.getContractFactory("ERC20Custom", signer);
+        const erc20BtcFactory = await ethers.getContractFactory("ERC20Btc", signer);
+
+        const doge = await (await erc20BtcFactory.deploy("Dogecoin", "DOGE")).deployed();
+        const minterRole = await doge.MINTER_ROLE();
+        await doge.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`DOGE: \u001b[1;34m${doge.address}\u001b[0m`);
+
+        const xrp = await (await erc20CustomFactory.deploy("Ripple", "XRP")).deployed();
+        await xrp.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`XRP: \u001b[1;34m${xrp.address}\u001b[0m`);
+
+        const ada = await (await erc20CustomFactory.deploy("Cardano", "ADA")).deployed();
+        await ada.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`ADA: \u001b[1;34m${ada.address}\u001b[0m`);
+
+        const dot = await (await erc20CustomFactory.deploy("Polkadot", "DOT")).deployed();
+        await dot.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`DOT: \u001b[1;34m${dot.address}\u001b[0m`);
+
+        const sol = await (await erc20CustomFactory.deploy("Solana", "SOL")).deployed();
+        await sol.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`SOL: \u001b[1;34m${sol.address}\u001b[0m`);
+
+        const uni = await (await erc20CustomFactory.deploy("Uniswap", "UNI")).deployed();
+        await uni.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`UNI: \u001b[1;34m${uni.address}\u001b[0m`);
+
+        const atom = await (await erc20CustomFactory.deploy("Cosmos", "ATOM")).deployed();
+        await atom.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`ATOM: \u001b[1;34m${atom.address}\u001b[0m`);
+
+        const aave = await (await erc20CustomFactory.deploy("Aave", "AAVE")).deployed();
+        await aave.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`AAVE: \u001b[1;34m${aave.address}\u001b[0m`);
+
+        const axs = await (await erc20CustomFactory.deploy("Axie Infinity Shard", "AXS")).deployed();
+        await axs.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`AXS: \u001b[1;34m${axs.address}\u001b[0m`);
+
+        const sand = await (await erc20CustomFactory.deploy("Sandbox", "SAND")).deployed();
+        await sand.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`SAND: \u001b[1;34m${sand.address}\u001b[0m`);
+
+        const mana = await (await erc20CustomFactory.deploy("Decentraland", "MANA")).deployed();
+        await mana.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`MANA: \u001b[1;34m${mana.address}\u001b[0m`);
+
+        const cake = await (await erc20CustomFactory.deploy("PancakeSwap", "CAKE")).deployed();
+        await cake.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`CAKE: \u001b[1;34m${cake.address}\u001b[0m`);
+
+        const near = await (await erc20CustomFactory.deploy("NEAR Protocol", "NEAR")).deployed();
+        await near.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`NEAR: \u001b[1;34m${near.address}\u001b[0m`);
+
+        const inch = await (await erc20CustomFactory.deploy("1INCH", "1INCH")).deployed();
+        await inch.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`1INCH: \u001b[1;34m${inch.address}\u001b[0m`);
+
+        const flux = await (await erc20CustomFactory.deploy("FLUX", "FLUX")).deployed();
+        await flux.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`FLUX: \u001b[1;34m${flux.address}\u001b[0m`);
+
+        const trx = await (await erc20CustomFactory.deploy("TRON", "TRX")).deployed();
+        await trx.grantRole(minterRole, taskArgs.erc20Handler);
+        console.log(`TRX: \u001b[1;34m${trx.address}\u001b[0m`);
     });

@@ -27,22 +27,39 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
         const domainId:BigNumberish = await bridge._domainID();
 
         const tokenAddresses = [
-            new Token("WULX",   "0x3a4F06431457de873B588846d139EC0d86275d54"), 
-            new Token("WBTC",   "0xd2b86a80A8f30b83843e247A50eCDc8D843D87dD"), 
-            new Token("WETH",   "0x2318Bf5809a72AaBAdd15a3453A18e50Bbd651Cd"), 
-            new Token("BNB",    "0x169ac560852ed79af3D97A8977DCf2EBA54A0488"), 
-            new Token("AVAX",   "0x6FE94412953D373Ef464b85637218EFA9EAB8e97"), 
-            new Token("BUSD",   "0xc7cAc85C1779d2B8ADA94EFfff49A4754865e2E4"), 
-            new Token("SHIB",   "0xb5Bb1911cf6C83C1a6E439951C40C2949B0d907f"), 
-            new Token("MATIC",  "0x6094a1e3919b302E236B447f45c4eb2DeCE9D9F4"),
-            new Token("FTM",    "0xE8Ef8A6FE387C2D10951a63ca8f37dB6B8fA02C1"), 
-            new Token("DAI",    "0x045F0f2DE758743c84b756B1Fca735a0dDf0b8f4"),
-            new Token("LINK",   "0xc8Fb7999d62072E12fE8f3EDcd7821204FCa0344"), 
-            new Token("uUSDT",  "0x97FDd294024f50c388e39e73F1705a35cfE87656"),
-            new Token("uUSDC",  "0x3c4E0FdeD74876295Ca36F62da289F69E3929cc4"),
+            // new Token("WULX",   "0x3a4F06431457de873B588846d139EC0d86275d54"), 
+            // new Token("WBTC",   "0xd2b86a80A8f30b83843e247A50eCDc8D843D87dD"), 
+            // new Token("WETH",   "0x2318Bf5809a72AaBAdd15a3453A18e50Bbd651Cd"), 
+            // new Token("BNB",    "0x169ac560852ed79af3D97A8977DCf2EBA54A0488"), 
+            // new Token("AVAX",   "0x6FE94412953D373Ef464b85637218EFA9EAB8e97"), 
+            // new Token("BUSD",   "0xc7cAc85C1779d2B8ADA94EFfff49A4754865e2E4"), 
+            // new Token("SHIB",   "0xb5Bb1911cf6C83C1a6E439951C40C2949B0d907f"), 
+            // new Token("MATIC",  "0x6094a1e3919b302E236B447f45c4eb2DeCE9D9F4"),
+            // new Token("FTM",    "0xE8Ef8A6FE387C2D10951a63ca8f37dB6B8fA02C1"), 
+            // new Token("DAI",    "0x045F0f2DE758743c84b756B1Fca735a0dDf0b8f4"),
+            // new Token("LINK",   "0xc8Fb7999d62072E12fE8f3EDcd7821204FCa0344"), 
+            // new Token("uUSDT",  "0x97FDd294024f50c388e39e73F1705a35cfE87656"),
+            // new Token("uUSDC",  "0x3c4E0FdeD74876295Ca36F62da289F69E3929cc4"),
 
-            new Token("bep_uUSDT",  "0xB8160f15D44604E892Ac52eC4CCBfDA3cafbFDbd"),
-            new Token("bep_uUSDC",  "0x06d522b2118d535978382d9533a68B0b110f9BC2"),
+            // new Token("bep_uUSDT",  "0xB8160f15D44604E892Ac52eC4CCBfDA3cafbFDbd"),
+            // new Token("bep_uUSDC",  "0x06d522b2118d535978382d9533a68B0b110f9BC2"),
+            
+            new Token("DOGE",  "0x01458EFbC8f290d226A7EeaE6A351e74f49B53db"),
+            new Token("XRP",  "0xA277fD3CF60cd2C37A07bccFC108990293DBF58b"),
+            new Token("ADA",  "0x2867cC0Ae16409003A41Ff57230a992E24CD5847"),
+            new Token("DOT",  "0xFF1180c58Ff4F63c4dB2E2835980d860B9D4A6AC"),
+            new Token("SOL",  "0xd9C46fa26b538BabB98ad3a6dFFa225E718010ff"),
+            new Token("UNI",  "0xFd697C6dF70D6164CE11F8477cbFf01458FA87Cc"),
+            new Token("ATOM",  "0x943E6790FA94686F6FFB0996Cd92eC5313cb6B86"),
+            new Token("AAVE",  "0xdbD8077180eBa0711A2336Cc54F05a91685F3FF7"),
+            new Token("AXS",  "0x64f9D58a03B7f303b836CE733674F85AC494E616"),
+            new Token("SAND",  "0xA620B6b7f2507a184e56200F36C266779bDd8d69"),
+            new Token("MANA",  "0x9CD5123e6FBaAA72604884F90dC37e91Ba3A806B"),
+            new Token("CAKE",  "0xB76EEbE588B6Ad1525b26d077D38DE7D298E0485"),
+            new Token("NEAR",  "0x44d5F333cAED3b70Cad92CCa4C63F397B2E89aa6"),
+            new Token("1INCH",  "0xC757848bb5a7e2539b4b6F61176879199822A79B"),
+            new Token("FLUX",  "0x400596CE5CdCB8f37A6183a421671802d53515a3"),
+            new Token("TRX",  "0x5Aa4D9b8DB3a6413408Cb31E77bc03867A845485"),
         ];
 
         // for(let i:number = 2; i <= tokenAddresses.length - 4; i++) {
@@ -62,34 +79,51 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
         // }
 
         const resourceIds = [
-            new TokenResourceId("WULX",      "0x00000000000000000000003a4F06431457de873B588846d139EC0d86275d5401"),
-            new TokenResourceId("WBTC",      "0x00000000000000000000008e96f8fcd6815b4e1528d63e5f72e6dcc04bf9be01"),
-            new TokenResourceId("WETH",      "0x0000000000000000000000b15b478246201dac8d92353c34615a7b20bea93801"),
-            new TokenResourceId("BNB",       "0x000000000000000000000093b400831fb4689e41457f43b3f697042fe59f0101"),
-            new TokenResourceId("AVAX",      "0x0000000000000000000000b5be0484fb6118401f5377c32ec3f1e530cc181501"),
-            new TokenResourceId("BUSD",      "0x0000000000000000000000422b105bb127a883f9dc0ee022304fcb5fde5b9c01"),
-            new TokenResourceId("SHIB",      "0x000000000000000000000049f1b81eca2b0d1e3aa82e64934292a6b59ad61b01"),
-            new TokenResourceId("MATIC",     "0x0000000000000000000000cecc5727d1e5e4af94304ef98b559b00183cbeac01"),
-            new TokenResourceId("FTM",       "0x0000000000000000000000df1c1c2f3305bb6e082d382a15eb9c048dc4c58a01"),
-            new TokenResourceId("DAI",       "0x0000000000000000000000312cf2901c89637f34a83f594028fba1517f8cd501"),
-            new TokenResourceId("LINK",      "0x00000000000000000000004df449d10bd2bf419f2fe578dfd15bb361a2d14801"),
-            new TokenResourceId("uUSDT",     "0x0000000000000000000000b7fe74c0c957534400d2ff0612d3f59af79eba4901"),
-            new TokenResourceId("uUSDC",     "0x0000000000000000000000026d9a638b8981ed47aa1580f79533cea7c1fc4801"),
+            // new TokenResourceId("WULX",      "0x00000000000000000000003a4F06431457de873B588846d139EC0d86275d5401"),
+            // new TokenResourceId("WBTC",      "0x00000000000000000000008e96f8fcd6815b4e1528d63e5f72e6dcc04bf9be01"),
+            // new TokenResourceId("WETH",      "0x0000000000000000000000b15b478246201dac8d92353c34615a7b20bea93801"),
+            // new TokenResourceId("BNB",       "0x000000000000000000000093b400831fb4689e41457f43b3f697042fe59f0101"),
+            // new TokenResourceId("AVAX",      "0x0000000000000000000000b5be0484fb6118401f5377c32ec3f1e530cc181501"),
+            // new TokenResourceId("BUSD",      "0x0000000000000000000000422b105bb127a883f9dc0ee022304fcb5fde5b9c01"),
+            // new TokenResourceId("SHIB",      "0x000000000000000000000049f1b81eca2b0d1e3aa82e64934292a6b59ad61b01"),
+            // new TokenResourceId("MATIC",     "0x0000000000000000000000cecc5727d1e5e4af94304ef98b559b00183cbeac01"),
+            // new TokenResourceId("FTM",       "0x0000000000000000000000df1c1c2f3305bb6e082d382a15eb9c048dc4c58a01"),
+            // new TokenResourceId("DAI",       "0x0000000000000000000000312cf2901c89637f34a83f594028fba1517f8cd501"),
+            // new TokenResourceId("LINK",      "0x00000000000000000000004df449d10bd2bf419f2fe578dfd15bb361a2d14801"),
+            // new TokenResourceId("uUSDT",     "0x0000000000000000000000b7fe74c0c957534400d2ff0612d3f59af79eba4901"),
+            // new TokenResourceId("uUSDC",     "0x0000000000000000000000026d9a638b8981ed47aa1580f79533cea7c1fc4801"),
 
-            new TokenResourceId("bep_uUSDT", "0x0000000000000000000000b8160f15d44604e892ac52ec4ccbfda3cafbfdbd01"),
-            new TokenResourceId("bep_uUSDC", "0x000000000000000000000006d522b2118d535978382d9533a68b0b110f9bc201"),
+            // new TokenResourceId("bep_uUSDT", "0x0000000000000000000000b8160f15d44604e892ac52ec4ccbfda3cafbfdbd01"),
+            // new TokenResourceId("bep_uUSDC", "0x000000000000000000000006d522b2118d535978382d9533a68b0b110f9bc201"),
+            
+            new TokenResourceId("DOGE",   "0x000000000000000000000001458efbc8f290d226a7eeae6a351e74f49b53db01"),
+            new TokenResourceId("XRP",    "0x0000000000000000000000a277fd3cf60cd2c37a07bccfc108990293dbf58b01"),
+            new TokenResourceId("ADA",    "0x00000000000000000000002867cc0ae16409003a41ff57230a992e24cd584701"),
+            new TokenResourceId("DOT",    "0x0000000000000000000000ff1180c58ff4f63c4db2e2835980d860b9d4a6ac01"),
+            new TokenResourceId("SOL",    "0x0000000000000000000000d9c46fa26b538babb98ad3a6dffa225e718010ff01"),
+            new TokenResourceId("UNI",    "0x0000000000000000000000fd697c6df70d6164ce11f8477cbff01458fa87cc01"),
+            new TokenResourceId("ATOM",   "0x0000000000000000000000943e6790fa94686f6ffb0996cd92ec5313cb6b8601"),
+            new TokenResourceId("AAVE",   "0x0000000000000000000000dbd8077180eba0711a2336cc54f05a91685f3ff701"),
+            new TokenResourceId("AXS",    "0x000000000000000000000064f9d58a03b7f303b836ce733674f85ac494e61601"),
+            new TokenResourceId("SAND",   "0x0000000000000000000000a620b6b7f2507a184e56200f36c266779bdd8d6901"),
+            new TokenResourceId("MANA",   "0x00000000000000000000009cd5123e6fbaaa72604884f90dc37e91ba3a806b01"),
+            new TokenResourceId("CAKE",   "0x0000000000000000000000b76eebe588b6ad1525b26d077d38de7d298e048501"),
+            new TokenResourceId("NEAR",   "0x000000000000000000000044d5f333caed3b70cad92cca4c63f397b2e89aa601"),
+            new TokenResourceId("1INCH",  "0x0000000000000000000000c757848bb5a7e2539b4b6f61176879199822a79b01"),
+            new TokenResourceId("FLUX",   "0x0000000000000000000000400596ce5cdcb8f37a6183a421671802d53515a301"),
+            new TokenResourceId("TRX",    "0x00000000000000000000005aa4d9b8db3a6413408cb31e77bc03867a84548501"),
         ];
 
-        const handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
-        for(let i:number = 1; i <= tokenAddresses.length; i++) {
-            let tokenAddress = await handler._resourceIDToTokenContractAddress(resourceIds[i - 1].resourceId); 
-            console.info(`Minter ${tokenAddresses[i - 1].tokenName} - ${tokenAddress.toLowerCase() == tokenAddresses[i - 1].tokenAddress.toLowerCase()}`);
-        }
+        // const handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
+        // for(let i:number = 1; i <= tokenAddresses.length; i++) {
+        //     let tokenAddress = await handler._resourceIDToTokenContractAddress(resourceIds[i - 1].resourceId); 
+        //     console.info(`Minter ${tokenAddresses[i - 1].tokenName} - ${tokenAddress.toLowerCase() == tokenAddresses[i - 1].tokenAddress.toLowerCase()}`);
+        // }
 
-        for(let i:number = 1; i <= tokenAddresses.length; i++) {
-            let isBurnable = await handler._burnList(tokenAddresses[i - 1].tokenAddress); 
-            console.info(`Burnable ${tokenAddresses[i - 1].tokenName} - ${isBurnable}`);
-        }
+        // for(let i:number = 1; i <= tokenAddresses.length; i++) {
+        //     let isBurnable = await handler._burnList(tokenAddresses[i - 1].tokenAddress); 
+        //     console.info(`Burnable ${tokenAddresses[i - 1].tokenName} - ${isBurnable}`);
+        // }
         
         const iteratorResource = +(await DAO.getSetResourceRequestCount());
         console.info(iteratorResource);   
@@ -97,11 +131,11 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
         console.info(iteratorBurnable);
 
         // // let resourceIds: string[] = [];
-        // for(let i:number = 1; i <= tokenAddresses.length; i++) {
-        //     // resourceIds.push(Helpers.createResourceID(tokenAddresses[i - 1].tokenAddress, domainId));
-        //     await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - 1].resourceId, tokenAddresses[i - 1].tokenAddress);
-        //     console.info(`newSetResourceRequest ${await DAO.getSetResourceRequestCount()}`)
+        // for(let i:number = iteratorResource + 1; i <= iteratorResource + tokenAddresses.length; i++) {
+        //     // resourceIds.push(Helpers.createResourceID(tokenAddresses[i - iteratorResource - 1].tokenAddress, domainId));
+        //     await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - iteratorResource - 1].resourceId, tokenAddresses[i - iteratorResource - 1].tokenAddress);
         //     await Helpers.delay(4000);
+        //     console.info(`${resourceIds[i - iteratorResource - 1].tokenName} - ${resourceIds[i - iteratorResource  - 1].resourceId} - ${await DAO.getSetResourceRequestCount()}`)
         // }
 
         // for(let i:number = iteratorResource; i <= (await DAO.getSetResourceRequestCount()); i++) {
@@ -110,9 +144,9 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
         //     await Helpers.delay(4000);
         // }
 
-        // for(let i:number = 1; i <= tokenAddresses.length; i++) {
-        //     await DAO.newSetBurnableRequest(erc20HandlerAddress, tokenAddresses[i - 1].tokenAddress);
-        //     console.info(`newSetBurnableRequest ${await DAO.getSetBurnableRequestCount()}`)
+        // for(let i:number = iteratorBurnable + 1; i <= iteratorBurnable + tokenAddresses.length; i++) {
+        //     await DAO.newSetBurnableRequest(erc20HandlerAddress, tokenAddresses[i - iteratorBurnable - 1].tokenAddress);
+        //     console.info(`${tokenAddresses[i - iteratorBurnable - 1].tokenName} - ${await DAO.getSetBurnableRequestCount()}`)
         //     await Helpers.delay(4000);
         // }
 
