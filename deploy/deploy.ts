@@ -296,7 +296,7 @@ task("deploy-sub-tokens", "Deploying sub tokens for our chain")
         await inch.grantRole(minterRole, taskArgs.erc20Handler);
         console.log(`1INCH: \u001b[1;34m${inch.address}\u001b[0m`);
 
-        const flux = await (await erc20CustomFactory.deploy("FLUX", "FLUX")).deployed();
+        const flux = await (await erc20BtcFactory.deploy("FLUX", "FLUX")).deployed();
         await flux.grantRole(minterRole, taskArgs.erc20Handler);
         console.log(`FLUX: \u001b[1;34m${flux.address}\u001b[0m`);
 

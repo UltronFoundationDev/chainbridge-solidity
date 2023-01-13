@@ -58,7 +58,7 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
             new Token("CAKE",  "0xB76EEbE588B6Ad1525b26d077D38DE7D298E0485"),
             new Token("NEAR",  "0x44d5F333cAED3b70Cad92CCa4C63F397B2E89aa6"),
             new Token("1INCH",  "0xC757848bb5a7e2539b4b6F61176879199822A79B"),
-            new Token("FLUX",  "0x400596CE5CdCB8f37A6183a421671802d53515a3"),
+            new Token("FLUX",  "0x0681ed2D9EbFe37b12622c270eD0C534528fC673"),
             new Token("TRX",  "0x5Aa4D9b8DB3a6413408Cb31E77bc03867A845485"),
         ];
 
@@ -110,7 +110,7 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
             new TokenResourceId("CAKE",   "0x0000000000000000000000b76eebe588b6ad1525b26d077d38de7d298e048501"),
             new TokenResourceId("NEAR",   "0x000000000000000000000044d5f333caed3b70cad92cca4c63f397b2e89aa601"),
             new TokenResourceId("1INCH",  "0x0000000000000000000000c757848bb5a7e2539b4b6f61176879199822a79b01"),
-            new TokenResourceId("FLUX",   "0x0000000000000000000000400596ce5cdcb8f37a6183a421671802d53515a301"),
+            new TokenResourceId("FLUX",   "0x00000000000000000000000681ed2d9ebfe37b12622c270ed0c534528fc67301"),
             new TokenResourceId("TRX",    "0x00000000000000000000005aa4d9b8db3a6413408cb31e77bc03867a84548501"),
         ];
 
@@ -132,7 +132,7 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
 
         // // let resourceIds: string[] = [];
         // for(let i:number = iteratorResource + 1; i <= iteratorResource + tokenAddresses.length; i++) {
-        //     // resourceIds.push(Helpers.createResourceID(tokenAddresses[i - iteratorResource - 1].tokenAddress, domainId));
+        //     // resourceIds.push(Helpers.createResourceID(tokenAddresses[i - 1].tokenAddress, domainId));
         //     await DAO.newSetResourceRequest(erc20HandlerAddress, resourceIds[i - iteratorResource - 1].resourceId, tokenAddresses[i - iteratorResource - 1].tokenAddress);
         //     await Helpers.delay(4000);
         //     console.info(`${resourceIds[i - iteratorResource - 1].tokenName} - ${resourceIds[i - iteratorResource  - 1].resourceId} - ${await DAO.getSetResourceRequestCount()}`)
