@@ -63,7 +63,7 @@ const config: HardhatUserConfig = {
     ethereum: {
       url: "https://eth-mainnet.alchemyapi.io/v2/yTaJRZrkn9LUEI6S7_GQhU4_9fhMgMsv",
       chainId: 1,
-      gasPrice: 30000000000,
+      gasPrice: 25000000000,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     bsc: {
@@ -77,7 +77,7 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     polygon: {
-      url: "https://polygon-mainnet.g.alchemy.com/v2/1NyLrZDbQlwOlSdSWBYYcRpioLBnvBeX",
+      url: "https://polygon-bor.publicnode.com",
       chainId: 137,
       gasPrice: 40000000000,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
