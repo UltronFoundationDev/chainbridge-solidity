@@ -73,6 +73,8 @@ task("fee-ultron", "Changing fee for ultron tokens")
             new Token("VET",   "0xd3ECeEd56da398aB32C7B997b29dBFA377fA0Cb1"),
             new Token("EGLD",  "0x1869e04426974e3fF82417692Cc610c15f4F56d1"),
             new Token("SNX",   "0x167536058b060E38e07B6defAbcD74d169b8fCAD"),
+
+            new Token("PEPE",  "0x2e29eab368c30E692B9805084C0D3B07215D7762"),
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
@@ -501,6 +503,16 @@ task("fee-ultron", "Changing fee for ultron tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "SNX"), fantomDomainId, Helpers.parseDecimals(0.04, 18), Helpers.parseDecimals(3.75, 18), Helpers.parseDecimals(1000000, 18));
         // await Helpers.delay(4000);
 
+        // // PEPE
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "PEPE"), domainId, Helpers.parseDecimals(6675, 18), Helpers.parseDecimals(6675000, 18), Helpers.parseDecimals(3720000000000, 18));
+        // await Helpers.delay(4000);
+        
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "PEPE"), ethereumDomainId, Helpers.parseDecimals(6675000, 18), Helpers.parseDecimals(166875000, 18), Helpers.parseDecimals(3720000000000, 18));
+        // await Helpers.delay(4000);
+                
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "PEPE"), bscDomainId, Helpers.parseDecimals(6675, 18), Helpers.parseDecimals(6675000, 18), Helpers.parseDecimals(3720000000000, 18));
+        // await Helpers.delay(4000);
+
         // for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
         //     await bridge.adminChangeFee(i);
         //     console.info(`adminChangeFeeRequest ${i}`)    
@@ -553,6 +565,8 @@ task("fee-ethereum", "Changing fee for ethereum tokens")
             new Token("LDO", "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32"), // DONE
 
             new Token("SNX",   "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F"),
+
+            new Token("PEPE", "0x6982508145454ce325ddbe47a25d4ec3d2311933"),
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
@@ -705,6 +719,13 @@ task("fee-ethereum", "Changing fee for ethereum tokens")
         // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "SNX"), domainId, Helpers.parseDecimals(18.73, 18), Helpers.parseDecimals(19.67, 18), Helpers.parseDecimals(1000000, 18));
         // await Helpers.delay(4000);
 
+        // // PEPE
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "PEPE"), ultronDomainId, Helpers.parseDecimals(6675, 18), Helpers.parseDecimals(6675000, 18), Helpers.parseDecimals(3720000000000, 18));
+        // await Helpers.delay(4000);
+
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "PEPE"), domainId, Helpers.parseDecimals(6675000, 18), Helpers.parseDecimals(166875000, 18), Helpers.parseDecimals(3720000000000, 18));
+        // await Helpers.delay(4000);
+
         // for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {
         //     await bridge.adminChangeFee(i);
         //     console.info(`adminChangeFeeRequest ${i}`)    
@@ -767,6 +788,8 @@ task("fee-bsc", "Changing fee for bsc tokens")
             new Token("EGLD", "0xbF7c81FFF98BbE61B40Ed186e4AfD6DDd01337fe"), // DONE
 
             new Token("SNX",   "0x9Ac983826058b8a9C7Aa1C9171441191232E8404"),  // DONE
+
+            new Token("PEPE", "0x25d887Ce7a35172C62FeBFD67a1856F20FaEbB00"),
         ];
 
         const iterator = +(await DAO.getChangeFeeRequestCount()) + 1;
@@ -987,6 +1010,13 @@ task("fee-bsc", "Changing fee for bsc tokens")
         // await Helpers.delay(4000);
                 
         // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "SNX"), domainId, Helpers.parseDecimals(0.04, 18), Helpers.parseDecimals(3.75, 18), Helpers.parseDecimals(1000000, 18));
+        // await Helpers.delay(4000);
+
+        // // PEPE
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "PEPE"), ultronDomainId, Helpers.parseDecimals(6675, 18), Helpers.parseDecimals(6675000, 18), Helpers.parseDecimals(3720000000000, 18));
+        // await Helpers.delay(4000);
+                
+        // await DAO.newChangeFeeRequest(Helpers.findToken(tokenAddresses, "PEPE"), domainId, Helpers.parseDecimals(6675, 18), Helpers.parseDecimals(6675000, 18), Helpers.parseDecimals(3720000000000, 18));
         // await Helpers.delay(4000);
 
         // for(let i:number = iterator; i <= (await DAO.getChangeFeeRequestCount()); i++) {

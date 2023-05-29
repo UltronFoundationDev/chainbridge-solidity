@@ -323,4 +323,8 @@ task("deploy-sub-tokens", "Deploying sub tokens for our chain")
         // const snx = await (await erc20CustomFactory.deploy("Synthetix", "SNX")).deployed();
         // await snx.grantRole(minterRole, taskArgs.erc20Handler);
         // console.log(`SNX: \u001b[1;34m${snx.address}\u001b[0m`);
+
+        // const pepe = await (await erc20CustomFactory.deploy("Pepe", "PEPE")).deployed();
+        // await pepe.grantRole(minterRole, taskArgs.erc20Handler);
+        // console.log(`PEPE: \u001b[1;34m${pepe.address}\u001b[0m`);
     });

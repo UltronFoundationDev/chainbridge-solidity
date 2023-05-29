@@ -66,6 +66,8 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
             // new Token("VET",   "0xd3ECeEd56da398aB32C7B997b29dBFA377fA0Cb1"),
             // new Token("EGLD",  "0x1869e04426974e3fF82417692Cc610c15f4F56d1"),
             // new Token("SNX",   "0x167536058b060E38e07B6defAbcD74d169b8fCAD"),
+            
+            new Token("PEPE",   "0x2e29eab368c30E692B9805084C0D3B07215D7762"),
         ];
 
         // for(let i:number = 2; i <= tokenAddresses.length - 4; i++) {
@@ -123,7 +125,9 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
             // new TokenResourceId("LDO",    "0x00000000000000000000009743FbdAfE350B8D5dF5Bf445918BeF3C0D19ddb01"),
             // new TokenResourceId("VET",    "0x00000000000000000000001a9F8a54E151377d1067DB335C748df2deB0955201"),
             // new TokenResourceId("EGLD",   "0x00000000000000000000001869e04426974e3fF82417692Cc610c15f4F56d101"),
-            // new TokenResourceId("SNX",   "0x0000000000000000000000167536058b060E38e07B6defAbcD74d169b8fCAD01"),
+            // new TokenResourceId("SNX",    "0x0000000000000000000000167536058b060E38e07B6defAbcD74d169b8fCAD01"),
+
+            new TokenResourceId("PEPE",   "0x00000000000000000000002e29eab368c30e692b9805084c0d3b07215d776201"),
         ];
 
         // const handler = await ethers.getContractAt("ERC20Handler", erc20HandlerAddress, signer);
@@ -152,20 +156,20 @@ task("set-resource-ids-burnable-ultron", "Setting burnable and resource Ids for 
 
         // for(let i:number = iteratorResource; i <= (await DAO.getSetResourceRequestCount()); i++) {
         //     await bridge.adminSetResource(i);    
-        //     console.info(`adminSetResource ${i}`)
         //     await Helpers.delay(4000);
+        //     console.info(`adminSetResource ${i}`)
         // }
 
         // for(let i:number = iteratorBurnable + 1; i <= iteratorBurnable + tokenAddresses.length; i++) {
         //     await DAO.newSetBurnableRequest(erc20HandlerAddress, tokenAddresses[i - iteratorBurnable - 1].tokenAddress);
-        //     console.info(`${tokenAddresses[i - iteratorBurnable - 1].tokenName} - ${await DAO.getSetBurnableRequestCount()}`)
         //     await Helpers.delay(4000);
+        //     console.info(`${tokenAddresses[i - iteratorBurnable - 1].tokenName} - ${await DAO.getSetBurnableRequestCount()}`)
         // }
 
         // for(let i:number = iteratorBurnable; i <= (await DAO.getSetBurnableRequestCount()); i++) {
         //     await bridge.adminSetBurnable(i);
-        //     console.info(`adminSetBurnable ${i}`)
         //     await Helpers.delay(4000);
+        //     console.info(`adminSetBurnable ${i}`)
         // }
 
         return true;
@@ -213,6 +217,7 @@ task("set-resource-ids-burnable-ethereum", "Setting resource Ids for tokens")
             // new Token("LDO", "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32"),
 
             // new Token("SNX", "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F"),
+            new Token("PEPE", "0x6982508145454ce325ddbe47a25d4ec3d2311933"),
         ];
 
         const resourceIds = [
@@ -242,6 +247,7 @@ task("set-resource-ids-burnable-ethereum", "Setting resource Ids for tokens")
             // new TokenResourceId("LDO",    "0x00000000000000000000009743FbdAfE350B8D5dF5Bf445918BeF3C0D19ddb01"),
 
             // new TokenResourceId("SNX", "0x0000000000000000000000167536058b060E38e07B6defAbcD74d169b8fCAD01"),
+            new TokenResourceId("PEPE",   "0x00000000000000000000002e29eab368c30e692b9805084c0d3b07215d776201"),
         ];
 
         // for(let i:number = 1; i <= tokenAddresses.length; i++) {
@@ -276,20 +282,20 @@ task("set-resource-ids-burnable-ethereum", "Setting resource Ids for tokens")
 
         // for(let i:number = iteratorResource; i <= (await DAO.getSetResourceRequestCount()); i++) {
         //     await bridge.adminSetResource(i);    
-        //     console.info(`adminSetResource ${i}`)
         //     await Helpers.delay(4000);
+        //     console.info(`adminSetResource ${i}`)
         // }
 
         // for(let i:number = iteratorBurnable + 1; i <= iteratorBurnable + tokenAddresses.length; i++) {
         //     await DAO.newSetBurnableRequest(erc20HandlerAddress, tokenAddresses[i - iteratorBurnable - 1].tokenAddress);
-        //     console.info(`${tokenAddresses[i - iteratorBurnable - 1].tokenName} - ${await DAO.getSetBurnableRequestCount()}`)
         //     await Helpers.delay(4000);
+        //     console.info(`${tokenAddresses[i - 1].tokenName} - ${await DAO.getSetBurnableRequestCount()}`)
         // }
 
         // for(let i:number = iteratorBurnable; i <= (await DAO.getSetBurnableRequestCount()); i++) {
         //     await bridge.adminSetBurnable(i);
-        //     console.info(`adminSetBurnable ${i}`)
         //     await Helpers.delay(4000);
+        //     console.info(`adminSetBurnable ${i}`)
         // }
 
         return true;
@@ -346,6 +352,7 @@ task("set-resource-ids-burnable-bsc", "Setting resource Ids for tokens")
             // new Token("VET", "0x6FDcdfef7c496407cCb0cEC90f9C5Aaa1Cc8D888"),
             // new Token("EGLD", "0xbF7c81FFF98BbE61B40Ed186e4AfD6DDd01337fe"),
             // new Token("SNX", "0x9Ac983826058b8a9C7Aa1C9171441191232E8404"),
+            new Token("PEPE", "0x25d887Ce7a35172C62FeBFD67a1856F20FaEbB00"),
         ];
 
         const resourceIds = [
@@ -386,7 +393,8 @@ task("set-resource-ids-burnable-bsc", "Setting resource Ids for tokens")
             // new TokenResourceId("LDO",    "0x00000000000000000000009743FbdAfE350B8D5dF5Bf445918BeF3C0D19ddb01"),
             // new TokenResourceId("VET",    "0x00000000000000000000001a9F8a54E151377d1067DB335C748df2deB0955201"),
             // new TokenResourceId("EGLD",   "0x00000000000000000000001869e04426974e3fF82417692Cc610c15f4F56d101"),
-            // new TokenResourceId("SNX",   "0x0000000000000000000000167536058b060E38e07B6defAbcD74d169b8fCAD01"),
+            // new TokenResourceId("SNX",    "0x0000000000000000000000167536058b060E38e07B6defAbcD74d169b8fCAD01"),
+            new TokenResourceId("PEPE",      "0x00000000000000000000002e29eab368c30e692b9805084c0d3b07215d776201"),
         ];
 
         // for(let i:number = 1; i <= tokenAddresses.length; i++) {
@@ -421,20 +429,20 @@ task("set-resource-ids-burnable-bsc", "Setting resource Ids for tokens")
 
         // for(let i:number = iteratorResource; i <= (await DAO.getSetResourceRequestCount()); i++) {
         //     await bridge.adminSetResource(i);    
-        //     console.info(`adminSetResource ${i}`)
         //     await Helpers.delay(4000);
+        //     console.info(`adminSetResource ${i}`)
         // }
 
         // for(let i:number = iteratorBurnable + 1; i <= iteratorBurnable + tokenAddresses.length; i++) {
         //     await DAO.newSetBurnableRequest(erc20HandlerAddress, tokenAddresses[i - iteratorBurnable - 1].tokenAddress);
-        //     console.info(`${tokenAddresses[i - iteratorBurnable - 1].tokenName} - ${await DAO.getSetBurnableRequestCount()}`)
         //     await Helpers.delay(4000);
+        //     console.info(`${tokenAddresses[i - 1].tokenName} - ${await DAO.getSetBurnableRequestCount()}`)
         // }
 
         // for(let i:number = iteratorBurnable; i <= (await DAO.getSetBurnableRequestCount()); i++) {
         //     await bridge.adminSetBurnable(i);
-        //     console.info(`adminSetBurnable ${i}`)
         //     await Helpers.delay(4000);
+        //     console.info(`adminSetBurnable ${i}`)
         // }
 
         return true;
