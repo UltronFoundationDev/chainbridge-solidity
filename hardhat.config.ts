@@ -71,6 +71,11 @@ const config: HardhatUserConfig = {
       chainId: 8453,
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    base_testnet: {
+      url: "https://sepolia.base.org",
+      chainId: 84532,
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
     bsc: {
       url: "https://bsc-dataseed1.binance.org/",
       chainId: 56,
